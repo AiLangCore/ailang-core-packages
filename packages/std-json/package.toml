@@ -1,0 +1,12 @@
+schema = "ailang.package-source.v1"
+name = "std-json"
+version = "0.0.1-alpha.1"
+types = ["library"]
+
+[[dependencies]]
+name = "ailang"
+version = "0.0.1-alpha.24"
+
+[libraries.json]
+entry = "src/json.aos"
+exports = ["encode", "parse", "parseNode"]

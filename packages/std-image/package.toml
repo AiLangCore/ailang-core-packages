@@ -1,0 +1,8 @@
+schema = "ailang.package-source.v1"
+name = "std-image"
+version = "0.0.1-alpha.1"
+types = ["library"]
+
+[libraries.image]
+entry = "src/image.aos"
+exports = ["decodeToRgbaBase64"]

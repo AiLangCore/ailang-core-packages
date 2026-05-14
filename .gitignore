@@ -1,0 +1,10 @@
+.DS_Store
+.tmp/
+.artifacts/
+.local/
+.toolchain/
+bin/
+dist/
+*.local.*
+*.aibc1
+*.aibe

@@ -1,0 +1,8 @@
+schema = "ailang.package-source.v1"
+name = "std-net"
+version = "0.0.1-alpha.1"
+types = ["library"]
+
+[libraries.net]
+entry = "src/net.aos"
+exports = ["udpBind", "udpSend", "udpRecv"]
