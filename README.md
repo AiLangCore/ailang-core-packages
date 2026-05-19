@@ -34,3 +34,18 @@ packages/
 - Package source must be reachable-code friendly: examples, tests, templates,
   and tools are not included in app output unless explicitly referenced or
   selected by publish/template commands.
+
+## Publishing Workflow
+
+1. Update the package under `packages/<name>/`.
+2. Keep importable library source under `src/`.
+3. Keep optional package templates under `templates/projects/` or
+   `templates/files/`.
+4. Update `packages/<name>/package.toml` with the package version and exposed
+   library/tool/template metadata.
+5. Run package validation and any example that imports the package.
+6. Commit and tag the source repository.
+7. Update `AiLangCore/ailang-packages` with the package version, readable ref,
+   exact commit, and package root.
+
+The package registry owns discovery. This repository owns package source.
