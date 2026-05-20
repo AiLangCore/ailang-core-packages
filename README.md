@@ -11,6 +11,14 @@ These packages are first-party optional packages for the beta SDK. They are not
 part of the minimum standard library and should only be included in an app when
 referenced by package restore/build/publish.
 
+This repository uses `main` as its public default branch. Package source changes
+land here first, then immutable released package versions are added to
+[AiLangCore/ailang-packages](https://github.com/AiLangCore/ailang-packages).
+
+Public roadmap:
+
+- https://ailang.codes/docs/roadmap.html
+
 ## Package Types
 
 An AiLang package can contain one or more package item types:
