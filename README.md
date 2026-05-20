@@ -5,6 +5,12 @@ of the minimum standard library.
 
 The package registry points at this repository. Package source lives here.
 
+## Status
+
+These packages are first-party optional packages for the beta SDK. They are not
+part of the minimum standard library and should only be included in an app when
+referenced by package restore/build/publish.
+
 ## Package Types
 
 An AiLang package can contain one or more package item types:
@@ -25,6 +31,14 @@ packages/
     src/
       http.aos
 ```
+
+Current packages:
+
+- `std-http`
+- `std-image`
+- `std-json`
+- `std-net`
+- `std-ui-input`
 
 ## Rules
 
