@@ -1,5 +1,5 @@
 Program#ghttpredir_p1 {
-  Import#ghttpredir_i1(package="std-http" path="src/http.aos")
+  Import#ghttpredir_i1(package="std-http" path="src/net/http.aos")
   Import#ghttpredir_i2(package="ailang" path="src/std/io.aos")
 
   Let#ghttpredir_l1(name=redirectText) {

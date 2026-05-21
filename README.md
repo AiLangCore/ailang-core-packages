@@ -37,22 +37,26 @@ packages/
   std-http/
     package.toml
     src/
-      http.aos
+      net/
+        http.aos
 ```
 
 Current packages:
 
-- `std-http`
-- `std-image`
-- `std-json`
-- `std-net`
-- `std-ui-input`
+- `std-http`: `src/net/http.aos`
+- `std-image`: `src/media/image.aos`
+- `std-json`: `src/format/json.aos`
+- `std-net`: `src/net/udp.aos`
+- `std-ui-input`: `src/ui/input.aos`
 
 ## Rules
 
 - Do not duplicate minimum stdlib modules here.
 - A package may depend on AiLang core libraries through package imports.
 - Package descriptors use TOML and schema `ailang.package-source.v1`.
+- Package source paths should be nested by domain. For example, format codecs
+  live under `src/format/`, network helpers live under `src/net/`, media helpers
+  live under `src/media/`, and UI helpers live under `src/ui/`.
 - Package source must be reachable-code friendly: examples, tests, templates,
   and tools are not included in app output unless explicitly referenced or
   selected by publish/template commands.

@@ -1,6 +1,6 @@
 Program#gjsonup_p1 {
   Import#gjsonup_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsonup_i2(package="std-json" path="src/json.aos")
+  Import#gjsonup_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonup_c1(target=AttrValueString) {
     ChildAt#gjsonup_ca1 {
       ChildAt#gjsonup_ca2 {

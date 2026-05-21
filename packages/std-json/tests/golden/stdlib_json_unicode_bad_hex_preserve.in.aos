@@ -1,6 +1,6 @@
 Program#gjsonubh_p1 {
   Import#gjsonubh_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsonubh_i2(package="std-json" path="src/json.aos")
+  Import#gjsonubh_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonubh_c1(target=AttrValueString) {
     ChildAt#gjsonubh_ca1 {
       ChildAt#gjsonubh_ca2 {

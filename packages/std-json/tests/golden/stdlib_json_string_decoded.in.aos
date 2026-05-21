@@ -1,6 +1,6 @@
 Program#gjsonsd_p1 {
   Import#gjsonsd_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsonsd_i2(package="std-json" path="src/json.aos")
+  Import#gjsonsd_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonsd_c1(target=AttrValueString) {
     ChildAt#gjsonsd_ca1 {
       ChildAt#gjsonsd_ca2 {

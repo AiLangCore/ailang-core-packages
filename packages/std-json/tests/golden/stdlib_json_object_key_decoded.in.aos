@@ -1,6 +1,6 @@
 Program#gjsonkd_p1 {
   Import#gjsonkd_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsonkd_i2(package="std-json" path="src/json.aos")
+  Import#gjsonkd_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonkd_c1(target=AttrValueString) {
     ChildAt#gjsonkd_ca1 {
       ChildAt#gjsonkd_ca2 {

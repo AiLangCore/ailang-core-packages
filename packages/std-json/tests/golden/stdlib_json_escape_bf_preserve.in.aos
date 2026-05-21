@@ -1,6 +1,6 @@
 Program#gjsoneb_p1 {
   Import#gjsoneb_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsoneb_i2(package="std-json" path="src/json.aos")
+  Import#gjsoneb_i2(package="std-json" path="src/format/json.aos")
   Call#gjsoneb_c1(target=AttrValueString) {
     ChildAt#gjsoneb_ca1 {
       ChildAt#gjsoneb_ca2 {

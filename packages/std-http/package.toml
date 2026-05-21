@@ -8,7 +8,7 @@ name = "ailang"
 version = "0.0.1-alpha.24"
 
 [libraries.http]
-entry = "src/http.aos"
+entry = "src/net/http.aos"
 exports = [
   "httpRequest",
   "httpRequestPoll",

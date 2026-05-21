@@ -4,5 +4,5 @@ version = "0.0.1-alpha.1"
 types = ["library"]
 
 [libraries.net]
-entry = "src/net.aos"
+entry = "src/net/udp.aos"
 exports = ["udpBind", "udpSend", "udpRecv"]

@@ -8,5 +8,5 @@ name = "ailang"
 version = "0.0.1-alpha.24"
 
 [libraries.json]
-entry = "src/json.aos"
+entry = "src/format/json.aos"
 exports = ["encode", "parse", "parseNode"]

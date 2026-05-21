@@ -1,6 +1,6 @@
 Program#gjsontc_p1 {
   Import#gjsontc_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsontc_i2(package="std-json" path="src/json.aos")
+  Import#gjsontc_i2(package="std-json" path="src/format/json.aos")
   Call#gjsontc_c1(target=ChildCount) {
     Call#gjsontc_c2(target=resultNodeOr) {
       Call#gjsontc_c3(target=parseNode) { Lit#gjsontc_l1(value="[1,true,{\"a\":2}]") }

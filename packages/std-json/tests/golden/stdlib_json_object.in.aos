@@ -1,6 +1,6 @@
 Program#gjsono_p1 {
   Import#gjsono_i1(package="ailang" path="src/std/core.aos")
-  Import#gjsono_i2(package="std-json" path="src/json.aos")
+  Import#gjsono_i2(package="std-json" path="src/format/json.aos")
   Call#gjsono_c1(target=resultValueOr) {
     Call#gjsono_c2(target=parse) { Lit#gjsono_l1(value="{\"a\":1,\"b\":[true,false,null]}") }
     Lit#gjsono_l2(value="fallback")

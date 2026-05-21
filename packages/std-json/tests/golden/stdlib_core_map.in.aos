@@ -1,6 +1,6 @@
 Program#gcoremap_p1 {
   Import#gcoremap_i1(package="ailang" path="src/std/core.aos")
-  Import#gcoremap_i2(package="std-json" path="src/json.aos")
+  Import#gcoremap_i2(package="std-json" path="src/format/json.aos")
 
   Let#gcoremap_l1(name=state) {
     Map#gcoremap_m1 {

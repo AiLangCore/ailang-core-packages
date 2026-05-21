@@ -1,5 +1,5 @@
 Program#wa_p1 {
-  Import#wa_i0(package="std-http" path="src/http.aos")
+  Import#wa_i0(package="std-http" path="src/net/http.aos")
 
   Let#wa_l0(name=sampleWeatherJson) {
     Lit#wa_v0(value="{\"message\":\"AiLang weather API response\",\"city\":\"Fort Worth\",\"report\":\"Fort Worth: +22C\"}")

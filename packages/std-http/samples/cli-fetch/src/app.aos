@@ -1,5 +1,5 @@
 Program#cf_p1 {
-  Import#cf_im0(package="std-http" path="src/http.aos")
+  Import#cf_im0(package="std-http" path="src/net/http.aos")
   Import#cf_im1(path="../../../src/std/str.aos")
   Import#cf_im2(path="../../../src/std/io.aos")
 

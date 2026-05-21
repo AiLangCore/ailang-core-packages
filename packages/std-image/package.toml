@@ -4,5 +4,5 @@ version = "0.0.1-alpha.1"
 types = ["library"]
 
 [libraries.image]
-entry = "src/image.aos"
+entry = "src/media/image.aos"
 exports = ["decodeToRgbaBase64"]

@@ -1,5 +1,5 @@
 Program#ghttpresp_p1 {
-  Import#ghttpresp_i1(package="std-http" path="src/http.aos")
+  Import#ghttpresp_i1(package="std-http" path="src/net/http.aos")
   Import#ghttpresp_i2(package="ailang" path="src/std/io.aos")
 
   Let#ghttpresp_l1(name=responseText) {

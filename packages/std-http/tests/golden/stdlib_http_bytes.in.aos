@@ -1,5 +1,5 @@
 Program#ghttpbytes_p1 {
-  Import#ghttpbytes_i1(package="std-http" path="src/http.aos")
+  Import#ghttpbytes_i1(package="std-http" path="src/net/http.aos")
   Import#ghttpbytes_i2(package="ailang" path="src/std/bytes.aos")
   Import#ghttpbytes_i3(package="ailang" path="src/std/io.aos")
 

@@ -4,7 +4,7 @@ version = "0.0.1-alpha.1"
 types = ["library"]
 
 [libraries.ui_input]
-entry = "src/ui_input.aos"
+entry = "src/ui/input.aos"
 exports = [
   "editNextText",
   "editNextCursor",

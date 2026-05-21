@@ -1,5 +1,5 @@
 Program#ghttpinfo_p1 {
-  Import#ghttpinfo_i1(package="std-http" path="src/http.aos")
+  Import#ghttpinfo_i1(package="std-http" path="src/net/http.aos")
   Import#ghttpinfo_i2(package="ailang" path="src/std/core.aos")
   Import#ghttpinfo_i3(package="ailang" path="src/std/io.aos")
 
