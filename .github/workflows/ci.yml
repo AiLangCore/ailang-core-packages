@@ -1,0 +1,25 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate package namespaces
+        run: ./scripts/validate-package-namespaces.sh
+
+      - name: List package descriptors
+        run: find packages -name package.toml -print | sort
+
+      - name: List AiLang sources
+        run: find packages -name '*.aos' -print | sort
