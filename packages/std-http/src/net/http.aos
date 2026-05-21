@@ -1,6 +1,7 @@
 Program#std_http_p1 {
   Import#std_http_im0(package="ailang" path="src/std/core.aos")
   Import#std_http_im1(package="ailang" path="src/std/bytes.aos")
+  Import#std_http_im2(package="ailang" path="src/std/str.aos")
   Let#std_http_l1(name=httpHeaders) {
     Fn#std_http_f1(params=req) {
       Block#std_http_b1 {
@@ -109,7 +110,7 @@ Program#std_http_p1 {
   Let#std_http_l11(name=httpResponse) {
     Fn#std_http_f8(params=statusCode,reason,contentType,body) {
       Block#std_http_b14 {
-        Let#std_http_l12(name=length) { Call#std_http_c7(target=sys.str.utf8ByteCount) { Var#std_http_v29(name=body) } }
+        Let#std_http_l12(name=length) { Call#std_http_c7(target=utf8ByteCount) { Var#std_http_v29(name=body) } }
         Return#std_http_r11 {
           StrConcat#std_http_s1 {
             Lit#std_http_i10(value="HTTP/1.1 ")
@@ -361,7 +362,7 @@ Program#std_http_p1 {
       Block#std_http_b24aa {
         Return#std_http_r21aa {
           Eq#std_http_eq61aa {
-            Call#std_http_c10aaa(target=sys.str.find) {
+            Call#std_http_c10aaa(target=find) {
               Var#std_http_v57aa(name=error)
               Var#std_http_v57ab(name=prefix)
               Lit#std_http_i44aa(value=0)
@@ -1005,7 +1006,7 @@ Program#std_http_p1 {
             Let#std_http_l29ch(name=dataStart) {
               Add#std_http_add1z {
                 Var#std_http_v63a(name=start)
-                Add#std_http_add2a { Call#std_http_c11x(target=sys.str.utf8ByteCount) { Var#std_http_v63b(name=sizeLine) } Lit#std_http_i46ec(value=2) }
+                Add#std_http_add2a { Call#std_http_c11x(target=utf8ByteCount) { Var#std_http_v63b(name=sizeLine) } Lit#std_http_i46ec(value=2) }
               }
             }
             Let#std_http_l29ci(name=chunkData) {
@@ -1618,7 +1619,7 @@ Program#std_http_p1 {
             }
           }
         }
-        Let#std_http_l32(name=bodyLength) { Call#std_http_c12(target=sys.str.utf8ByteCount) { Var#std_http_v62(name=body) } }
+        Let#std_http_l32(name=bodyLength) { Call#std_http_c12(target=utf8ByteCount) { Var#std_http_v62(name=body) } }
         Let#std_http_l33(name=contentLengthHeader) {
           If#std_http_if63 {
             Eq#std_http_eq63 { Var#std_http_v63(name=bodyLength) Lit#std_http_i50(value=0) }

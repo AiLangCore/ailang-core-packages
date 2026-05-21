@@ -1,5 +1,6 @@
 Program#std_json_p1 {
   Import#std_json_im1(package="ailang" path="src/std/core.aos")
+  Import#std_json_im2(package="ailang" path="src/std/str.aos")
 
   Let#std_json_l1(name=encode) {
     Fn#std_json_f1(params=node) {
@@ -13,7 +14,7 @@ Program#std_json_p1 {
     Fn#std_json_f2(params=text,index) {
       Block#std_json_b2 {
         Return#std_json_r2 {
-          Call#std_json_c2(target=sys.str.substring) {
+          Call#std_json_c2(target=substring) {
             Var#std_json_v2(name=text)
             Var#std_json_v3(name=index)
             Lit#std_json_i1(value=1)
@@ -135,7 +136,7 @@ Program#std_json_p1 {
         Let#std_json_l11(name=tokenLen) { Call#std_json_c12(target=textLength) { Var#std_json_v32(name=token) } }
         Return#std_json_r17 {
           Eq#std_json_eq8 {
-            Call#std_json_c13(target=sys.str.substring) {
+            Call#std_json_c13(target=substring) {
               Var#std_json_v33(name=text)
               Var#std_json_v34(name=start)
               Var#std_json_v35(name=tokenLen)
@@ -848,7 +849,7 @@ Program#std_json_p1 {
   Let#std_json_l38bb(name=decodeUnicodeHex4) {
     Fn#std_json_f15bb(params=hex4) {
       Block#std_json_b153bb {
-        Return#std_json_r76bb { Call#std_json_c162(target=sys.str.decodeUnicodeHex4) { Var#std_json_v313bb(name=hex4) } }
+        Return#std_json_r76bb { Call#std_json_c162(target=decodeUnicodeHex4) { Var#std_json_v313bb(name=hex4) } }
       }
     }
   }
@@ -857,7 +858,7 @@ Program#std_json_p1 {
     Fn#std_json_f15bc(params=highHex4,lowHex4) {
       Block#std_json_b153bc {
         Return#std_json_r76bc {
-          Call#std_json_c162b(target=sys.str.decodeUnicodeSurrogatePairHex4) {
+          Call#std_json_c162b(target=decodeUnicodeSurrogatePairHex4) {
             Var#std_json_v313bc(name=highHex4)
             Var#std_json_v314bc(name=lowHex4)
           }
@@ -932,7 +933,7 @@ Program#std_json_p1 {
               Eq#std_json_eq57c { Var#std_json_v337d(name=ch) Lit#std_json_i221d(value="u") }
               Block#std_json_b160d {
                 Let#std_json_l38g(name=hex4) {
-                  Call#std_json_c89u(target=sys.str.substring) {
+                  Call#std_json_c89u(target=substring) {
                     Var#std_json_v338d(name=text)
                     Add#std_json_a43d { Var#std_json_v339d(name=index) Lit#std_json_i222d(value=1) }
                     Lit#std_json_i223d(value=4)
@@ -949,7 +950,7 @@ Program#std_json_p1 {
                           Call#std_json_c91e(target=isHighSurrogateHex4) { Var#std_json_v347d(name=hex4) }
                           Block#std_json_b162e {
                             Let#std_json_l38i(name=tail) {
-                              Call#std_json_c91f(target=sys.str.substring) {
+                              Call#std_json_c91f(target=substring) {
                                 Var#std_json_v348e(name=text)
                                 Add#std_json_a47d { Var#std_json_v349e(name=index) Lit#std_json_i233e(value=5) }
                                 Lit#std_json_i234e(value=6)
@@ -965,7 +966,7 @@ Program#std_json_p1 {
                                       Eq#std_json_eq62d { Call#std_json_c91i(target=charAt) { Var#std_json_v352e(name=tail) Lit#std_json_i238e(value=1) } Lit#std_json_i239e(value="u") }
                                       Block#std_json_b165e {
                                         Let#std_json_l38j(name=lowHex4) {
-                                          Call#std_json_c91j(target=sys.str.substring) {
+                                          Call#std_json_c91j(target=substring) {
                                             Var#std_json_v353e(name=text)
                                             Add#std_json_a48d { Var#std_json_v354e(name=index) Lit#std_json_i240e(value=7) }
                                             Lit#std_json_i241e(value=4)
