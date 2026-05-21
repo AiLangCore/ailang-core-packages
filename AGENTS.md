@@ -26,6 +26,7 @@ This repository contains official optional AiLang packages.
 ## Verification
 
 ```bash
+./scripts/validate-package-namespaces.sh
 find packages -name package.toml -print
 find packages -name '*.aos' -print
 ```

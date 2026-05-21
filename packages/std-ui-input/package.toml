@@ -1,9 +1,10 @@
 schema = "ailang.package-source.v1"
 name = "std-ui-input"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 types = ["library"]
 
-[libraries.ui_input]
+[libraries.input]
+namespace = "std.ui.input"
 entry = "src/ui/input.aos"
 exports = [
   "editNextText",

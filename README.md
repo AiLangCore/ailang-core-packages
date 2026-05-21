@@ -43,11 +43,11 @@ packages/
 
 Current packages:
 
-- `std-http`: `src/net/http.aos`
-- `std-image`: `src/media/image.aos`
-- `std-json`: `src/format/json.aos`
-- `std-net`: `src/net/udp.aos`
-- `std-ui-input`: `src/ui/input.aos`
+- `std-http`: `std.net.http`, `src/net/http.aos`
+- `std-image`: `std.media.image`, `src/media/image.aos`
+- `std-json`: `std.format.json`, `src/format/json.aos`
+- `std-net`: `std.net.udp`, `src/net/udp.aos`
+- `std-ui-input`: `std.ui.input`, `src/ui/input.aos`
 
 ## Rules
 
@@ -57,6 +57,8 @@ Current packages:
 - Package source paths should be nested by domain. For example, format codecs
   live under `src/format/`, network helpers live under `src/net/`, media helpers
   live under `src/media/`, and UI helpers live under `src/ui/`.
+- Library descriptors must declare a dotted semantic `namespace`. Package names
+  remain dashed for registry identity; source namespaces use dots.
 - Package source must be reachable-code friendly: examples, tests, templates,
   and tools are not included in app output unless explicitly referenced or
   selected by publish/template commands.
@@ -75,3 +77,11 @@ Current packages:
    exact commit, and package root.
 
 The package registry owns discovery. This repository owns package source.
+
+## Verification
+
+```bash
+./scripts/validate-package-namespaces.sh
+find packages -name package.toml -print
+find packages -name '*.aos' -print
+```

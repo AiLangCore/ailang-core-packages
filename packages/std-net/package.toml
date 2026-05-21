@@ -1,8 +1,9 @@
 schema = "ailang.package-source.v1"
 name = "std-net"
-version = "0.0.1-alpha.2"
+version = "0.0.1-alpha.3"
 types = ["library"]
 
-[libraries.net]
+[libraries.udp]
+namespace = "std.net.udp"
 entry = "src/net/udp.aos"
 exports = ["udpBind", "udpSend", "udpRecv"]
