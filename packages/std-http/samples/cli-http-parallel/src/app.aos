@@ -1,8 +1,8 @@
 Program {
   Import(package="std-http" path="src/net/http.aos")
-  Import(path="../../../src/std/str.aos")
-  Import(path="../../../src/std/io.aos")
-  Import(path="../../../src/std/time.aos")
+  Import(sdk="ailang" path="std/str.aos")
+  Import(sdk="ailang" path="std/io.aos")
+  Import(sdk="ailang" path="std/time.aos")
 
   Let(name=isTerminal) {
     Fn(params=state) {

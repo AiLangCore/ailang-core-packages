@@ -1,7 +1,7 @@
 Program#cf_p1 {
   Import#cf_im0(package="std-http" path="src/net/http.aos")
-  Import#cf_im1(path="../../../src/std/str.aos")
-  Import#cf_im2(path="../../../src/std/io.aos")
+  Import#cf_im1(sdk="ailang" path="std/str.aos")
+  Import#cf_im2(sdk="ailang" path="std/io.aos")
 
   Export#cf_e1(name=start)
   Export#cf_e2(name=formatWeather)
