@@ -1,5 +1,5 @@
 Program#gjsonnb_p1 {
-  Import#gjsonnb_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsonnb_i1(sdk="ailang" path="std/core.aos")
   Import#gjsonnb_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonnb_c1(target=AttrValueBool) {
     ChildAt#gjsonnb_ca1 {

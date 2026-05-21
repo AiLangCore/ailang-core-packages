@@ -1,5 +1,5 @@
 Program#gjsontc_p1 {
-  Import#gjsontc_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsontc_i1(sdk="ailang" path="std/core.aos")
   Import#gjsontc_i2(package="std-json" path="src/format/json.aos")
   Call#gjsontc_c1(target=ChildCount) {
     Call#gjsontc_c2(target=resultNodeOr) {

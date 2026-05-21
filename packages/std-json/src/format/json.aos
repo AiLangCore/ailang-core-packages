@@ -1,6 +1,6 @@
 Program#std_json_p1 {
-  Import#std_json_im1(package="ailang" path="src/std/core.aos")
-  Import#std_json_im2(package="ailang" path="src/std/str.aos")
+  Import#std_json_im1(sdk="ailang" path="std/core.aos")
+  Import#std_json_im2(sdk="ailang" path="std/str.aos")
 
   Let#std_json_l1(name=encode) {
     Fn#std_json_f1(params=node) {

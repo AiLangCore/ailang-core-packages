@@ -1,5 +1,5 @@
 Program#gjsontv_p1 {
-  Import#gjsontv_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsontv_i1(sdk="ailang" path="std/core.aos")
   Import#gjsontv_i2(package="std-json" path="src/format/json.aos")
   Call#gjsontv_c1(target=NodeKind) {
     ChildAt#gjsontv_ca1 {

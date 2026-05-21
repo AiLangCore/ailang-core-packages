@@ -1,5 +1,5 @@
 Program#gcorerecord_p1 {
-  Import#gcorerecord_i1(package="ailang" path="src/std/core.aos")
+  Import#gcorerecord_i1(sdk="ailang" path="std/core.aos")
   Import#gcorerecord_i2(package="std-json" path="src/format/json.aos")
 
   Let#gcorerecord_l1(name=state) {

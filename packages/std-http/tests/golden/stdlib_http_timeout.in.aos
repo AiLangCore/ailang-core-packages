@@ -1,6 +1,6 @@
 Program#ghttptimeout_p1 {
   Import#ghttptimeout_i1(package="std-http" path="src/net/http.aos")
-  Import#ghttptimeout_i2(package="ailang" path="src/std/io.aos")
+  Import#ghttptimeout_i2(sdk="ailang" path="std/io.aos")
 
   Let#ghttptimeout_l1(name=state) {
     Call#ghttptimeout_c1(target=http.httpRequestWithTimeoutPolls) {

@@ -1,5 +1,5 @@
 Program#gjsonusp_p1 {
-  Import#gjsonusp_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsonusp_i1(sdk="ailang" path="std/core.aos")
   Import#gjsonusp_i2(package="std-json" path="src/format/json.aos")
   Call#gjsonusp_c1(target=AttrValueString) {
     ChildAt#gjsonusp_ca1 {

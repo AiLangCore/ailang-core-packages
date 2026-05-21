@@ -1,11 +1,7 @@
 schema = "ailang.package-source.v1"
 name = "std-http"
-version = "0.0.1-alpha.4"
+version = "0.0.1-alpha.5"
 types = ["library"]
-
-[[dependencies]]
-name = "ailang"
-version = "0.0.1-alpha.24"
 
 [libraries.http]
 namespace = "std.net.http"

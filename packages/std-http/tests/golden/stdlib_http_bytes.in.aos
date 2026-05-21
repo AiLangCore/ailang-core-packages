@@ -1,7 +1,7 @@
 Program#ghttpbytes_p1 {
   Import#ghttpbytes_i1(package="std-http" path="src/net/http.aos")
-  Import#ghttpbytes_i2(package="ailang" path="src/std/bytes.aos")
-  Import#ghttpbytes_i3(package="ailang" path="src/std/io.aos")
+  Import#ghttpbytes_i2(sdk="ailang" path="std/bytes.aos")
+  Import#ghttpbytes_i3(sdk="ailang" path="std/io.aos")
 
   Let#ghttpbytes_l1(name=state) {
     Call#ghttpbytes_c1(target=http.httpMakeRequestState) {

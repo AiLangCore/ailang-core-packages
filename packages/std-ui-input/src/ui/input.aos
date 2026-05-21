@@ -1,5 +1,5 @@
 Program#std_ui_p1 {
-  Import#std_ui_im1(package="ailang" path="src/std/str.aos")
+  Import#std_ui_im1(sdk="ailang" path="std/str.aos")
 
   Let#std_ui_l1(name=isBackspaceKey) {
     Fn#std_ui_f1(params=key) {

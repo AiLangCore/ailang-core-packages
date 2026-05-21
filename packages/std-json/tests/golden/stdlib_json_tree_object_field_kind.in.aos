@@ -1,5 +1,5 @@
 Program#gjsontk_p1 {
-  Import#gjsontk_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsontk_i1(sdk="ailang" path="std/core.aos")
   Import#gjsontk_i2(package="std-json" path="src/format/json.aos")
   Call#gjsontk_c1(target=NodeKind) {
     ChildAt#gjsontk_ca1 {

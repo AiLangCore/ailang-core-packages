@@ -1,7 +1,7 @@
 Program#std_http_p1 {
-  Import#std_http_im0(package="ailang" path="src/std/core.aos")
-  Import#std_http_im1(package="ailang" path="src/std/bytes.aos")
-  Import#std_http_im2(package="ailang" path="src/std/str.aos")
+  Import#std_http_im0(sdk="ailang" path="std/core.aos")
+  Import#std_http_im1(sdk="ailang" path="std/bytes.aos")
+  Import#std_http_im2(sdk="ailang" path="std/str.aos")
   Let#std_http_l1(name=httpHeaders) {
     Fn#std_http_f1(params=req) {
       Block#std_http_b1 {

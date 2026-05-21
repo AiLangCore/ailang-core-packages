@@ -1,5 +1,5 @@
 Program#gjsoneu_p1 {
-  Import#gjsoneu_i1(package="ailang" path="src/std/core.aos")
+  Import#gjsoneu_i1(sdk="ailang" path="std/core.aos")
   Import#gjsoneu_i2(package="std-json" path="src/format/json.aos")
   Call#gjsoneu_c1(target=AttrValueString) {
     ChildAt#gjsoneu_ca1 {
