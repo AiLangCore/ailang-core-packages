@@ -1,6 +1,6 @@
 schema = "ailang.package-source.v1"
 name = "std-app"
-version = "0.0.1-alpha.1"
+version = "0.0.1-alpha.2"
 types = ["library"]
 
 [libraries.app]
@@ -14,6 +14,18 @@ exports = [
   "profileGui",
   "profileService",
   "profileWorker",
+]
+
+[libraries.global]
+namespace = "std.app.global"
+entry = "src/app/global.aos"
+exports = [
+  "globalApp",
+  "globalAppName",
+  "globalAppProfile",
+  "globalAppLifecycle",
+  "globalAppInit",
+  "globalAppUpdate",
 ]
 
 [libraries.event]

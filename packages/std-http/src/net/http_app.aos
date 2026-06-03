@@ -1,0 +1,92 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-app" path="src/app/app.aos")
+  Import(package="std-app" path="src/app/global.aos")
+
+  Export(name=httpApp)
+  Export(name=httpAppStaticAssets)
+  Export(name=httpAppDynamicAssets)
+  Export(name=httpAppWebServices)
+  Export(name=httpAppSockets)
+
+  Let(name=httpApp) {
+    Fn(params=name,initName,updateName,staticAssets,dynamicAssets,webServices,sockets) {
+      Block {
+        Let(name=base) {
+          Call(target=globalApp) {
+            Var(name=name)
+            Call(target=profileHttp) { Lit(value=0) }
+            Var(name=initName)
+            Var(name=updateName)
+          }
+        }
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="HttpApp") }
+            Field(key="app") { Var(name=base) }
+            Field(key="staticAssets") { Var(name=staticAssets) }
+            Field(key="dynamicAssets") { Var(name=dynamicAssets) }
+            Field(key="webServices") { Var(name=webServices) }
+            Field(key="sockets") { Var(name=sockets) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpAppStaticAssets) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=app)
+            Lit(value="staticAssets")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpAppDynamicAssets) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=app)
+            Lit(value="dynamicAssets")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpAppWebServices) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=app)
+            Lit(value="webServices")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpAppSockets) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=app)
+            Lit(value="sockets")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+}

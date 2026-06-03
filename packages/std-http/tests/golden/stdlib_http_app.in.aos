@@ -1,0 +1,53 @@
+Program {
+  Import(package="std-http" path="src/net/http_app.aos")
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/io.aos")
+  Export(name=start)
+
+  Let(name=start) {
+    Fn(params=args) {
+      Block {
+        Let(name=app) {
+          Call(target=httpApp) {
+            Lit(value="site")
+            Lit(value="init")
+            Lit(value="update")
+            Map { Field(key="root") { Lit(value="public") } }
+            Map { Field(key="handler") { Lit(value="asset") } }
+            Map { Field(key="api") { Lit(value="service") } }
+            Map { Field(key="chat") { Lit(value="socket") } }
+          }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=httpAppStaticAssets) { Var(name=app) }
+            Lit(value="root")
+            Lit(value="")
+          }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=httpAppDynamicAssets) { Var(name=app) }
+            Lit(value="handler")
+            Lit(value="")
+          }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=httpAppWebServices) { Var(name=app) }
+            Lit(value="api")
+            Lit(value="")
+          }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=httpAppSockets) { Var(name=app) }
+            Lit(value="chat")
+            Lit(value="")
+          }
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+}

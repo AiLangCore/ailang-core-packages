@@ -8,4 +8,8 @@ workerInit
 workerUpdate
 geo
 ready
+demo
+gui
+init
+update
 Ok#ok1(type=int value=0)

@@ -1,0 +1,101 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(path="app.aos")
+
+  Export(name=globalApp)
+  Export(name=globalAppName)
+  Export(name=globalAppProfile)
+  Export(name=globalAppLifecycle)
+  Export(name=globalAppInit)
+  Export(name=globalAppUpdate)
+
+  Let(name=globalApp) {
+    Fn(params=name,profile,initName,updateName) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="GlobalApp") }
+            Field(key="name") { Var(name=name) }
+            Field(key="profile") { Var(name=profile) }
+            Field(key="lifecycle") {
+              Call(target=appLifecycle) {
+                Var(name=initName)
+                Var(name=updateName)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalAppName) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=app)
+            Lit(value="name")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalAppProfile) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=app)
+            Lit(value="profile")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalAppLifecycle) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=app)
+            Lit(value="lifecycle")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalAppInit) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Call(target=globalAppLifecycle) { Var(name=app) }
+            Lit(value="init")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalAppUpdate) {
+    Fn(params=app) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Call(target=globalAppLifecycle) { Var(name=app) }
+            Lit(value="update")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+}

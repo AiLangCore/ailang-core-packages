@@ -1,6 +1,7 @@
 Program {
   Import(path="../../src/app/command.aos")
   Import(path="../../src/app/event.aos")
+  Import(path="../../src/app/global.aos")
   Import(path="../../src/app/next.aos")
   Import(path="../../src/app/worker.aos")
   Import(sdk="ailang" path="std/core.aos")
@@ -56,6 +57,14 @@ Program {
             }
           }
         }
+        Let(name=appSpec) {
+          Call(target=globalApp) {
+            Lit(value="demo")
+            Call(target=profileGui) { Lit(value=0) }
+            Lit(value="init")
+            Lit(value="update")
+          }
+        }
 
         Call(target=io.print) {
           Call(target=eventType) { Var(name=startEventValue) }
@@ -98,6 +107,18 @@ Program {
             Lit(value="status")
             Lit(value="")
           }
+        }
+        Call(target=io.print) {
+          Call(target=globalAppName) { Var(name=appSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=globalAppProfile) { Var(name=appSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=globalAppInit) { Var(name=appSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=globalAppUpdate) { Var(name=appSpec) }
         }
         Return { Lit(value=0) }
       }

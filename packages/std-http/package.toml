@@ -1,7 +1,10 @@
 schema = "ailang.package-source.v1"
 name = "std-http"
-version = "0.0.1-alpha.6"
+version = "0.0.1-alpha.7"
 types = ["library"]
+
+[dependencies]
+std-app = "0.0.1-alpha.2"
 
 [libraries.http]
 namespace = "std.net.http"
@@ -12,4 +15,15 @@ exports = [
   "httpRequestAwait",
   "httpResponse",
   "httpResponseInfo",
+]
+
+[libraries.app]
+namespace = "std.net.http.app"
+entry = "src/net/http_app.aos"
+exports = [
+  "httpApp",
+  "httpAppStaticAssets",
+  "httpAppDynamicAssets",
+  "httpAppWebServices",
+  "httpAppSockets",
 ]
