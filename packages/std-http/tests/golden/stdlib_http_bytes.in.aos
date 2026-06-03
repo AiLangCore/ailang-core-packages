@@ -18,15 +18,15 @@ Program#ghttpbytes_p1 {
   }
 
   Call#ghttpbytes_c2(target=io.print) {
-    Call#ghttpbytes_c3(target=toBase64) {
+    Call#ghttpbytes_c3(target=bytes.toBase64) {
       Call#ghttpbytes_c4(target=http.httpRequestResponseBytes) { Var#ghttpbytes_v1(name=state) }
     }
   }
 
   Call#ghttpbytes_c5(target=io.print) {
-    Call#ghttpbytes_c6(target=toBase64) {
+    Call#ghttpbytes_c6(target=bytes.toBase64) {
       Call#ghttpbytes_c7(target=http.httpResponseBodyBytes) {
-        Call#ghttpbytes_c8(target=fromUtf8String) {
+        Call#ghttpbytes_c8(target=bytes.fromUtf8String) {
           Lit#ghttpbytes_i10(value="HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nWIKI")
         }
       }

@@ -331,8 +331,8 @@ Program#std_http_p1 {
         Let#std_http_l26c(name=encoded) { Call#std_http_c10a(target=httpRequestResponseBytesBase64) { Var#std_http_v56b(name=state) } }
         If#std_http_if60a {
           Eq#std_http_eq60a { Var#std_http_v56c(name=encoded) Lit#std_http_i42c(value="") }
-          Block#std_http_b23c { Return#std_http_r20b { Call#std_http_c10b(target=fromUtf8String) { Lit#std_http_i42d(value="") } } }
-          Block#std_http_b23d { Return#std_http_r20c { Call#std_http_c10c(target=fromBase64) { Var#std_http_v56d(name=encoded) } } }
+          Block#std_http_b23c { Return#std_http_r20b { Call#std_http_c10b(target=bytes.fromUtf8String) { Lit#std_http_i42d(value="") } } }
+          Block#std_http_b23d { Return#std_http_r20c { Call#std_http_c10c(target=bytes.fromBase64) { Var#std_http_v56d(name=encoded) } } }
         }
       }
     }
@@ -1795,7 +1795,7 @@ Program#std_http_p1 {
                 Let#std_http_l40(name=writeOp) {
                   Call#std_http_c25(target=sys.net.tcp.writeStart) {
                     Var#std_http_v90(name=connection)
-                    Call#std_http_c26(target=fromUtf8String) { Call#std_http_c107(target=httpRequestText) { Var#std_http_v91(name=state) } }
+                    Call#std_http_c26(target=bytes.fromUtf8String) { Call#std_http_c107(target=httpRequestText) { Var#std_http_v91(name=state) } }
                   }
                 }
                 Return#std_http_r28 {
@@ -1979,9 +1979,9 @@ Program#std_http_p1 {
               }
             }
             Let#std_http_l50(name=responseBytesText) { Call#std_http_c108(target=sys.net.async.resultBytes) { Var#std_http_v120(name=op) } }
-            Let#std_http_l50a(name=response) { Call#std_http_c49(target=toUtf8String) { Var#std_http_v120a(name=responseBytesText) } }
+            Let#std_http_l50a(name=response) { Call#std_http_c49(target=bytes.toUtf8String) { Var#std_http_v120a(name=responseBytesText) } }
             Let#std_http_l50b(name=responseBytesBase64) {
-              Call#std_http_c49a(target=toBase64) {
+              Call#std_http_c49a(target=bytes.toBase64) {
                 Call#std_http_c108a(target=sys.net.async.resultBytes) { Var#std_http_v120b(name=op) }
               }
             }
@@ -2094,7 +2094,7 @@ Program#std_http_p1 {
           Block#std_http_b76d {
             If#std_http_if82b {
               Call#std_http_c110c(target=httpRequestFailed) { Var#std_http_v183c(name=state) }
-              Block#std_http_b76e { Return#std_http_r52b { Call#std_http_c110d(target=fromUtf8String) { Lit#std_http_i153a(value="") } } }
+              Block#std_http_b76e { Return#std_http_r52b { Call#std_http_c110d(target=bytes.fromUtf8String) { Lit#std_http_i153a(value="") } } }
               Block#std_http_b76f {
                 Let#std_http_l65a(name=phase) { Call#std_http_c110e(target=httpRequestPhase) { Var#std_http_v183d(name=state) } }
                 If#std_http_if82c {
@@ -2117,7 +2117,7 @@ Program#std_http_p1 {
                             Call#std_http_c110n(target=sys.net.async.await) { Call#std_http_c110o(target=httpRequestOp) { Var#std_http_v183l(name=state) } }
                             Return#std_http_r52e { Call#std_http_c110p(target=httpRequestAwaitBytes) { Call#std_http_c110q(target=httpRequestPoll) { Var#std_http_v183m(name=state) } } }
                           }
-                          Block#std_http_b76l { Return#std_http_r52f { Call#std_http_c110r(target=fromUtf8String) { Lit#std_http_i153e(value="") } } }
+                          Block#std_http_b76l { Return#std_http_r52f { Call#std_http_c110r(target=bytes.fromUtf8String) { Lit#std_http_i153e(value="") } } }
                         }
                       }
                     }
