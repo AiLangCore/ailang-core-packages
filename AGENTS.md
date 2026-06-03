@@ -15,6 +15,14 @@ This repository contains official optional AiLang packages.
 - Do not add backward compatibility shims for pre-release package paths.
 - Package source must not assume every file in the package is bundled into app
   output.
+- Agents must prefer creating focused semantic `.aos` modules over expanding
+  large facade, tool, template, host, or runtime files. Do not create or
+  continue "blob" files.
+- Host/runtime changes must remain mechanical and must not introduce language,
+  library, UI, package, parsing, validation, formatting, or application
+  semantics. Deterministic package behavior belongs in package `.aos` modules.
+- Keep package entry/facade files thin. Split unrelated responsibilities into
+  modules with clear imports and exports before adding more behavior.
 - IMPORTANT: Until a major or minor release is officially released, all
   contracts, APIs, schemas, interfaces, and architectural decisions are
   considered negotiable and may change freely. Do not add backward

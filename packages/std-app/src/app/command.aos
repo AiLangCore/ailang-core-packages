@@ -1,0 +1,121 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=commandType)
+  Export(name=emitCommand)
+  Export(name=exitCommand)
+  Export(name=httpRespondCommand)
+  Export(name=spawnWorkerCommand)
+  Export(name=sendWorkerCommand)
+  Export(name=openUrlCommand)
+  Export(name=writeFileCommand)
+
+  Let(name=commandType) {
+    Fn(params=command) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=command)
+            Lit(value="type")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=emitCommand) {
+    Fn(params=channel,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Emit") }
+            Field(key="channel") { Var(name=channel) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=exitCommand) {
+    Fn(params=code) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Exit") }
+            Field(key="code") { Var(name=code) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpRespondCommand) {
+    Fn(params=requestId,response) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="HttpRespond") }
+            Field(key="requestId") { Var(name=requestId) }
+            Field(key="response") { Var(name=response) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=spawnWorkerCommand) {
+    Fn(params=worker) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="SpawnWorker") }
+            Field(key="worker") { Var(name=worker) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=sendWorkerCommand) {
+    Fn(params=workerId,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="SendWorker") }
+            Field(key="workerId") { Var(name=workerId) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=openUrlCommand) {
+    Fn(params=url) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="OpenUrl") }
+            Field(key="url") { Var(name=url) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=writeFileCommand) {
+    Fn(params=path,content) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="WriteFile") }
+            Field(key="path") { Var(name=path) }
+            Field(key="content") { Var(name=content) }
+          }
+        }
+      }
+    }
+  }
+}

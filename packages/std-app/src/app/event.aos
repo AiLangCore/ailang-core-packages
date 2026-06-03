@@ -1,0 +1,118 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=eventType)
+  Export(name=startEvent)
+  Export(name=messageEvent)
+  Export(name=httpRequestEvent)
+  Export(name=uiEvent)
+  Export(name=workerMessageEvent)
+  Export(name=timerEvent)
+  Export(name=shutdownEvent)
+
+  Let(name=eventType) {
+    Fn(params=event) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=event)
+            Lit(value="type")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=startEvent) {
+    Fn(params=args) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Start") }
+            Field(key="args") { Var(name=args) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=messageEvent) {
+    Fn(params=message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Message") }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpRequestEvent) {
+    Fn(params=request) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="HttpRequest") }
+            Field(key="request") { Var(name=request) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=uiEvent) {
+    Fn(params=event) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="UiEvent") }
+            Field(key="event") { Var(name=event) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerMessageEvent) {
+    Fn(params=workerId,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="WorkerMessage") }
+            Field(key="workerId") { Var(name=workerId) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=timerEvent) {
+    Fn(params=timerId) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Timer") }
+            Field(key="timerId") { Var(name=timerId) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=shutdownEvent) {
+    Fn(params=reason) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="Shutdown") }
+            Field(key="reason") { Var(name=reason) }
+          }
+        }
+      }
+    }
+  }
+}

@@ -43,6 +43,8 @@ packages/
 
 Current packages:
 
+- `std-app`: `std.app`, `std.app.event`, `std.app.next`,
+  `std.app.command`, `std.app.worker`, `src/app/*.aos`
 - `std-http`: `std.net.http`, `src/net/http.aos`
 - `std-image`: `std.media.image`, `src/media/image.aos`
 - `std-json`: `std.format.json`, `src/format/json.aos`
@@ -62,6 +64,17 @@ Current packages:
 - Package source must be reachable-code friendly: examples, tests, templates,
   and tools are not included in app output unless explicitly referenced or
   selected by publish/template commands.
+- Application lifecycle semantics belong in `std-app`, not compiler, VM, UI
+  libraries, or host code. The long-term lifecycle model is
+  `State + Event -> Next`.
+- CLI, HTTP, services, workers, and GUI are runtime profiles over the same
+  `std-app` lifecycle model.
+- Packages should expose context, event, message, command, and worker contracts
+  without exposing host threads, locks, mutexes, semaphores, or async/await
+  primitives.
+- GUI runtimes such as AiVectra are profile adapters: they adapt GUI host events
+  into `std-app` events and consume `std-app` commands. AiVM and host code own
+  only mechanical scheduling, syscall execution, and transport plumbing.
 
 ## Publishing Workflow
 

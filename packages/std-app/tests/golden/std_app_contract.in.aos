@@ -1,0 +1,106 @@
+Program {
+  Import(path="../../src/app/command.aos")
+  Import(path="../../src/app/event.aos")
+  Import(path="../../src/app/next.aos")
+  Import(path="../../src/app/worker.aos")
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/io.aos")
+  Export(name=start)
+
+  Let(name=start) {
+    Fn(params=args) {
+      Block {
+        Let(name=state) {
+          Map {
+            Field(key="screen") { Lit(value="home") }
+          }
+        }
+        Let(name=startEventValue) {
+          Call(target=startEvent) {
+            Map { }
+          }
+        }
+        Let(name=exit) {
+          Call(target=exitCommand) { Lit(value=7) }
+        }
+        Let(name=commands) {
+          Call(target=commandListOne) {
+            Var(name=exit)
+          }
+        }
+        Let(name=step) {
+          Call(target=next) {
+            Var(name=state)
+            Var(name=commands)
+          }
+        }
+        Let(name=firstCommand) {
+          Call(target=commandAtOr) {
+            Call(target=nextCommands) { Var(name=step) }
+            Lit(value=0)
+            Map { }
+          }
+        }
+        Let(name=workerSpec) {
+          Call(target=worker) {
+            Lit(value="geo")
+            Lit(value="workerInit")
+            Lit(value="workerUpdate")
+          }
+        }
+        Let(name=workerMsg) {
+          Call(target=workerMessage) {
+            Lit(value="geo")
+            Map {
+              Field(key="status") { Lit(value="ready") }
+            }
+          }
+        }
+
+        Call(target=io.print) {
+          Call(target=eventType) { Var(name=startEventValue) }
+        }
+        Call(target=io.print) {
+          Call(target=commandType) { Var(name=exit) }
+        }
+        Call(target=io.print) {
+          ToString {
+            Call(target=commandListCount) {
+              Call(target=nextCommands) { Var(name=step) }
+            }
+          }
+        }
+        Call(target=io.print) {
+          Call(target=commandType) { Var(name=firstCommand) }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=nextState) { Var(name=step) }
+            Lit(value="screen")
+            Lit(value="")
+          }
+        }
+        Call(target=io.print) {
+          Call(target=workerId) { Var(name=workerSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=workerInit) { Var(name=workerSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=workerUpdate) { Var(name=workerSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=workerMessageWorkerId) { Var(name=workerMsg) }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Call(target=workerMessagePayload) { Var(name=workerMsg) }
+            Lit(value="status")
+            Lit(value="")
+          }
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+}

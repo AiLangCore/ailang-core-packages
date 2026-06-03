@@ -1,0 +1,67 @@
+Program {
+  Export(name=profileCli)
+  Export(name=profileHttp)
+  Export(name=profileGui)
+  Export(name=profileService)
+  Export(name=profileWorker)
+  Export(name=appContext)
+  Export(name=appLifecycle)
+
+  Let(name=profileCli) {
+    Fn(params=_) {
+      Block { Return { Lit(value="cli") } }
+    }
+  }
+
+  Let(name=profileHttp) {
+    Fn(params=_) {
+      Block { Return { Lit(value="http") } }
+    }
+  }
+
+  Let(name=profileGui) {
+    Fn(params=_) {
+      Block { Return { Lit(value="gui") } }
+    }
+  }
+
+  Let(name=profileService) {
+    Fn(params=_) {
+      Block { Return { Lit(value="service") } }
+    }
+  }
+
+  Let(name=profileWorker) {
+    Fn(params=_) {
+      Block { Return { Lit(value="worker") } }
+    }
+  }
+
+  Let(name=appContext) {
+    Fn(params=profile,args) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="AppContext") }
+            Field(key="profile") { Var(name=profile) }
+            Field(key="args") { Var(name=args) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=appLifecycle) {
+    Fn(params=initName,updateName) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="AppLifecycle") }
+            Field(key="init") { Var(name=initName) }
+            Field(key="update") { Var(name=updateName) }
+          }
+        }
+      }
+    }
+  }
+}

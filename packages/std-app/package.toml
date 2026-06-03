@@ -1,0 +1,75 @@
+schema = "ailang.package-source.v1"
+name = "std-app"
+version = "0.0.1-alpha.1"
+types = ["library"]
+
+[libraries.app]
+namespace = "std.app"
+entry = "src/app/app.aos"
+exports = [
+  "appContext",
+  "appLifecycle",
+  "profileCli",
+  "profileHttp",
+  "profileGui",
+  "profileService",
+  "profileWorker",
+]
+
+[libraries.event]
+namespace = "std.app.event"
+entry = "src/app/event.aos"
+exports = [
+  "eventType",
+  "startEvent",
+  "messageEvent",
+  "httpRequestEvent",
+  "uiEvent",
+  "workerMessageEvent",
+  "timerEvent",
+  "shutdownEvent",
+]
+
+[libraries.next]
+namespace = "std.app.next"
+entry = "src/app/next.aos"
+exports = [
+  "next",
+  "nextNoCommands",
+  "nextState",
+  "nextCommands",
+  "commandList",
+  "commandListOne",
+  "commandListCount",
+  "commandAtOr",
+]
+
+[libraries.command]
+namespace = "std.app.command"
+entry = "src/app/command.aos"
+exports = [
+  "commandType",
+  "emitCommand",
+  "exitCommand",
+  "httpRespondCommand",
+  "spawnWorkerCommand",
+  "sendWorkerCommand",
+  "openUrlCommand",
+  "writeFileCommand",
+]
+
+[libraries.worker]
+namespace = "std.app.worker"
+entry = "src/app/worker.aos"
+exports = [
+  "worker",
+  "workerId",
+  "workerInit",
+  "workerUpdate",
+  "workerMessage",
+  "workerMessageWorkerId",
+  "workerMessagePayload",
+  "spawnWorker",
+  "sendWorker",
+  "workerEvent",
+]

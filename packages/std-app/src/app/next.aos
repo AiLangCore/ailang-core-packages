@@ -1,0 +1,122 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=next)
+  Export(name=nextNoCommands)
+  Export(name=nextState)
+  Export(name=nextCommands)
+  Export(name=commandList)
+  Export(name=commandListOne)
+  Export(name=commandListCount)
+  Export(name=commandAtOr)
+
+  Let(name=commandList) {
+    Fn(params=_) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CommandList") }
+            Field(key="count") { Lit(value=0) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandListOne) {
+    Fn(params=command) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CommandList") }
+            Field(key="count") { Lit(value=1) }
+            Field(key="0") { Var(name=command) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandListCount) {
+    Fn(params=commands) {
+      Block {
+        Return {
+          Call(target=mapGetIntOr) {
+            Var(name=commands)
+            Lit(value="count")
+            Lit(value=0)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandAtOr) {
+    Fn(params=commands,index,fallback) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=commands)
+            ToString { Var(name=index) }
+            Var(name=fallback)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=next) {
+    Fn(params=state,commands) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="Next") }
+            Field(key="state") { Var(name=state) }
+            Field(key="commands") { Var(name=commands) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=nextNoCommands) {
+    Fn(params=state) {
+      Block {
+        Return {
+          Call(target=next) {
+            Var(name=state)
+            Call(target=commandList) { Lit(value=0) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=nextState) {
+    Fn(params=nextValue) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=nextValue)
+            Lit(value="state")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=nextCommands) {
+    Fn(params=nextValue) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=nextValue)
+            Lit(value="commands")
+            Call(target=commandList) { Lit(value=0) }
+          }
+        }
+      }
+    }
+  }
+}

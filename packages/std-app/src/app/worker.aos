@@ -1,0 +1,154 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=worker)
+  Export(name=workerId)
+  Export(name=workerInit)
+  Export(name=workerUpdate)
+  Export(name=workerMessage)
+  Export(name=workerMessageWorkerId)
+  Export(name=workerMessagePayload)
+  Export(name=spawnWorker)
+  Export(name=sendWorker)
+  Export(name=workerEvent)
+
+  Let(name=worker) {
+    Fn(params=id,initName,updateName) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="Worker") }
+            Field(key="id") { Var(name=id) }
+            Field(key="init") { Var(name=initName) }
+            Field(key="update") { Var(name=updateName) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerId) {
+    Fn(params=workerSpec) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=workerSpec)
+            Lit(value="id")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerInit) {
+    Fn(params=workerSpec) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=workerSpec)
+            Lit(value="init")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerUpdate) {
+    Fn(params=workerSpec) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=workerSpec)
+            Lit(value="update")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerMessage) {
+    Fn(params=workerId,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="WorkerMessage") }
+            Field(key="workerId") { Var(name=workerId) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerMessageWorkerId) {
+    Fn(params=message) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Var(name=message)
+            Lit(value="workerId")
+            Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerMessagePayload) {
+    Fn(params=message) {
+      Block {
+        Return {
+          Call(target=mapGetNodeOr) {
+            Var(name=message)
+            Lit(value="message")
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=spawnWorker) {
+    Fn(params=workerSpec) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="SpawnWorker") }
+            Field(key="worker") { Var(name=workerSpec) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=sendWorker) {
+    Fn(params=workerId,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="SendWorker") }
+            Field(key="workerId") { Var(name=workerId) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=workerEvent) {
+    Fn(params=workerId,message) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="WorkerMessage") }
+            Field(key="workerId") { Var(name=workerId) }
+            Field(key="message") { Var(name=message) }
+          }
+        }
+      }
+    }
+  }
+}
