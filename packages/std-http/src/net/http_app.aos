@@ -8,6 +8,7 @@ Program {
   Export(name=httpAppDynamicAssets)
   Export(name=httpAppWebServices)
   Export(name=httpAppSockets)
+  Export(name=httpRequestEvent)
 
   Let(name=httpApp) {
     Fn(params=name,initName,updateName,staticAssets,dynamicAssets,webServices,sockets) {
@@ -84,6 +85,19 @@ Program {
             Var(name=app)
             Lit(value="sockets")
             Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=httpRequestEvent) {
+    Fn(params=request) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="HttpRequest") }
+            Field(key="request") { Var(name=request) }
           }
         }
       }

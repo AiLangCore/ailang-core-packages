@@ -2,9 +2,9 @@ Program {
   Import(sdk="ailang" path="std/core.aos")
 
   Export(name=eventType)
+  Export(name=noneEvent)
   Export(name=startEvent)
   Export(name=messageEvent)
-  Export(name=httpRequestEvent)
   Export(name=uiEvent)
   Export(name=workerMessageEvent)
   Export(name=timerEvent)
@@ -18,6 +18,18 @@ Program {
             Var(name=event)
             Lit(value="type")
             Lit(value="")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=noneEvent) {
+    Fn(params=_) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="None") }
           }
         }
       }
@@ -44,19 +56,6 @@ Program {
           Map {
             Field(key="type") { Lit(value="Message") }
             Field(key="message") { Var(name=message) }
-          }
-        }
-      }
-    }
-  }
-
-  Let(name=httpRequestEvent) {
-    Fn(params=request) {
-      Block {
-        Return {
-          Map {
-            Field(key="type") { Lit(value="HttpRequest") }
-            Field(key="request") { Var(name=request) }
           }
         }
       }

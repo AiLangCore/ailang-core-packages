@@ -18,6 +18,13 @@ Program {
             Map { Field(key="chat") { Lit(value="socket") } }
           }
         }
+        Let(name=reqEvent) {
+          Call(target=httpRequestEvent) {
+            Map {
+              Field(key="path") { Lit(value="/health") }
+            }
+          }
+        }
         Call(target=io.print) {
           Call(target=mapGetStringOr) {
             Call(target=httpAppStaticAssets) { Var(name=app) }
@@ -43,6 +50,13 @@ Program {
           Call(target=mapGetStringOr) {
             Call(target=httpAppSockets) { Var(name=app) }
             Lit(value="chat")
+            Lit(value="")
+          }
+        }
+        Call(target=io.print) {
+          Call(target=mapGetStringOr) {
+            Var(name=reqEvent)
+            Lit(value="type")
             Lit(value="")
           }
         }

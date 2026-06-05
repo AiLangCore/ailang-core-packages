@@ -21,6 +21,11 @@ Program {
             Map { }
           }
         }
+        Let(name=noneEventValue) {
+          Call(target=noneEvent) {
+            Lit(value=0)
+          }
+        }
         Let(name=exit) {
           Call(target=exitCommand) { Lit(value=7) }
         }
@@ -68,6 +73,9 @@ Program {
 
         Call(target=io.print) {
           Call(target=eventType) { Var(name=startEventValue) }
+        }
+        Call(target=io.print) {
+          Call(target=eventType) { Var(name=noneEventValue) }
         }
         Call(target=io.print) {
           Call(target=commandType) { Var(name=exit) }
