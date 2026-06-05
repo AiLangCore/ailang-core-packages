@@ -28,9 +28,9 @@ repo = "${SOURCE_DIR}"
 packageRoot = "packages/std-app"
 license = "MIT"
 types = ["library"]
-defaultVersion = "0.0.1-alpha.2"
+defaultVersion = "0.0.1-alpha.3"
 
-[versions."0.0.1-alpha.2"]
+[versions."0.0.1-alpha.3"]
 ref = "HEAD"
 commit = "${SOURCE_COMMIT}"
 EOF
@@ -42,9 +42,9 @@ repo = "${SOURCE_DIR}"
 packageRoot = "packages/std-http"
 license = "MIT"
 types = ["library"]
-defaultVersion = "0.0.1-alpha.7"
+defaultVersion = "0.0.1-alpha.8"
 
-[versions."0.0.1-alpha.7"]
+[versions."0.0.1-alpha.8"]
 ref = "HEAD"
 commit = "${SOURCE_COMMIT}"
 EOF
