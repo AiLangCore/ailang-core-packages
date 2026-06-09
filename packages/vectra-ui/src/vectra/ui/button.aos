@@ -1,9 +1,34 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
+  Import(path="element.aos")
 
   Export(name=button)
   Export(name=buttonHit)
+  Export(name=buttonElement)
+  Export(name=buttonRender)
+  Export(name=buttonHitElement)
+
+  Let(name=buttonElement) {
+    Fn(params=id,x,y,w,h,label,state) {
+      Block {
+        Return {
+          Call(target=uiElement) {
+            Var(name=id)
+            Lit(value="button")
+            Var(name=x)
+            Var(name=y)
+            Var(name=w)
+            Var(name=h)
+            Map {
+              Field(key="label") { Var(name=label) }
+            }
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
 
   Let(name=button) {
     Fn(params=handle,x,y,w,h,label,state) {
@@ -23,29 +48,10 @@ Program {
           Lit(value="#1e40af")
           Lit(value="#64748b")
         }
-        Let(name=labelWidth) { Call(target=mul) { Lit(value=10) Call(target=textLen) { Var(name=label) } } }
-        Let(name=labelX) {
-          Add {
-            Var(name=x)
-            Call(target=halfFloor) {
-              Call(target=sub) { Var(name=w) Var(name=labelWidth) }
-              Lit(value=0)
-            }
-          }
-        }
-        Let(name=labelY) {
-          Add {
-            Var(name=y)
-            Call(target=halfFloor) {
-              Add { Var(name=h) Lit(value=16) }
-              Lit(value=0)
-            }
-          }
-        }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
-          Var(name=labelX)
-          Var(name=labelY)
+          Add { Var(name=x) Lit(value=24) }
+          Add { Var(name=y) Lit(value=28) }
           Var(name=label)
           Lit(value="#ffffff")
           Lit(value=18)
@@ -75,6 +81,30 @@ Program {
           Block { Return { Lit(value=false) } }
         }
       }
+    }
+  }
+
+  Let(name=buttonRender) {
+    Fn(params=handle,element) {
+      Block {
+        Return {
+          Call(target=button) {
+            Var(name=handle)
+            Call(target=elementX) { Var(name=element) }
+            Call(target=elementY) { Var(name=element) }
+            Call(target=elementW) { Var(name=element) }
+            Call(target=elementH) { Var(name=element) }
+            Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
+            Call(target=elementState) { Var(name=element) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=buttonHitElement) {
+    Fn(params=event,element) {
+      Block { Return { Call(target=elementHit) { Var(name=event) Var(name=element) } } }
     }
   }
 }

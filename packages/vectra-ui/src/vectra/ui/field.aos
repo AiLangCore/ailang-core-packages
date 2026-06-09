@@ -1,6 +1,7 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
+  Import(path="element.aos")
 
   Export(name=field)
   Export(name=entry)
@@ -8,6 +9,57 @@ Program {
   Export(name=entryNextText)
   Export(name=entryNextCursor)
   Export(name=entryShouldSubmit)
+  Export(name=fieldElement)
+  Export(name=fieldRender)
+  Export(name=entryElement)
+  Export(name=entryRender)
+  Export(name=entryHitElement)
+
+  Let(name=fieldElement) {
+    Fn(params=id,x,y,w,label,value,state) {
+      Block {
+        Return {
+          Call(target=uiElement) {
+            Var(name=id)
+            Lit(value="field")
+            Var(name=x)
+            Var(name=y)
+            Var(name=w)
+            Lit(value=48)
+            Map {
+              Field(key="label") { Var(name=label) }
+              Field(key="value") { Var(name=value) }
+            }
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryElement) {
+    Fn(params=id,x,y,w,h,label,value,placeholder,focused,state) {
+      Block {
+        Return {
+          Call(target=uiElement) {
+            Var(name=id)
+            Lit(value="entry")
+            Var(name=x)
+            Var(name=y)
+            Var(name=w)
+            Var(name=h)
+            Map {
+              Field(key="label") { Var(name=label) }
+              Field(key="value") { Var(name=value) }
+              Field(key="placeholder") { Var(name=placeholder) }
+              Field(key="focused") { Var(name=focused) }
+            }
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
 
   Let(name=field) {
     Fn(params=handle,x,y,w,label,value) {
@@ -143,6 +195,59 @@ Program {
           Call(target=editShouldSubmit) {
             Call(target=inputEventKey) { Var(name=event) }
             Var(name=allowEnter)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=fieldRender) {
+    Fn(params=handle,element) {
+      Block {
+        Return {
+          Call(target=field) {
+            Var(name=handle)
+            Call(target=elementX) { Var(name=element) }
+            Call(target=elementY) { Var(name=element) }
+            Call(target=elementW) { Var(name=element) }
+            Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
+            Call(target=elementPropString) { Var(name=element) Lit(value="value") Lit(value="") }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryRender) {
+    Fn(params=handle,element) {
+      Block {
+        Return {
+          Call(target=entry) {
+            Var(name=handle)
+            Call(target=elementX) { Var(name=element) }
+            Call(target=elementY) { Var(name=element) }
+            Call(target=elementW) { Var(name=element) }
+            Call(target=elementH) { Var(name=element) }
+            Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
+            Call(target=elementPropString) { Var(name=element) Lit(value="value") Lit(value="") }
+            Call(target=elementPropString) { Var(name=element) Lit(value="placeholder") Lit(value="") }
+            Call(target=elementPropBool) { Var(name=element) Lit(value="focused") Lit(value=false) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryHitElement) {
+    Fn(params=event,element) {
+      Block {
+        Return {
+          Call(target=entryHit) {
+            Var(name=event)
+            Call(target=elementX) { Var(name=element) }
+            Call(target=elementY) { Var(name=element) }
+            Call(target=elementW) { Var(name=element) }
+            Call(target=elementH) { Var(name=element) }
           }
         }
       }

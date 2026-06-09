@@ -1,26 +1,71 @@
 schema = "ailang.package-source.v1"
 name = "vectra-ui"
-version = "0.0.1-alpha.3"
+version = "0.0.1-alpha.4"
 types = ["library"]
 
 [dependencies]
-aivectra = "0.0.1-alpha.30"
+aivectra = "0.0.1-alpha.31"
 std-ui-input = "0.0.1-alpha.7"
+
+[libraries.element]
+namespace = "vectra.ui.element"
+entry = "src/vectra/ui/element.aos"
+exports = [
+  "uiElement",
+  "elementId",
+  "elementKind",
+  "elementX",
+  "elementY",
+  "elementW",
+  "elementH",
+  "elementProps",
+  "elementState",
+  "elementPropString",
+  "elementPropBool",
+  "elementPropInt",
+  "elementHit",
+]
 
 [libraries.elements]
 namespace = "vectra.ui.elements"
 entry = "src/vectra/ui/elements.aos"
 exports = [
+  "uiElement",
+  "elementId",
+  "elementKind",
+  "elementX",
+  "elementY",
+  "elementW",
+  "elementH",
+  "elementProps",
+  "elementState",
+  "elementPropString",
+  "elementPropBool",
+  "elementPropInt",
+  "elementHit",
+  "renderElement",
+  "hitElement",
   "button",
   "buttonHit",
+  "buttonElement",
+  "buttonRender",
+  "buttonHitElement",
   "field",
   "entry",
   "entryHit",
   "entryNextText",
   "entryNextCursor",
   "entryShouldSubmit",
+  "fieldElement",
+  "fieldRender",
+  "entryElement",
+  "entryRender",
+  "entryHitElement",
   "radioButton",
   "radioHit",
+  "radioElement",
+  "radioRender",
+  "radioHitElement",
 ]
 
 [libraries.button]
@@ -29,6 +74,9 @@ entry = "src/vectra/ui/button.aos"
 exports = [
   "button",
   "buttonHit",
+  "buttonElement",
+  "buttonRender",
+  "buttonHitElement",
 ]
 
 [libraries.field]
@@ -41,6 +89,11 @@ exports = [
   "entryNextText",
   "entryNextCursor",
   "entryShouldSubmit",
+  "fieldElement",
+  "fieldRender",
+  "entryElement",
+  "entryRender",
+  "entryHitElement",
 ]
 
 [libraries.radio]
@@ -49,4 +102,7 @@ entry = "src/vectra/ui/radio.aos"
 exports = [
   "radioButton",
   "radioHit",
+  "radioElement",
+  "radioRender",
+  "radioHitElement",
 ]

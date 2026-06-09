@@ -1,16 +1,87 @@
 Program {
+  Import(path="element.aos")
   Import(path="button.aos")
   Import(path="field.aos")
   Import(path="radio.aos")
 
+  Export(name=uiElement)
+  Export(name=elementId)
+  Export(name=elementKind)
+  Export(name=elementX)
+  Export(name=elementY)
+  Export(name=elementW)
+  Export(name=elementH)
+  Export(name=elementProps)
+  Export(name=elementState)
+  Export(name=elementPropString)
+  Export(name=elementPropBool)
+  Export(name=elementPropInt)
+  Export(name=elementHit)
+  Export(name=renderElement)
+  Export(name=hitElement)
   Export(name=button)
   Export(name=buttonHit)
+  Export(name=buttonElement)
+  Export(name=buttonRender)
+  Export(name=buttonHitElement)
   Export(name=field)
   Export(name=entry)
   Export(name=entryHit)
   Export(name=entryNextText)
   Export(name=entryNextCursor)
   Export(name=entryShouldSubmit)
+  Export(name=fieldElement)
+  Export(name=fieldRender)
+  Export(name=entryElement)
+  Export(name=entryRender)
+  Export(name=entryHitElement)
   Export(name=radioButton)
   Export(name=radioHit)
+  Export(name=radioElement)
+  Export(name=radioRender)
+  Export(name=radioHitElement)
+
+  Let(name=renderElement) {
+    Fn(params=handle,element) {
+      Block {
+        Let(name=kind) { Call(target=elementKind) { Var(name=element) } }
+        If {
+          Eq { Var(name=kind) Lit(value="button") }
+          Block { Return { Call(target=buttonRender) { Var(name=handle) Var(name=element) } } }
+          Block {
+            If {
+              Eq { Var(name=kind) Lit(value="entry") }
+              Block { Return { Call(target=entryRender) { Var(name=handle) Var(name=element) } } }
+              Block {
+                If {
+                  Eq { Var(name=kind) Lit(value="field") }
+                  Block { Return { Call(target=fieldRender) { Var(name=handle) Var(name=element) } } }
+                  Block {
+                    If {
+                      Eq { Var(name=kind) Lit(value="radio") }
+                      Block { Return { Call(target=radioRender) { Var(name=handle) Var(name=element) } } }
+                      Block { Return { Lit(value=0) } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=hitElement) {
+    Fn(params=event,element) {
+      Block {
+        Let(name=kind) { Call(target=elementKind) { Var(name=element) } }
+        If {
+          Eq { Var(name=kind) Lit(value="entry") }
+          Block { Return { Call(target=entryHitElement) { Var(name=event) Var(name=element) } } }
+          Block { Return { Call(target=elementHit) { Var(name=event) Var(name=element) } } }
+        }
+      }
+    }
+  }
 }

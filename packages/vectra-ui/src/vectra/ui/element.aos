@@ -1,0 +1,152 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="std-ui-input" path="src/ui/input.aos")
+
+  Export(name=uiElement)
+  Export(name=elementId)
+  Export(name=elementKind)
+  Export(name=elementX)
+  Export(name=elementY)
+  Export(name=elementW)
+  Export(name=elementH)
+  Export(name=elementProps)
+  Export(name=elementState)
+  Export(name=elementPropString)
+  Export(name=elementPropBool)
+  Export(name=elementPropInt)
+  Export(name=elementHit)
+
+  Let(name=uiElement) {
+    Fn(params=id,kind,x,y,w,h,props,state) {
+      Block {
+        Return {
+          Map {
+            Field(key="type") { Lit(value="vectra.ui.element") }
+            Field(key="id") { Var(name=id) }
+            Field(key="kind") { Var(name=kind) }
+            Field(key="x") { Var(name=x) }
+            Field(key="y") { Var(name=y) }
+            Field(key="w") { Var(name=w) }
+            Field(key="h") { Var(name=h) }
+            Field(key="props") { Var(name=props) }
+            Field(key="state") { Var(name=state) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=elementId) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetStringOr) { Var(name=element) Lit(value="id") Lit(value="") } } }
+    }
+  }
+
+  Let(name=elementKind) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetStringOr) { Var(name=element) Lit(value="kind") Lit(value="") } } }
+    }
+  }
+
+  Let(name=elementX) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetIntOr) { Var(name=element) Lit(value="x") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=elementY) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetIntOr) { Var(name=element) Lit(value="y") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=elementW) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetIntOr) { Var(name=element) Lit(value="w") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=elementH) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetIntOr) { Var(name=element) Lit(value="h") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=elementProps) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetNodeOr) { Var(name=element) Lit(value="props") Map { } } } }
+    }
+  }
+
+  Let(name=elementState) {
+    Fn(params=element) {
+      Block { Return { Call(target=mapGetStringOr) { Var(name=element) Lit(value="state") Lit(value="normal") } } }
+    }
+  }
+
+  Let(name=elementPropString) {
+    Fn(params=element,key,defaultValue) {
+      Block {
+        Return {
+          Call(target=mapGetStringOr) {
+            Call(target=elementProps) { Var(name=element) }
+            Var(name=key)
+            Var(name=defaultValue)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=elementPropBool) {
+    Fn(params=element,key,defaultValue) {
+      Block {
+        Return {
+          Call(target=mapGetBoolOr) {
+            Call(target=elementProps) { Var(name=element) }
+            Var(name=key)
+            Var(name=defaultValue)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=elementPropInt) {
+    Fn(params=element,key,defaultValue) {
+      Block {
+        Return {
+          Call(target=mapGetIntOr) {
+            Call(target=elementProps) { Var(name=element) }
+            Var(name=key)
+            Var(name=defaultValue)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=elementHit) {
+    Fn(params=event,element) {
+      Block {
+        If {
+          Call(target=inputEventIsClickLike) { Var(name=event) }
+          Block {
+            Return {
+              Call(target=pointInRect) {
+                Call(target=inputEventX) { Var(name=event) }
+                Call(target=inputEventY) { Var(name=event) }
+                Call(target=elementX) { Var(name=element) }
+                Call(target=elementY) { Var(name=element) }
+                Call(target=elementW) { Var(name=element) }
+                Call(target=elementH) { Var(name=element) }
+              }
+            }
+          }
+          Block { Return { Lit(value=false) } }
+        }
+      }
+    }
+  }
+}

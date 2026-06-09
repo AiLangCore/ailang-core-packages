@@ -1,9 +1,36 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
+  Import(path="element.aos")
 
   Export(name=radioButton)
   Export(name=radioHit)
+  Export(name=radioElement)
+  Export(name=radioRender)
+  Export(name=radioHitElement)
+
+  Let(name=radioElement) {
+    Fn(params=id,x,y,label,labelWidth,selected,state) {
+      Block {
+        Return {
+          Call(target=uiElement) {
+            Var(name=id)
+            Lit(value="radio")
+            Var(name=x)
+            Var(name=y)
+            Add { Var(name=labelWidth) Lit(value=32) }
+            Lit(value=24)
+            Map {
+              Field(key="label") { Var(name=label) }
+              Field(key="labelWidth") { Var(name=labelWidth) }
+              Field(key="selected") { Var(name=selected) }
+            }
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
 
   Let(name=radioButton) {
     Fn(params=handle,x,y,label,selected,state) {
@@ -71,6 +98,29 @@ Program {
           Block { Return { Lit(value=false) } }
         }
       }
+    }
+  }
+
+  Let(name=radioRender) {
+    Fn(params=handle,element) {
+      Block {
+        Return {
+          Call(target=radioButton) {
+            Var(name=handle)
+            Call(target=elementX) { Var(name=element) }
+            Call(target=elementY) { Var(name=element) }
+            Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
+            Call(target=elementPropBool) { Var(name=element) Lit(value="selected") Lit(value=false) }
+            Call(target=elementState) { Var(name=element) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=radioHitElement) {
+    Fn(params=event,element) {
+      Block { Return { Call(target=elementHit) { Var(name=event) Var(name=element) } } }
     }
   }
 }
