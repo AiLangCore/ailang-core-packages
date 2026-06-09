@@ -12,6 +12,7 @@ Program {
   Export(name=fieldElement)
   Export(name=fieldRender)
   Export(name=entryElement)
+  Export(name=entryElementWithCaret)
   Export(name=entryRender)
   Export(name=entryHitElement)
 
@@ -53,6 +54,32 @@ Program {
               Field(key="value") { Var(name=value) }
               Field(key="placeholder") { Var(name=placeholder) }
               Field(key="focused") { Var(name=focused) }
+            }
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryElementWithCaret) {
+    Fn(params=id,x,y,w,h,label,value,placeholder,focused,state,cursor,caretVisible) {
+      Block {
+        Return {
+          Call(target=uiElement) {
+            Var(name=id)
+            Lit(value="entry")
+            Var(name=x)
+            Var(name=y)
+            Var(name=w)
+            Var(name=h)
+            Map {
+              Field(key="label") { Var(name=label) }
+              Field(key="value") { Var(name=value) }
+              Field(key="placeholder") { Var(name=placeholder) }
+              Field(key="focused") { Var(name=focused) }
+              Field(key="cursor") { Var(name=cursor) }
+              Field(key="caretVisible") { Var(name=caretVisible) }
             }
             Var(name=state)
           }
@@ -221,18 +248,43 @@ Program {
   Let(name=entryRender) {
     Fn(params=handle,element) {
       Block {
-        Return {
-          Call(target=entry) {
-            Var(name=handle)
-            Call(target=elementX) { Var(name=element) }
-            Call(target=elementY) { Var(name=element) }
-            Call(target=elementW) { Var(name=element) }
-            Call(target=elementH) { Var(name=element) }
-            Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
-            Call(target=elementPropString) { Var(name=element) Lit(value="value") Lit(value="") }
-            Call(target=elementPropString) { Var(name=element) Lit(value="placeholder") Lit(value="") }
-            Call(target=elementPropBool) { Var(name=element) Lit(value="focused") Lit(value=false) }
+        Let(name=value) { Call(target=elementPropString) { Var(name=element) Lit(value="value") Lit(value="") } }
+        Call(target=entry) {
+          Var(name=handle)
+          Call(target=elementX) { Var(name=element) }
+          Call(target=elementY) { Var(name=element) }
+          Call(target=elementW) { Var(name=element) }
+          Call(target=elementH) { Var(name=element) }
+          Call(target=elementPropString) { Var(name=element) Lit(value="label") Lit(value="") }
+          Var(name=value)
+          Call(target=elementPropString) { Var(name=element) Lit(value="placeholder") Lit(value="") }
+          Call(target=elementPropBool) { Var(name=element) Lit(value="focused") Lit(value=false) }
+        }
+        If {
+          Call(target=elementPropBool) { Var(name=element) Lit(value="caretVisible") Lit(value=false) }
+          Block {
+            Call(target=sys.ui.drawRect) {
+              Var(name=handle)
+              Add {
+                Add { Call(target=elementX) { Var(name=element) } Lit(value=16) }
+                Call(target=caretPixelOffset) {
+                  Var(name=value)
+                  Call(target=elementPropInt) {
+                    Var(name=element)
+                    Lit(value="cursor")
+                    Call(target=textLen) { Var(name=value) }
+                  }
+                  Lit(value=9)
+                }
+              }
+              Add { Call(target=elementY) { Var(name=element) } Lit(value=30) }
+              Lit(value=2)
+              Lit(value=20)
+              Lit(value="#e2e8f0")
+            }
+            Return { Lit(value=0) }
           }
+          Block { Return { Lit(value=0) } }
         }
       }
     }

@@ -30,6 +30,50 @@ Program {
     }
   }
 
+  Let(name=buttonHalfFloor) {
+    Fn(params=value,acc) {
+      Block {
+        If {
+          Eq { Var(name=value) Lit(value=0) }
+          Block { Return { Var(name=acc) } }
+          Block {
+            If {
+              Eq { Var(name=value) Lit(value=1) }
+              Block { Return { Var(name=acc) } }
+              Block {
+                Return {
+                  Call(target=buttonHalfFloor) {
+                    Add { Var(name=value) Lit(value=-2) }
+                    Add { Var(name=acc) Lit(value=1) }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=buttonNegativeTextWidthLoop) {
+    Fn(params=count,acc) {
+      Block {
+        If {
+          Eq { Var(name=count) Lit(value=0) }
+          Block { Return { Var(name=acc) } }
+          Block {
+            Return {
+              Call(target=buttonNegativeTextWidthLoop) {
+                Add { Var(name=count) Lit(value=-1) }
+                Add { Var(name=acc) Lit(value=-10) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
   Let(name=button) {
     Fn(params=handle,x,y,w,h,label,state) {
       Block {
@@ -50,8 +94,23 @@ Program {
         }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
-          Add { Var(name=x) Lit(value=24) }
-          Add { Var(name=y) Lit(value=28) }
+          Add {
+            Var(name=x)
+            Call(target=buttonHalfFloor) {
+              Add {
+                Var(name=w)
+                Call(target=buttonNegativeTextWidthLoop) { Call(target=textLen) { Var(name=label) } Lit(value=0) }
+              }
+              Lit(value=0)
+            }
+          }
+          Add {
+            Var(name=y)
+            Call(target=buttonHalfFloor) {
+              Add { Var(name=h) Lit(value=16) }
+              Lit(value=0)
+            }
+          }
           Var(name=label)
           Lit(value="#ffffff")
           Lit(value=18)

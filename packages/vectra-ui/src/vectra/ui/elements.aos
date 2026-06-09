@@ -33,6 +33,7 @@ Program {
   Export(name=fieldElement)
   Export(name=fieldRender)
   Export(name=entryElement)
+  Export(name=entryElementWithCaret)
   Export(name=entryRender)
   Export(name=entryHitElement)
   Export(name=radioButton)

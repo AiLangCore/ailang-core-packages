@@ -1,6 +1,6 @@
 schema = "ailang.package-source.v1"
 name = "vectra-ui"
-version = "0.0.1-alpha.4"
+version = "0.0.1-alpha.5"
 types = ["library"]
 
 [dependencies]
@@ -59,6 +59,7 @@ exports = [
   "fieldElement",
   "fieldRender",
   "entryElement",
+  "entryElementWithCaret",
   "entryRender",
   "entryHitElement",
   "radioButton",
@@ -92,6 +93,7 @@ exports = [
   "fieldElement",
   "fieldRender",
   "entryElement",
+  "entryElementWithCaret",
   "entryRender",
   "entryHitElement",
 ]
