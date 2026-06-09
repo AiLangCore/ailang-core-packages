@@ -112,9 +112,27 @@ Program {
     }
   }
 
+  Let(name=drawEntryRoundRect) {
+    Fn(params=handle,x,y,w,h,r,color) {
+      Block {
+        Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Var(name=r) } Var(name=y) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } Var(name=h) Var(name=color) }
+        Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Add { Var(name=y) Var(name=r) } Var(name=w) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Var(name=x) Var(name=y) Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Var(name=y) Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Var(name=x) Add { Var(name=y) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Add { Var(name=y) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
   Let(name=entry) {
     Fn(params=handle,x,y,w,h,label,value,placeholder,focused) {
       Block {
+        Let(name=entryY) { Add { Var(name=y) Lit(value=18) } }
+        Let(name=radius) { Lit(value=8) }
+        Let(name=borderColor) { If { Var(name=focused) Block { Lit(value="#60a5fa") } Block { Lit(value="#334155") } } }
+        Let(name=fillColor) { If { Var(name=focused) Block { Lit(value="#111827") } Block { Lit(value="#0f172a") } } }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
           Var(name=x)
@@ -123,20 +141,13 @@ Program {
           Lit(value="#cbd5e1")
           Lit(value=14)
         }
-        Call(target=interactiveVectorState) {
-          Var(name=handle)
-          Var(name=x)
-          Add { Var(name=y) Lit(value=18) }
-          Var(name=w)
-          Var(name=h)
-          If { Var(name=focused) Block { Lit(value="focused") } Block { Lit(value="normal") } }
-          Lit(value="rect")
-          Lit(value="")
-          Lit(value="#0f172a")
-          Lit(value="#0f172a")
-          Lit(value="#1e293b")
-          Lit(value="#172554")
-          Lit(value="#334155")
+        Call(target=drawEntryRoundRect) { Var(name=handle) Add { Var(name=x) Lit(value=1) } Add { Var(name=entryY) Lit(value=3) } Var(name=w) Var(name=h) Var(name=radius) Lit(value="#020617") }
+        Call(target=drawEntryRoundRect) { Var(name=handle) Var(name=x) Var(name=entryY) Var(name=w) Var(name=h) Var(name=radius) Var(name=borderColor) }
+        Call(target=drawEntryRoundRect) { Var(name=handle) Add { Var(name=x) Lit(value=1) } Add { Var(name=entryY) Lit(value=1) } Add { Var(name=w) Lit(value=-2) } Add { Var(name=h) Lit(value=-2) } Var(name=radius) Var(name=fillColor) }
+        If {
+          Var(name=focused)
+          Block { Call(target=sys.ui.drawLine) { Var(name=handle) Add { Var(name=x) Lit(value=12) } Add { Var(name=entryY) Lit(value=2) } Add { Add { Var(name=x) Var(name=w) } Lit(value=-12) } Add { Var(name=entryY) Lit(value=2) } Lit(value="#93c5fd") Lit(value=1) } Lit(value=0) }
+          Block { Lit(value=0) }
         }
         Let(name=visibleValue) {
           If {
@@ -148,7 +159,7 @@ Program {
         Call(target=sys.ui.drawText) {
           Var(name=handle)
           Add { Var(name=x) Lit(value=16) }
-          Add { Var(name=y) Lit(value=30) }
+          Add { Var(name=y) Lit(value=31) }
           Var(name=visibleValue)
           If { Eq { Var(name=value) Lit(value="") } Block { Lit(value="#94a3b8") } Block { Lit(value="#ffffff") } }
           Lit(value=18)
@@ -270,14 +281,14 @@ Program {
                 Call(target=caretPixelOffset) {
                   Var(name=value)
                   Call(target=elementPropInt) {
-                    Var(name=element)
-                    Lit(value="cursor")
-                    Call(target=textLen) { Var(name=value) }
-                  }
-                  Lit(value=9)
+                  Var(name=element)
+                  Lit(value="cursor")
+                  Call(target=textLen) { Var(name=value) }
+                }
+                  Lit(value=8)
                 }
               }
-              Add { Call(target=elementY) { Var(name=element) } Lit(value=30) }
+              Add { Call(target=elementY) { Var(name=element) } Lit(value=31) }
               Lit(value=2)
               Lit(value=20)
               Lit(value="#e2e8f0")

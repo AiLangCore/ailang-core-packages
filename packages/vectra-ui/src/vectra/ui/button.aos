@@ -55,17 +55,18 @@ Program {
     }
   }
 
-  Let(name=buttonNegativeTextWidthLoop) {
-    Fn(params=count,acc) {
+  Let(name=buttonTextWidthLoop) {
+    Fn(params=count,charWidth,acc) {
       Block {
         If {
           Eq { Var(name=count) Lit(value=0) }
           Block { Return { Var(name=acc) } }
           Block {
             Return {
-              Call(target=buttonNegativeTextWidthLoop) {
+              Call(target=buttonTextWidthLoop) {
                 Add { Var(name=count) Lit(value=-1) }
-                Add { Var(name=acc) Lit(value=-10) }
+                Var(name=charWidth)
+                Add { Var(name=acc) Var(name=charWidth) }
               }
             }
           }
@@ -74,46 +75,107 @@ Program {
     }
   }
 
+  Let(name=buttonTextWidth) {
+    Fn(params=label,fontSize) {
+      Block {
+        Let(name=charWidth) {
+          If {
+            Eq { Var(name=fontSize) Lit(value=16) }
+            Block { Lit(value=8) }
+            Block { Lit(value=9) }
+          }
+        }
+        Return { Call(target=buttonTextWidthLoop) { Call(target=textLen) { Var(name=label) } Var(name=charWidth) Lit(value=0) } }
+      }
+    }
+  }
+
+  Let(name=buttonFillTop) {
+    Fn(params=state) {
+      Block {
+        If { Eq { Var(name=state) Lit(value="pressed") } Block { Return { Lit(value="#1d4ed8") } } Block {
+          If { Eq { Var(name=state) Lit(value="busy") } Block { Return { Lit(value="#334155") } } Block {
+            If { Eq { Var(name=state) Lit(value="disabled") } Block { Return { Lit(value="#475569") } } Block { Return { Lit(value="#3b82f6") } } }
+          } }
+        } }
+      }
+    }
+  }
+
+  Let(name=buttonFillBottom) {
+    Fn(params=state) {
+      Block {
+        If { Eq { Var(name=state) Lit(value="pressed") } Block { Return { Lit(value="#1e40af") } } Block {
+          If { Eq { Var(name=state) Lit(value="busy") } Block { Return { Lit(value="#1e293b") } } Block {
+            If { Eq { Var(name=state) Lit(value="disabled") } Block { Return { Lit(value="#334155") } } Block { Return { Lit(value="#2563eb") } } }
+          } }
+        } }
+      }
+    }
+  }
+
+  Let(name=buttonBorderColor) {
+    Fn(params=state) {
+      Block {
+        If { Eq { Var(name=state) Lit(value="pressed") } Block { Return { Lit(value="#93c5fd") } } Block {
+          If { Eq { Var(name=state) Lit(value="busy") } Block { Return { Lit(value="#64748b") } } Block {
+            If { Eq { Var(name=state) Lit(value="disabled") } Block { Return { Lit(value="#64748b") } } Block { Return { Lit(value="#60a5fa") } } }
+          } }
+        } }
+      }
+    }
+  }
+
+  Let(name=buttonTextColor) {
+    Fn(params=state) {
+      Block {
+        If { Eq { Var(name=state) Lit(value="disabled") } Block { Return { Lit(value="#cbd5e1") } } Block { Return { Lit(value="#ffffff") } } }
+      }
+    }
+  }
+
+  Let(name=drawButtonRoundRect) {
+    Fn(params=handle,x,y,w,h,r,color) {
+      Block {
+        Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Var(name=r) } Var(name=y) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } Var(name=h) Var(name=color) }
+        Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Add { Var(name=y) Var(name=r) } Var(name=w) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Var(name=x) Var(name=y) Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Var(name=y) Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Var(name=x) Add { Var(name=y) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Add { Var(name=y) Add { Var(name=h) Call(target=mul) { Var(name=r) Lit(value=-2) } } } Call(target=mul) { Var(name=r) Lit(value=2) } Call(target=mul) { Var(name=r) Lit(value=2) } Var(name=color) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
   Let(name=button) {
     Fn(params=handle,x,y,w,h,label,state) {
       Block {
-        Call(target=interactiveVectorState) {
-          Var(name=handle)
-          Var(name=x)
-          Var(name=y)
-          Var(name=w)
-          Var(name=h)
-          Var(name=state)
-          Lit(value="rect")
-          Lit(value="")
-          Lit(value="#2563eb")
-          Lit(value="#1d4ed8")
-          Lit(value="#3b82f6")
-          Lit(value="#1e40af")
-          Lit(value="#64748b")
-        }
+        Let(name=offsetY) { If { Eq { Var(name=state) Lit(value="pressed") } Block { Lit(value=2) } Block { Lit(value=0) } } }
+        Let(name=buttonY) { Add { Var(name=y) Var(name=offsetY) } }
+        Let(name=radius) { Lit(value=8) }
+        Let(name=innerX) { Add { Var(name=x) Lit(value=1) } }
+        Let(name=innerY) { Add { Var(name=buttonY) Lit(value=1) } }
+        Let(name=innerW) { Add { Var(name=w) Lit(value=-2) } }
+        Let(name=innerH) { Add { Var(name=h) Lit(value=-2) } }
+        Let(name=fontSize) { Lit(value=17) }
+        Let(name=textWidth) { Call(target=buttonTextWidth) { Var(name=label) Var(name=fontSize) } }
+        Let(name=textXRaw) { Call(target=sub) { Var(name=w) Var(name=textWidth) } }
+        Let(name=textXPad) { If { Call(target=intLt) { Var(name=textXRaw) Lit(value=0) } Block { Lit(value=8) } Block { Call(target=buttonHalfFloor) { Var(name=textXRaw) Lit(value=0) } } } }
+        Let(name=textX) { Add { Var(name=x) Var(name=textXPad) } }
+        Let(name=textY) { Add { Var(name=buttonY) Call(target=buttonHalfFloor) { Add { Var(name=h) Var(name=fontSize) } Lit(value=0) } } }
+        Call(target=drawButtonRoundRect) { Var(name=handle) Add { Var(name=x) Lit(value=1) } Add { Var(name=y) Lit(value=4) } Var(name=w) Var(name=h) Var(name=radius) Lit(value="#0f172a") }
+        Call(target=drawButtonRoundRect) { Var(name=handle) Var(name=x) Var(name=buttonY) Var(name=w) Var(name=h) Var(name=radius) Call(target=buttonBorderColor) { Var(name=state) } }
+        Call(target=drawButtonRoundRect) { Var(name=handle) Var(name=innerX) Var(name=innerY) Var(name=innerW) Var(name=innerH) Var(name=radius) Call(target=buttonFillBottom) { Var(name=state) } }
+        Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=innerX) Var(name=radius) } Var(name=innerY) Add { Var(name=innerW) Call(target=mul) { Var(name=radius) Lit(value=-2) } } Call(target=buttonHalfFloor) { Var(name=innerH) Lit(value=0) } Call(target=buttonFillTop) { Var(name=state) } }
+        Call(target=sys.ui.drawLine) { Var(name=handle) Add { Var(name=x) Lit(value=12) } Add { Var(name=buttonY) Lit(value=2) } Add { Add { Var(name=x) Var(name=w) } Lit(value=-12) } Add { Var(name=buttonY) Lit(value=2) } Lit(value="#bfdbfe") Lit(value=1) }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
-          Add {
-            Var(name=x)
-            Call(target=buttonHalfFloor) {
-              Add {
-                Var(name=w)
-                Call(target=buttonNegativeTextWidthLoop) { Call(target=textLen) { Var(name=label) } Lit(value=0) }
-              }
-              Lit(value=0)
-            }
-          }
-          Add {
-            Var(name=y)
-            Call(target=buttonHalfFloor) {
-              Add { Var(name=h) Lit(value=16) }
-              Lit(value=0)
-            }
-          }
+          Var(name=textX)
+          Var(name=textY)
           Var(name=label)
-          Lit(value="#ffffff")
-          Lit(value=18)
+          Call(target=buttonTextColor) { Var(name=state) }
+          Var(name=fontSize)
         }
         Return { Lit(value=0) }
       }
