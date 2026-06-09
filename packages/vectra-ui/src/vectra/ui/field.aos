@@ -282,14 +282,17 @@ Program {
               Var(name=handle)
               Add {
                 Add { Call(target=elementX) { Var(name=element) } Lit(value=16) }
-                Call(target=caretPixelOffset) {
-                  Var(name=value)
-                  Call(target=elementPropInt) {
-                  Var(name=element)
-                  Lit(value="cursor")
-                  Call(target=textLen) { Var(name=value) }
-                }
-                  Lit(value=8)
+                Call(target=sys.ui.measureText) {
+                  Var(name=handle)
+                  Call(target=textPrefix) {
+                    Var(name=value)
+                    Call(target=elementPropInt) {
+                      Var(name=element)
+                      Lit(value="cursor")
+                      Call(target=textLen) { Var(name=value) }
+                    }
+                  }
+                  Lit(value=18)
                 }
               }
               Add { Call(target=elementY) { Var(name=element) } Lit(value=31) }

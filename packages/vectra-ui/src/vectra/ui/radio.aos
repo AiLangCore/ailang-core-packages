@@ -35,30 +35,16 @@ Program {
   Let(name=radioButton) {
     Fn(params=handle,x,y,label,selected,state) {
       Block {
-        Call(target=interactiveVectorState) {
-          Var(name=handle)
-          Var(name=x)
-          Var(name=y)
-          Lit(value=18)
-          Lit(value=18)
-          Var(name=state)
-          Lit(value="ellipse")
-          Lit(value="")
-          Lit(value="#0f172a")
-          Lit(value="#1d4ed8")
-          Lit(value="#1e293b")
-          Lit(value="#172554")
-          Lit(value="#334155")
-        }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Var(name=x) Var(name=y) Lit(value=20) Lit(value=20) Lit(value="#64748b") }
+        Call(target=sys.ui.drawEllipse) { Var(name=handle) Add { Var(name=x) Lit(value=2) } Add { Var(name=y) Lit(value=2) } Lit(value=16) Lit(value=16) Lit(value="#111827") }
         If {
           Var(name=selected)
           Block {
             Call(target=sys.ui.drawEllipse) {
               Var(name=handle)
-              Add { Var(name=x) Lit(value=5) }
-              Add { Var(name=y) Lit(value=5) }
-              Lit(value=8)
-              Lit(value=8)
+              Add { Var(name=x) Lit(value=6) }
+              Add { Var(name=y) Lit(value=6) }
+              Lit(value=8) Lit(value=8)
               Lit(value="#60a5fa")
             }
             Lit(value=0)
@@ -67,7 +53,7 @@ Program {
         }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
-          Add { Var(name=x) Lit(value=28) }
+          Add { Var(name=x) Lit(value=30) }
           Add { Var(name=y) Lit(value=2) }
           Var(name=label)
           Lit(value="#e2e8f0")
