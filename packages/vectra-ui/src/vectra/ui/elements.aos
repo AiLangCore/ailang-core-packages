@@ -8,9 +8,6 @@ Program {
   Export(name=field)
   Export(name=entry)
   Export(name=entryHit)
-  Export(name=entryNextText)
-  Export(name=entryNextCursor)
-  Export(name=entryShouldSubmit)
   Export(name=radioButton)
   Export(name=radioHit)
 }

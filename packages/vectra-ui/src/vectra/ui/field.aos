@@ -1,13 +1,9 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
-  Import(package="std-ui-input" path="src/ui/input.aos")
 
   Export(name=field)
   Export(name=entry)
   Export(name=entryHit)
-  Export(name=entryNextText)
-  Export(name=entryNextCursor)
-  Export(name=entryShouldSubmit)
 
   Let(name=field) {
     Fn(params=handle,x,y,w,label,value) {
@@ -97,53 +93,6 @@ Program {
             }
           }
           Block { Return { Lit(value=false) } }
-        }
-      }
-    }
-  }
-
-  Let(name=entryNextText) {
-    Fn(params=text,cursor,event,allowEnter,allowTab) {
-      Block {
-        Return {
-          Call(target=editNextText) {
-            Var(name=text)
-            Var(name=cursor)
-            Call(target=eventKeyOf) { Var(name=event) }
-            Call(target=eventTextOf) { Var(name=event) }
-            Var(name=allowEnter)
-            Var(name=allowTab)
-          }
-        }
-      }
-    }
-  }
-
-  Let(name=entryNextCursor) {
-    Fn(params=text,cursor,event,allowEnter,allowTab) {
-      Block {
-        Return {
-          Call(target=editNextCursor) {
-            Var(name=text)
-            Var(name=cursor)
-            Call(target=eventKeyOf) { Var(name=event) }
-            Call(target=eventTextOf) { Var(name=event) }
-            Var(name=allowEnter)
-            Var(name=allowTab)
-          }
-        }
-      }
-    }
-  }
-
-  Let(name=entryShouldSubmit) {
-    Fn(params=event,allowEnter) {
-      Block {
-        Return {
-          Call(target=editShouldSubmit) {
-            Call(target=eventKeyOf) { Var(name=event) }
-            Var(name=allowEnter)
-          }
         }
       }
     }
