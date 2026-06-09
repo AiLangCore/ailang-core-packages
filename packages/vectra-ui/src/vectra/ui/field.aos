@@ -1,9 +1,13 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="std-ui-input" path="src/ui/input.aos")
 
   Export(name=field)
   Export(name=entry)
   Export(name=entryHit)
+  Export(name=entryNextText)
+  Export(name=entryNextCursor)
+  Export(name=entryShouldSubmit)
 
   Let(name=field) {
     Fn(params=handle,x,y,w,label,value) {
@@ -79,12 +83,12 @@ Program {
     Fn(params=event,x,y,w,h) {
       Block {
         If {
-          Eq { Call(target=eventTypeOf) { Var(name=event) } Lit(value="click") }
+          Call(target=inputEventIsClickLike) { Var(name=event) }
           Block {
             Return {
               Call(target=pointInRect) {
-                Call(target=eventXOf) { Var(name=event) }
-                Call(target=eventYOf) { Var(name=event) }
+                Call(target=inputEventX) { Var(name=event) }
+                Call(target=inputEventY) { Var(name=event) }
                 Var(name=x)
                 Add { Var(name=y) Lit(value=18) }
                 Var(name=w)
@@ -93,6 +97,53 @@ Program {
             }
           }
           Block { Return { Lit(value=false) } }
+        }
+      }
+    }
+  }
+
+  Let(name=entryNextText) {
+    Fn(params=text,cursor,event,allowEnter,allowTab) {
+      Block {
+        Return {
+          Call(target=editNextText) {
+            Var(name=text)
+            Var(name=cursor)
+            Call(target=inputEventKey) { Var(name=event) }
+            Call(target=inputEventText) { Var(name=event) }
+            Var(name=allowEnter)
+            Var(name=allowTab)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryNextCursor) {
+    Fn(params=text,cursor,event,allowEnter,allowTab) {
+      Block {
+        Return {
+          Call(target=editNextCursor) {
+            Var(name=text)
+            Var(name=cursor)
+            Call(target=inputEventKey) { Var(name=event) }
+            Call(target=inputEventText) { Var(name=event) }
+            Var(name=allowEnter)
+            Var(name=allowTab)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryShouldSubmit) {
+    Fn(params=event,allowEnter) {
+      Block {
+        Return {
+          Call(target=editShouldSubmit) {
+            Call(target=inputEventKey) { Var(name=event) }
+            Var(name=allowEnter)
+          }
         }
       }
     }

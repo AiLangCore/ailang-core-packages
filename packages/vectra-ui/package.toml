@@ -1,10 +1,11 @@
 schema = "ailang.package-source.v1"
 name = "vectra-ui"
-version = "0.0.1-alpha.1"
+version = "0.0.1-alpha.2"
 types = ["library"]
 
 [dependencies]
 aivectra = "0.0.1-alpha.30"
+std-ui-input = "0.0.1-alpha.6"
 
 [libraries.elements]
 namespace = "vectra.ui.elements"
@@ -15,6 +16,9 @@ exports = [
   "field",
   "entry",
   "entryHit",
+  "entryNextText",
+  "entryNextCursor",
+  "entryShouldSubmit",
   "radioButton",
   "radioHit",
 ]
@@ -34,6 +38,9 @@ exports = [
   "field",
   "entry",
   "entryHit",
+  "entryNextText",
+  "entryNextCursor",
+  "entryShouldSubmit",
 ]
 
 [libraries.radio]

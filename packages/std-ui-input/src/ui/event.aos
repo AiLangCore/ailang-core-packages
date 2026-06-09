@@ -1,0 +1,362 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/math.aos")
+
+  Let(name=inputAttrString) {
+    Fn(params=node,key,index) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block {
+            If {
+              Eq { AttrCount { Var(name=node) } Lit(value=0) }
+              Block { Return { Call(target=mapGetStringOr) { Var(name=node) Var(name=key) Lit(value="") } } }
+              Block { Return { Lit(value="") } }
+            }
+          }
+          Block {
+            If {
+              Eq { AttrKey { Var(name=node) Var(name=index) } Var(name=key) }
+              Block { Return { AttrValueString { Var(name=node) Var(name=index) } } }
+              Block {
+                Return {
+                  Call(target=inputAttrString) {
+                    Var(name=node)
+                    Var(name=key)
+                    Add { Var(name=index) Lit(value=1) }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputAttrInt) {
+    Fn(params=node,key,index) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block {
+            If {
+              Eq { AttrCount { Var(name=node) } Lit(value=0) }
+              Block { Return { Call(target=mapGetIntOr) { Var(name=node) Var(name=key) Lit(value=-1) } } }
+              Block { Return { Lit(value=-1) } }
+            }
+          }
+          Block {
+            If {
+              Eq { AttrKey { Var(name=node) Var(name=index) } Var(name=key) }
+              Block { Return { AttrValueInt { Var(name=node) Var(name=index) } } }
+              Block {
+                Return {
+                  Call(target=inputAttrInt) {
+                    Var(name=node)
+                    Var(name=key)
+                    Add { Var(name=index) Lit(value=1) }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventType) {
+    Fn(params=event) {
+      Block {
+        If {
+          Eq { Add { AttrCount { Var(name=event) } ChildCount { Var(name=event) } } Lit(value=0) }
+          Block { Return { Lit(value="none") } }
+          Block { Return { Call(target=inputAttrString) { Var(name=event) Lit(value="type") Lit(value=0) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventKey) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrString) { Var(name=event) Lit(value="key") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventText) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrString) { Var(name=event) Lit(value="text") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventX) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrInt) { Var(name=event) Lit(value="x") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventY) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrInt) { Var(name=event) Lit(value="y") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventDeltaX) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrInt) { Var(name=event) Lit(value="dx") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventDeltaY) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrInt) { Var(name=event) Lit(value="dy") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventTargetId) {
+    Fn(params=event) {
+      Block { Return { Call(target=inputAttrString) { Var(name=event) Lit(value="target") Lit(value=0) } } }
+    }
+  }
+
+  Let(name=inputEventIsClickLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="click") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="tap") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="press") }
+                  Block { Return { Lit(value=true) } }
+                  Block { Return { Lit(value=false) } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsPointerDownLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="down") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="pointerdown") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="mouse_down") }
+                  Block { Return { Lit(value=true) } }
+                  Block { Return { Lit(value=false) } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsPointerUpLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="up") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="pointerup") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="mouse_up") }
+                  Block { Return { Lit(value=true) } }
+                  Block { Return { Lit(value=false) } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsMoveLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="move") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="mousemove") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="pointermove") }
+                  Block { Return { Lit(value=true) } }
+                  Block {
+                    If {
+                      Eq { Var(name=eventType) Lit(value="touchmove") }
+                      Block { Return { Lit(value=true) } }
+                      Block { Return { Lit(value=false) } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsDragLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="drag") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="pointerdrag") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="mouse_drag") }
+                  Block { Return { Lit(value=true) } }
+                  Block { Return { Lit(value=false) } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsSwipeLike) {
+    Fn(params=event,minDistance) {
+      Block {
+        Let(name=dx) { Call(target=inputEventDeltaX) { Var(name=event) } }
+        Let(name=dy) { Call(target=inputEventDeltaY) { Var(name=event) } }
+        Let(name=adx) { Call(target=abs) { Var(name=dx) } }
+        Let(name=ady) { Call(target=abs) { Var(name=dy) } }
+        If {
+          Call(target=lt) { Var(name=ady) Var(name=adx) }
+          Block { Return { Call(target=gte) { Var(name=adx) Var(name=minDistance) } } }
+          Block { Return { Call(target=gte) { Var(name=ady) Var(name=minDistance) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsTextLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="text") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="textinput") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="input") }
+                  Block { Return { Lit(value=true) } }
+                  Block {
+                    If {
+                      Eq { Var(name=eventType) Lit(value="char") }
+                      Block { Return { Lit(value=true) } }
+                      Block { Return { Lit(value=false) } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventIsKeyboardLike) {
+    Fn(params=event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="key") }
+          Block { Return { Lit(value=true) } }
+          Block {
+            If {
+              Eq { Var(name=eventType) Lit(value="keydown") }
+              Block { Return { Lit(value=true) } }
+              Block {
+                If {
+                  Eq { Var(name=eventType) Lit(value="key_down") }
+                  Block { Return { Lit(value=true) } }
+                  Block {
+                    If {
+                      Eq { Var(name=eventType) Lit(value="keypress") }
+                      Block { Return { Lit(value=true) } }
+                      Block { Return { Call(target=inputEventIsTextLike) { Var(name=event) } } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=inputEventTargets) {
+    Fn(params=event,targetId) {
+      Block {
+        Let(name=eventTargetId) { Call(target=inputEventTargetId) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventTargetId) Lit(value="") }
+          Block { Return { Lit(value=false) } }
+          Block { Return { Eq { Var(name=eventTargetId) Var(name=targetId) } } }
+        }
+      }
+    }
+  }
+
+  Export(name=inputEventType)
+  Export(name=inputEventKey)
+  Export(name=inputEventText)
+  Export(name=inputEventX)
+  Export(name=inputEventY)
+  Export(name=inputEventDeltaX)
+  Export(name=inputEventDeltaY)
+  Export(name=inputEventTargetId)
+  Export(name=inputEventIsClickLike)
+  Export(name=inputEventIsPointerDownLike)
+  Export(name=inputEventIsPointerUpLike)
+  Export(name=inputEventIsMoveLike)
+  Export(name=inputEventIsDragLike)
+  Export(name=inputEventIsSwipeLike)
+  Export(name=inputEventIsTextLike)
+  Export(name=inputEventIsKeyboardLike)
+  Export(name=inputEventTargets)
+}

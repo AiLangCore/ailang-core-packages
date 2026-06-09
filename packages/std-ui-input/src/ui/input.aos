@@ -1,4 +1,6 @@
 Program#std_ui_p1 {
+  Import#std_ui_im0(sdk="ailang" path="std/core.aos")
+  Import(path="event.aos")
   Import#std_ui_im1(sdk="ailang" path="std/str.aos")
 
   Let#std_ui_l1(name=isBackspaceKey) {
@@ -79,7 +81,7 @@ Program#std_ui_p1 {
     }
   }
 
-  Let#std_ui_l6(name=keyToText) {
+  Let#std_ui_l6(name=inputKeyToText) {
     Fn#std_ui_f6(params=key,text,allowEnter,allowTab) {
       Block#std_ui_b22 {
         Let#std_ui_l7(name=normalizedText) { Call#std_ui_c1(target=sanitizePrintableText) { Var#std_ui_v13(name=text) } }
@@ -222,7 +224,7 @@ Program#std_ui_p1 {
           Block#std_ui_b55 { Lit#std_ui_i58(value=0) }
         }
         Let#std_ui_l11(name=insertText) {
-          Call#std_ui_c14(target=keyToText) {
+          Call#std_ui_c14(target=inputKeyToText) {
             Var#std_ui_v43(name=key)
             Var#std_ui_v44(name=eventText)
             Var#std_ui_v45(name=allowEnter)
@@ -321,7 +323,7 @@ Program#std_ui_p1 {
           Block#std_ui_b76 { Lit#std_ui_i80(value=0) }
         }
         Let#std_ui_l15(name=insertText) {
-          Call#std_ui_c20(target=keyToText) {
+          Call#std_ui_c20(target=inputKeyToText) {
             Var#std_ui_v73(name=key)
             Var#std_ui_v74(name=eventText)
             Var#std_ui_v75(name=allowEnter)
@@ -386,7 +388,7 @@ Program#std_ui_p1 {
           Block#std_ui_b92 { Lit#std_ui_i93(value=0) }
         }
         Let#std_ui_l18(name=insertText) {
-          Call#std_ui_c26(target=keyToText) {
+          Call#std_ui_c26(target=inputKeyToText) {
             Var#std_ui_v88(name=key)
             Var#std_ui_v89(name=eventText)
             Var#std_ui_v90(name=allowEnter)
@@ -441,11 +443,33 @@ Program#std_ui_p1 {
     }
   }
 
+  Let(name=inputEventResolvedText) {
+    Fn(params=event,allowEnter,allowTab) {
+      Block {
+        Let(name=textValue) { Call(target=inputEventText) { Var(name=event) } }
+        If {
+          Eq { Var(name=textValue) Lit(value="") }
+          Block {
+            Return {
+              Call(target=inputKeyToText) {
+                Call(target=inputEventKey) { Var(name=event) }
+                Var(name=textValue)
+                Var(name=allowEnter)
+                Var(name=allowTab)
+              }
+            }
+          }
+          Block { Return { Var(name=textValue) } }
+        }
+      }
+    }
+  }
+
   Export#std_ui_e1(name=isBackspaceKey)
   Export#std_ui_e2(name=isDeleteKey)
   Export#std_ui_e3(name=isEnterKey)
   Export#std_ui_e4(name=isArrowKey)
-  Export#std_ui_e5(name=keyToText)
+  Export#std_ui_e5(name=inputKeyToText)
   Export#std_ui_e6(name=textLength)
   Export#std_ui_e7(name=editNextText)
   Export#std_ui_e8(name=editNextCursor)
@@ -453,4 +477,22 @@ Program#std_ui_p1 {
   Export#std_ui_e10(name=editDebugToken)
   Export#std_ui_e11(name=shouldHandleKeyEvent)
   Export#std_ui_e12(name=nextFocusOnClick)
+  Export(name=inputEventType)
+  Export(name=inputEventKey)
+  Export(name=inputEventText)
+  Export(name=inputEventX)
+  Export(name=inputEventY)
+  Export(name=inputEventDeltaX)
+  Export(name=inputEventDeltaY)
+  Export(name=inputEventTargetId)
+  Export(name=inputEventIsClickLike)
+  Export(name=inputEventIsPointerDownLike)
+  Export(name=inputEventIsPointerUpLike)
+  Export(name=inputEventIsMoveLike)
+  Export(name=inputEventIsDragLike)
+  Export(name=inputEventIsSwipeLike)
+  Export(name=inputEventIsTextLike)
+  Export(name=inputEventIsKeyboardLike)
+  Export(name=inputEventResolvedText)
+  Export(name=inputEventTargets)
 }

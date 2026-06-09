@@ -1,5 +1,6 @@
 Program {
   Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="std-ui-input" path="src/ui/input.aos")
 
   Export(name=button)
   Export(name=buttonHit)
@@ -58,12 +59,12 @@ Program {
     Fn(params=event,x,y,w,h) {
       Block {
         If {
-          Eq { Call(target=eventTypeOf) { Var(name=event) } Lit(value="click") }
+          Call(target=inputEventIsClickLike) { Var(name=event) }
           Block {
             Return {
               Call(target=pointInRect) {
-                Call(target=eventXOf) { Var(name=event) }
-                Call(target=eventYOf) { Var(name=event) }
+                Call(target=inputEventX) { Var(name=event) }
+                Call(target=inputEventY) { Var(name=event) }
                 Var(name=x)
                 Var(name=y)
                 Var(name=w)

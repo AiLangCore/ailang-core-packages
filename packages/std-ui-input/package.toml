@@ -1,15 +1,34 @@
 schema = "ailang.package-source.v1"
 name = "std-ui-input"
-version = "0.0.1-alpha.5"
+version = "0.0.1-alpha.6"
 types = ["library"]
 
 [libraries.input]
 namespace = "std.ui.input"
 entry = "src/ui/input.aos"
 exports = [
+  "inputKeyToText",
   "editNextText",
   "editNextCursor",
   "editShouldSubmit",
   "shouldHandleKeyEvent",
   "nextFocusOnClick",
+  "inputEventType",
+  "inputEventKey",
+  "inputEventText",
+  "inputEventX",
+  "inputEventY",
+  "inputEventDeltaX",
+  "inputEventDeltaY",
+  "inputEventTargetId",
+  "inputEventIsClickLike",
+  "inputEventIsPointerDownLike",
+  "inputEventIsPointerUpLike",
+  "inputEventIsMoveLike",
+  "inputEventIsDragLike",
+  "inputEventIsSwipeLike",
+  "inputEventIsTextLike",
+  "inputEventIsKeyboardLike",
+  "inputEventResolvedText",
+  "inputEventTargets",
 ]
