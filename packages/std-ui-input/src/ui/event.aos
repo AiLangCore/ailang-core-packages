@@ -1,6 +1,5 @@
 Program {
   Import(sdk="ailang" path="std/core.aos")
-  Import(sdk="ailang" path="std/math.aos")
 
   Let(name=inputAttrString) {
     Fn(params=node,key,index) {
@@ -226,47 +225,6 @@ Program {
     }
   }
 
-  Let(name=inputEventIsDragLike) {
-    Fn(params=event) {
-      Block {
-        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
-        If {
-          Eq { Var(name=eventType) Lit(value="drag") }
-          Block { Return { Lit(value=true) } }
-          Block {
-            If {
-              Eq { Var(name=eventType) Lit(value="pointerdrag") }
-              Block { Return { Lit(value=true) } }
-              Block {
-                If {
-                  Eq { Var(name=eventType) Lit(value="mouse_drag") }
-                  Block { Return { Lit(value=true) } }
-                  Block { Return { Lit(value=false) } }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  Let(name=inputEventIsSwipeLike) {
-    Fn(params=event,minDistance) {
-      Block {
-        Let(name=dx) { Call(target=inputEventDeltaX) { Var(name=event) } }
-        Let(name=dy) { Call(target=inputEventDeltaY) { Var(name=event) } }
-        Let(name=adx) { Call(target=abs) { Var(name=dx) } }
-        Let(name=ady) { Call(target=abs) { Var(name=dy) } }
-        If {
-          Call(target=lt) { Var(name=ady) Var(name=adx) }
-          Block { Return { Call(target=gte) { Var(name=adx) Var(name=minDistance) } } }
-          Block { Return { Call(target=gte) { Var(name=ady) Var(name=minDistance) } } }
-        }
-      }
-    }
-  }
-
   Let(name=inputEventIsTextLike) {
     Fn(params=event) {
       Block {
@@ -354,8 +312,6 @@ Program {
   Export(name=inputEventIsPointerDownLike)
   Export(name=inputEventIsPointerUpLike)
   Export(name=inputEventIsMoveLike)
-  Export(name=inputEventIsDragLike)
-  Export(name=inputEventIsSwipeLike)
   Export(name=inputEventIsTextLike)
   Export(name=inputEventIsKeyboardLike)
   Export(name=inputEventTargets)

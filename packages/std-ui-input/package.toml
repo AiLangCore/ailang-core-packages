@@ -1,6 +1,6 @@
 schema = "ailang.package-source.v1"
 name = "std-ui-input"
-version = "0.0.1-alpha.6"
+version = "0.0.1-alpha.7"
 types = ["library"]
 
 [libraries.input]
@@ -25,8 +25,6 @@ exports = [
   "inputEventIsPointerDownLike",
   "inputEventIsPointerUpLike",
   "inputEventIsMoveLike",
-  "inputEventIsDragLike",
-  "inputEventIsSwipeLike",
   "inputEventIsTextLike",
   "inputEventIsKeyboardLike",
   "inputEventResolvedText",

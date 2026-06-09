@@ -489,8 +489,6 @@ Program#std_ui_p1 {
   Export(name=inputEventIsPointerDownLike)
   Export(name=inputEventIsPointerUpLike)
   Export(name=inputEventIsMoveLike)
-  Export(name=inputEventIsDragLike)
-  Export(name=inputEventIsSwipeLike)
   Export(name=inputEventIsTextLike)
   Export(name=inputEventIsKeyboardLike)
   Export(name=inputEventResolvedText)
