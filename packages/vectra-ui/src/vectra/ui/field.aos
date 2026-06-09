@@ -1,0 +1,151 @@
+Program {
+  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="std-ui-input" path="src/ui/input.aos")
+
+  Export(name=field)
+  Export(name=entry)
+  Export(name=entryHit)
+  Export(name=entryNextText)
+  Export(name=entryNextCursor)
+  Export(name=entryShouldSubmit)
+
+  Let(name=field) {
+    Fn(params=handle,x,y,w,label,value) {
+      Block {
+        Call(target=sys.ui.drawText) {
+          Var(name=handle)
+          Var(name=x)
+          Var(name=y)
+          Var(name=label)
+          Lit(value="#cbd5e1")
+          Lit(value=14)
+        }
+        Call(target=sys.ui.drawText) {
+          Var(name=handle)
+          Var(name=x)
+          Add { Var(name=y) Lit(value=24) }
+          Var(name=value)
+          Lit(value="#ffffff")
+          Lit(value=18)
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=entry) {
+    Fn(params=handle,x,y,w,h,label,value,placeholder,focused) {
+      Block {
+        Call(target=sys.ui.drawText) {
+          Var(name=handle)
+          Var(name=x)
+          Var(name=y)
+          Var(name=label)
+          Lit(value="#cbd5e1")
+          Lit(value=14)
+        }
+        Call(target=interactiveVectorState) {
+          Var(name=handle)
+          Var(name=x)
+          Add { Var(name=y) Lit(value=18) }
+          Var(name=w)
+          Var(name=h)
+          If { Var(name=focused) Block { Lit(value="focused") } Block { Lit(value="normal") } }
+          Lit(value="rect")
+          Lit(value="")
+          Lit(value="#0f172a")
+          Lit(value="#0f172a")
+          Lit(value="#1e293b")
+          Lit(value="#172554")
+          Lit(value="#334155")
+        }
+        Let(name=visibleValue) {
+          If {
+            Eq { Var(name=value) Lit(value="") }
+            Block { Var(name=placeholder) }
+            Block { Var(name=value) }
+          }
+        }
+        Call(target=sys.ui.drawText) {
+          Var(name=handle)
+          Add { Var(name=x) Lit(value=16) }
+          Add { Var(name=y) Lit(value=30) }
+          Var(name=visibleValue)
+          If { Eq { Var(name=value) Lit(value="") } Block { Lit(value="#94a3b8") } Block { Lit(value="#ffffff") } }
+          Lit(value=18)
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=entryHit) {
+    Fn(params=event,x,y,w,h) {
+      Block {
+        If {
+          Eq { Call(target=eventTypeOf) { Var(name=event) } Lit(value="click") }
+          Block {
+            Return {
+              Call(target=pointInRect) {
+                Call(target=eventXOf) { Var(name=event) }
+                Call(target=eventYOf) { Var(name=event) }
+                Var(name=x)
+                Add { Var(name=y) Lit(value=18) }
+                Var(name=w)
+                Var(name=h)
+              }
+            }
+          }
+          Block { Return { Lit(value=false) } }
+        }
+      }
+    }
+  }
+
+  Let(name=entryNextText) {
+    Fn(params=text,cursor,event,allowEnter,allowTab) {
+      Block {
+        Return {
+          Call(target=editNextText) {
+            Var(name=text)
+            Var(name=cursor)
+            Call(target=eventKeyOf) { Var(name=event) }
+            Call(target=eventTextOf) { Var(name=event) }
+            Var(name=allowEnter)
+            Var(name=allowTab)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryNextCursor) {
+    Fn(params=text,cursor,event,allowEnter,allowTab) {
+      Block {
+        Return {
+          Call(target=editNextCursor) {
+            Var(name=text)
+            Var(name=cursor)
+            Call(target=eventKeyOf) { Var(name=event) }
+            Call(target=eventTextOf) { Var(name=event) }
+            Var(name=allowEnter)
+            Var(name=allowTab)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=entryShouldSubmit) {
+    Fn(params=event,allowEnter) {
+      Block {
+        Return {
+          Call(target=editShouldSubmit) {
+            Call(target=eventKeyOf) { Var(name=event) }
+            Var(name=allowEnter)
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+Program {
+  Import(path="button.aos")
+  Import(path="field.aos")
+  Import(path="radio.aos")
+
+  Export(name=button)
+  Export(name=buttonHit)
+  Export(name=field)
+  Export(name=entry)
+  Export(name=entryHit)
+  Export(name=entryNextText)
+  Export(name=entryNextCursor)
+  Export(name=entryShouldSubmit)
+  Export(name=radioButton)
+  Export(name=radioHit)
+}

@@ -1,0 +1,52 @@
+schema = "ailang.package-source.v1"
+name = "vectra-ui"
+version = "0.0.1-alpha.1"
+types = ["library"]
+
+[dependencies]
+aivectra = "0.0.1-alpha.30"
+std-ui-input = "0.0.1-alpha.5"
+
+[libraries.elements]
+namespace = "vectra.ui.elements"
+entry = "src/vectra/ui/elements.aos"
+exports = [
+  "button",
+  "buttonHit",
+  "field",
+  "entry",
+  "entryHit",
+  "entryNextText",
+  "entryNextCursor",
+  "entryShouldSubmit",
+  "radioButton",
+  "radioHit",
+]
+
+[libraries.button]
+namespace = "vectra.ui.button"
+entry = "src/vectra/ui/button.aos"
+exports = [
+  "button",
+  "buttonHit",
+]
+
+[libraries.field]
+namespace = "vectra.ui.field"
+entry = "src/vectra/ui/field.aos"
+exports = [
+  "field",
+  "entry",
+  "entryHit",
+  "entryNextText",
+  "entryNextCursor",
+  "entryShouldSubmit",
+]
+
+[libraries.radio]
+namespace = "vectra.ui.radio"
+entry = "src/vectra/ui/radio.aos"
+exports = [
+  "radioButton",
+  "radioHit",
+]

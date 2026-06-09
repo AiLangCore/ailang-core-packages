@@ -1,0 +1,79 @@
+Program {
+  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+
+  Export(name=button)
+  Export(name=buttonHit)
+
+  Let(name=button) {
+    Fn(params=handle,x,y,w,h,label,state) {
+      Block {
+        Call(target=interactiveVectorState) {
+          Var(name=handle)
+          Var(name=x)
+          Var(name=y)
+          Var(name=w)
+          Var(name=h)
+          Var(name=state)
+          Lit(value="rect")
+          Lit(value="")
+          Lit(value="#2563eb")
+          Lit(value="#1d4ed8")
+          Lit(value="#3b82f6")
+          Lit(value="#1e40af")
+          Lit(value="#64748b")
+        }
+        Let(name=labelWidth) { Call(target=mul) { Lit(value=10) Call(target=textLen) { Var(name=label) } } }
+        Let(name=labelX) {
+          Add {
+            Var(name=x)
+            Call(target=halfFloor) {
+              Call(target=sub) { Var(name=w) Var(name=labelWidth) }
+              Lit(value=0)
+            }
+          }
+        }
+        Let(name=labelY) {
+          Add {
+            Var(name=y)
+            Call(target=halfFloor) {
+              Add { Var(name=h) Lit(value=16) }
+              Lit(value=0)
+            }
+          }
+        }
+        Call(target=sys.ui.drawText) {
+          Var(name=handle)
+          Var(name=labelX)
+          Var(name=labelY)
+          Var(name=label)
+          Lit(value="#ffffff")
+          Lit(value=18)
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=buttonHit) {
+    Fn(params=event,x,y,w,h) {
+      Block {
+        If {
+          Eq { Call(target=eventTypeOf) { Var(name=event) } Lit(value="click") }
+          Block {
+            Return {
+              Call(target=pointInRect) {
+                Call(target=eventXOf) { Var(name=event) }
+                Call(target=eventYOf) { Var(name=event) }
+                Var(name=x)
+                Var(name=y)
+                Var(name=w)
+                Var(name=h)
+              }
+            }
+          }
+          Block { Return { Lit(value=false) } }
+        }
+      }
+    }
+  }
+}
