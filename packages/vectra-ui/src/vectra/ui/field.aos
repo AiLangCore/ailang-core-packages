@@ -132,7 +132,7 @@ Program {
         Let(name=entryY) { Add { Var(name=y) Lit(value=18) } }
         Let(name=radius) { Lit(value=8) }
         Let(name=borderColor) { If { Var(name=focused) Block { Lit(value="#60a5fa") } Block { Lit(value="#334155") } } }
-        Let(name=fillColor) { If { Var(name=focused) Block { Lit(value="#111827") } Block { Lit(value="#0f172a") } } }
+        Let(name=fillColor) { If { Var(name=focused) Block { Lit(value="#172033") } Block { Lit(value="#111827") } } }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
           Var(name=x)
@@ -272,7 +272,11 @@ Program {
           Call(target=elementPropBool) { Var(name=element) Lit(value="focused") Lit(value=false) }
         }
         If {
-          Call(target=elementPropBool) { Var(name=element) Lit(value="caretVisible") Lit(value=false) }
+          If {
+            Eq { Var(name=value) Lit(value="") }
+            Block { Lit(value=false) }
+            Block { Call(target=elementPropBool) { Var(name=element) Lit(value="caretVisible") Lit(value=false) } }
+          }
           Block {
             Call(target=sys.ui.drawRect) {
               Var(name=handle)

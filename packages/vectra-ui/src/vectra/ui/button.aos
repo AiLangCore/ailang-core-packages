@@ -163,7 +163,15 @@ Program {
         Let(name=textXRaw) { Call(target=sub) { Var(name=w) Var(name=textWidth) } }
         Let(name=textXPad) { If { Call(target=intLt) { Var(name=textXRaw) Lit(value=0) } Block { Lit(value=8) } Block { Call(target=buttonHalfFloor) { Var(name=textXRaw) Lit(value=0) } } } }
         Let(name=textX) { Add { Var(name=x) Var(name=textXPad) } }
-        Let(name=textY) { Add { Var(name=buttonY) Call(target=buttonHalfFloor) { Add { Var(name=h) Var(name=fontSize) } Lit(value=0) } } }
+        Let(name=textY) {
+          Add {
+            Var(name=buttonY)
+            Call(target=buttonHalfFloor) {
+              Call(target=sub) { Var(name=h) Var(name=fontSize) }
+              Lit(value=0)
+            }
+          }
+        }
         Call(target=drawButtonRoundRect) { Var(name=handle) Add { Var(name=x) Lit(value=1) } Add { Var(name=y) Lit(value=4) } Var(name=w) Var(name=h) Var(name=radius) Lit(value="#0f172a") }
         Call(target=drawButtonRoundRect) { Var(name=handle) Var(name=x) Var(name=buttonY) Var(name=w) Var(name=h) Var(name=radius) Call(target=buttonBorderColor) { Var(name=state) } }
         Call(target=drawButtonRoundRect) { Var(name=handle) Var(name=innerX) Var(name=innerY) Var(name=innerW) Var(name=innerH) Var(name=radius) Call(target=buttonFillBottom) { Var(name=state) } }
