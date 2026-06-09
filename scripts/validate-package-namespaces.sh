@@ -4,6 +4,18 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 failed=0
 
+has_line() {
+  local pattern="$1"
+  local file="$2"
+  grep -Eq "${pattern}" "${file}"
+}
+
+count_lines() {
+  local pattern="$1"
+  local file="$2"
+  grep -Ec "${pattern}" "${file}" || true
+}
+
 check_descriptor() {
   local file="$1"
   local package_dir
@@ -19,13 +31,13 @@ check_descriptor() {
     return
   fi
 
-  if ! rg -q '^schema = "ailang\.package-source\.v1"$' "${file}"; then
+  if ! has_line '^schema = "ailang\.package-source\.v1"$' "${file}"; then
     echo "package descriptor missing source schema: ${file}" >&2
     failed=1
   fi
 
-  namespace_count="$(rg -c '^namespace = "' "${file}" || true)"
-  entry_count="$(rg -c '^entry = "' "${file}" || true)"
+  namespace_count="$(count_lines '^namespace = "' "${file}")"
+  entry_count="$(count_lines '^entry = "' "${file}")"
   if [[ "${entry_count}" -gt 0 && "${namespace_count}" -ne "${entry_count}" ]]; then
     echo "library namespace count mismatch: ${file}" >&2
     failed=1
