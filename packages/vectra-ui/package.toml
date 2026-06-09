@@ -4,7 +4,7 @@ version = "0.0.1-alpha.6"
 types = ["library"]
 
 [dependencies]
-aivectra = "0.0.1-alpha.31"
+aivectra = "0.0.1-beta.2"
 std-ui-input = "0.0.1-alpha.7"
 
 [libraries.element]
