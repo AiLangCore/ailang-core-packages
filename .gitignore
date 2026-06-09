@@ -6,5 +6,6 @@
 bin/
 dist/
 *.local.*
+config.local.toml
 *.aibc1
 *.aibe
