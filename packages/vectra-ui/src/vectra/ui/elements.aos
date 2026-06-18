@@ -3,6 +3,8 @@ Program {
   Import(path="button.aos")
   Import(path="field.aos")
   Import(path="radio.aos")
+  Import(path="icon.aos")
+  Import(path="popup.aos")
 
   Export(name=uiElement)
   Export(name=elementId)
@@ -41,6 +43,21 @@ Program {
   Export(name=radioElement)
   Export(name=radioRender)
   Export(name=radioHitElement)
+  Export(name=gearIcon)
+  Export(name=gearButton)
+  Export(name=gearButtonElement)
+  Export(name=gearButtonHitElement)
+  Export(name=popupHalfFloor)
+  Export(name=popupCenterX)
+  Export(name=popupCenterY)
+  Export(name=modalOverlay)
+  Export(name=modalPanel)
+  Export(name=modalPanelCentered)
+  Export(name=alertPresentation)
+  Export(name=alertUsesWindow)
+  Export(name=alertModal)
+  Export(name=alertWindow)
+  Export(name=alert)
 
   Let(name=renderElement) {
     Fn(params=handle,element) {

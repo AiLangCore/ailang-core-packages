@@ -70,6 +70,13 @@ Program {
             Lit(value="update")
           }
         }
+        Let(name=cliAppSpec) {
+          Call(target=globalCliApp) {
+            Lit(value="cli-demo")
+            Lit(value="init")
+            Lit(value="update")
+          }
+        }
 
         Call(target=io.print) {
           Call(target=eventType) { Var(name=startEventValue) }
@@ -127,6 +134,12 @@ Program {
         }
         Call(target=io.print) {
           Call(target=globalAppUpdate) { Var(name=appSpec) }
+        }
+        Call(target=io.print) {
+          Call(target=profile) { Lit(value=0) }
+        }
+        Call(target=io.print) {
+          Call(target=globalAppProfile) { Var(name=cliAppSpec) }
         }
         Return { Lit(value=0) }
       }

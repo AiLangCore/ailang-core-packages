@@ -1,4 +1,5 @@
 Program {
+  Export(name=profile)
   Export(name=profileCli)
   Export(name=profileHttp)
   Export(name=profileGui)
@@ -6,6 +7,12 @@ Program {
   Export(name=profileWorker)
   Export(name=appContext)
   Export(name=appLifecycle)
+
+  Let(name=profile) {
+    Fn(params=_) {
+      Block { Return { Call(target=profileCli) { Lit(value=0) } } }
+    }
+  }
 
   Let(name=profileCli) {
     Fn(params=_) {

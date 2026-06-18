@@ -28,3 +28,8 @@ exports = [
   "httpAppSockets",
   "httpRequestEvent",
 ]
+
+[libraries.dev-server]
+namespace = "std.net.http.server.dev"
+entry = "src/net/http_dev_server.aos"
+exports = ["start"]

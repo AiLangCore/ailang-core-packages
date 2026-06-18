@@ -1,0 +1,122 @@
+Program {
+  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(path="button.aos")
+
+  Export(name=gearIcon)
+  Export(name=gearButton)
+  Export(name=gearButtonElement)
+  Export(name=gearButtonHitElement)
+
+  Let(name=svgPoint) {
+    Fn(params=cmd,x,y) {
+      Block {
+        Return {
+          StrConcat {
+            Var(name=cmd)
+            StrConcat {
+              ToString { Var(name=x) }
+              StrConcat {
+                Lit(value=" ")
+                ToString { Var(name=y) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=svgLine) {
+    Fn(params=path,x,y) {
+      Block {
+        Return {
+          StrConcat {
+            Var(name=path)
+            StrConcat {
+              Lit(value=" ")
+              Call(target=svgPoint) { Lit(value="L") Var(name=x) Var(name=y) }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=gearButtonElement) {
+    Fn(params=id,x,y,size,state) {
+      Block {
+        Return {
+          Call(target=buttonElement) {
+            Var(name=id)
+            Var(name=x)
+            Var(name=y)
+            Var(name=size)
+            Var(name=size)
+            Lit(value="")
+            Var(name=state)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=gearIcon) {
+    Fn(params=handle,x,y,size,color,cutoutColor) {
+      Block {
+        Let(name=outline0) { Call(target=svgPoint) { Lit(value="M") Add { Var(name=x) Lit(value=10) } Add { Var(name=y) Lit(value=1) } } }
+        Let(name=outline1) { Call(target=svgLine) { Var(name=outline0) Add { Var(name=x) Lit(value=13) } Add { Var(name=y) Lit(value=4) } } }
+        Let(name=outline2) { Call(target=svgLine) { Var(name=outline1) Add { Var(name=x) Lit(value=17) } Add { Var(name=y) Lit(value=3) } } }
+        Let(name=outline3) { Call(target=svgLine) { Var(name=outline2) Add { Var(name=x) Lit(value=18) } Add { Var(name=y) Lit(value=7) } } }
+        Let(name=outline4) { Call(target=svgLine) { Var(name=outline3) Add { Var(name=x) Lit(value=15) } Add { Var(name=y) Lit(value=9) } } }
+        Let(name=outline5) { Call(target=svgLine) { Var(name=outline4) Add { Var(name=x) Lit(value=15) } Add { Var(name=y) Lit(value=11) } } }
+        Let(name=outline6) { Call(target=svgLine) { Var(name=outline5) Add { Var(name=x) Lit(value=18) } Add { Var(name=y) Lit(value=13) } } }
+        Let(name=outline7) { Call(target=svgLine) { Var(name=outline6) Add { Var(name=x) Lit(value=17) } Add { Var(name=y) Lit(value=17) } } }
+        Let(name=outline8) { Call(target=svgLine) { Var(name=outline7) Add { Var(name=x) Lit(value=13) } Add { Var(name=y) Lit(value=16) } } }
+        Let(name=outline9) { Call(target=svgLine) { Var(name=outline8) Add { Var(name=x) Lit(value=10) } Add { Var(name=y) Lit(value=19) } } }
+        Let(name=outline10) { Call(target=svgLine) { Var(name=outline9) Add { Var(name=x) Lit(value=7) } Add { Var(name=y) Lit(value=16) } } }
+        Let(name=outline11) { Call(target=svgLine) { Var(name=outline10) Add { Var(name=x) Lit(value=3) } Add { Var(name=y) Lit(value=17) } } }
+        Let(name=outline12) { Call(target=svgLine) { Var(name=outline11) Add { Var(name=x) Lit(value=2) } Add { Var(name=y) Lit(value=13) } } }
+        Let(name=outline13) { Call(target=svgLine) { Var(name=outline12) Add { Var(name=x) Lit(value=5) } Add { Var(name=y) Lit(value=11) } } }
+        Let(name=outline14) { Call(target=svgLine) { Var(name=outline13) Add { Var(name=x) Lit(value=5) } Add { Var(name=y) Lit(value=9) } } }
+        Let(name=outline15) { Call(target=svgLine) { Var(name=outline14) Add { Var(name=x) Lit(value=2) } Add { Var(name=y) Lit(value=7) } } }
+        Let(name=outline16) { Call(target=svgLine) { Var(name=outline15) Add { Var(name=x) Lit(value=3) } Add { Var(name=y) Lit(value=3) } } }
+        Let(name=outline17) { Call(target=svgLine) { Var(name=outline16) Add { Var(name=x) Lit(value=7) } Add { Var(name=y) Lit(value=4) } } }
+        Let(name=outlinePath) { StrConcat { Var(name=outline17) Lit(value=" Z") } }
+        Let(name=hole0) { Call(target=svgPoint) { Lit(value="M") Add { Var(name=x) Lit(value=10) } Add { Var(name=y) Lit(value=7) } } }
+        Let(name=hole1) { Call(target=svgLine) { Var(name=hole0) Add { Var(name=x) Lit(value=13) } Add { Var(name=y) Lit(value=8) } } }
+        Let(name=hole2) { Call(target=svgLine) { Var(name=hole1) Add { Var(name=x) Lit(value=13) } Add { Var(name=y) Lit(value=12) } } }
+        Let(name=hole3) { Call(target=svgLine) { Var(name=hole2) Add { Var(name=x) Lit(value=10) } Add { Var(name=y) Lit(value=13) } } }
+        Let(name=hole4) { Call(target=svgLine) { Var(name=hole3) Add { Var(name=x) Lit(value=7) } Add { Var(name=y) Lit(value=12) } } }
+        Let(name=hole5) { Call(target=svgLine) { Var(name=hole4) Add { Var(name=x) Lit(value=7) } Add { Var(name=y) Lit(value=8) } } }
+        Let(name=holePath) { StrConcat { Var(name=hole5) Lit(value=" Z") } }
+        Call(target=sys.ui.drawPath) { Var(name=handle) Var(name=outlinePath) Lit(value="none") Var(name=color) Lit(value=2) }
+        Call(target=sys.ui.drawPath) { Var(name=handle) Var(name=holePath) Lit(value="none") Var(name=color) Lit(value=2) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=gearButton) {
+    Fn(params=handle,id,x,y,size,state) {
+      Block {
+        Let(name=element) { Call(target=gearButtonElement) { Var(name=id) Var(name=x) Var(name=y) Var(name=size) Var(name=state) } }
+        Call(target=buttonRender) { Var(name=handle) Var(name=element) }
+        Call(target=gearIcon) {
+          Var(name=handle)
+          Add { Var(name=x) Lit(value=10) }
+          Add { Var(name=y) Lit(value=10) }
+          Add { Var(name=size) Lit(value=-20) }
+          Lit(value="#ffffff")
+          Lit(value="#2563eb")
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=gearButtonHitElement) {
+    Fn(params=event,element) {
+      Block { Return { Call(target=buttonHitElement) { Var(name=event) Var(name=element) } } }
+    }
+  }
+}

@@ -3,6 +3,7 @@ Program {
   Import(path="app.aos")
 
   Export(name=globalApp)
+  Export(name=globalCliApp)
   Export(name=globalAppName)
   Export(name=globalAppProfile)
   Export(name=globalAppLifecycle)
@@ -23,6 +24,21 @@ Program {
                 Var(name=updateName)
               }
             }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=globalCliApp) {
+    Fn(params=name,initName,updateName) {
+      Block {
+        Return {
+          Call(target=globalApp) {
+            Var(name=name)
+            Call(target=profileCli) { Lit(value=0) }
+            Var(name=initName)
+            Var(name=updateName)
           }
         }
       }

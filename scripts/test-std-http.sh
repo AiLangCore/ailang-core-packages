@@ -60,6 +60,53 @@ EOF
 AILANG_PACKAGE_REGISTRY="${REGISTRY_DIR}" "${AILANG_BIN}" package restore "${PROJECT_DIR}" >/dev/null
 rm -f "${PROJECT_DIR}/project.aiproj"
 
+SERVER_SOURCE="${PROJECT_DIR}/.ailang/packages/std-http/packages/std-http/src/net/http_dev_server.aos"
+SERVER_WEB_ROOT="${TMP_DIR}/server-root"
+SERVER_PORT="$((18000 + ($$ % 10000)))"
+SERVER_LOG="${TMP_DIR}/server.log"
+SERVER_PID=""
+
+if [[ ! -f "${SERVER_SOURCE}" ]]; then
+  echo "missing restored std-http dev server: ${SERVER_SOURCE}" >&2
+  exit 1
+fi
+
+mkdir -p "${SERVER_WEB_ROOT}"
+printf '%s\n' '<!doctype html><title>std-http dev server</title>' > "${SERVER_WEB_ROOT}/index.html"
+dd if=/dev/zero of="${SERVER_WEB_ROOT}/large.wasm" bs=1024 count=192 2>/dev/null
+
+"${AILANG_BIN}" run "${SERVER_SOURCE}" -- "${SERVER_WEB_ROOT}" "${SERVER_PORT}" >"${SERVER_LOG}" 2>&1 &
+SERVER_PID=$!
+cleanup_server() {
+  if [[ -n "${SERVER_PID}" ]]; then
+    kill "${SERVER_PID}" 2>/dev/null || true
+    wait "${SERVER_PID}" 2>/dev/null || true
+  fi
+}
+trap cleanup_server EXIT
+
+SERVER_READY=0
+for _ in $(seq 1 50); do
+  if curl -fsS "http://127.0.0.1:${SERVER_PORT}/" > "${TMP_DIR}/server-index.html"; then
+    SERVER_READY=1
+    break
+  fi
+  sleep 0.1
+done
+if [[ "${SERVER_READY}" -ne 1 ]]; then
+  cat "${SERVER_LOG}" >&2
+  echo "std-http dev server did not become ready" >&2
+  exit 1
+fi
+curl -fsS "http://127.0.0.1:${SERVER_PORT}/large.wasm" > "${TMP_DIR}/large-response.wasm"
+curl -fsS "http://127.0.0.1:${SERVER_PORT}/" > "${TMP_DIR}/server-index-second.html"
+cmp "${SERVER_WEB_ROOT}/index.html" "${TMP_DIR}/server-index.html"
+cmp "${SERVER_WEB_ROOT}/index.html" "${TMP_DIR}/server-index-second.html"
+cmp "${SERVER_WEB_ROOT}/large.wasm" "${TMP_DIR}/large-response.wasm"
+cleanup_server
+SERVER_PID=""
+trap - EXIT
+
 for input in "${GOLDEN_DIR}"/stdlib_http_app.in.aos; do
   name="$(basename "${input}" .in.aos)"
   expected="${GOLDEN_DIR}/${name}.out.aos"
@@ -84,3 +131,4 @@ done
 rm -rf "${TMP_DIR}"
 
 echo "std-http app golden: PASS"
+echo "std-http AiLang dev server: PASS"

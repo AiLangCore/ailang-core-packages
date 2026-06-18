@@ -1,0 +1,285 @@
+Program {
+  Import(sdk="ailang" path="std/bytes.aos")
+  Import(sdk="ailang" path="std/number.aos")
+
+  Export(name=start)
+
+  Let(name=attrString) {
+    Fn(params=node,key,index) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block { Return { Lit(value="") } }
+          Block {
+            If {
+              Eq { AttrKey { Var(name=node) Var(name=index) } Var(name=key) }
+              Block { Return { AttrValueString { Var(name=node) Var(name=index) } } }
+              Block { Return { Call(target=attrString) { Var(name=node) Var(name=key) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=argString) {
+    Fn(params=args,index,defaultValue) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=args) } }
+          Block { Return { Var(name=defaultValue) } }
+          Block {
+            Let(name=value) { Call(target=attrString) { ChildAt { Var(name=args) Var(name=index) } Lit(value="value") Lit(value=0) } }
+            If { Eq { Var(name=value) Lit(value="") } Block { Return { Var(name=defaultValue) } } Block { Return { Var(name=value) } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=attrInt) {
+    Fn(params=node,key,index,defaultValue) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block { Return { Var(name=defaultValue) } }
+          Block {
+            If {
+              Eq { AttrKey { Var(name=node) Var(name=index) } Var(name=key) }
+              Block { Return { AttrValueInt { Var(name=node) Var(name=index) } } }
+              Block {
+                Return {
+                  Call(target=attrInt) {
+                    Var(name=node)
+                    Var(name=key)
+                    Add { Var(name=index) Lit(value=1) }
+                    Var(name=defaultValue)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=requestPath) {
+    Fn(params=request) {
+      Block {
+        Let(name=firstSpace) { StringFind { Var(name=request) Lit(value=" ") Lit(value=0) } }
+        If { Eq { Var(name=firstSpace) Lit(value=-1) } Block { Return { Lit(value="/") } } Block { Lit(value=0) } }
+        Let(name=pathStart) { Add { Var(name=firstSpace) Lit(value=1) } }
+        Let(name=secondSpace) { StringFind { Var(name=request) Lit(value=" ") Var(name=pathStart) } }
+        If { Eq { Var(name=secondSpace) Lit(value=-1) } Block { Return { Lit(value="/") } } Block { Lit(value=0) } }
+        Let(name=rawPath) {
+          StringSlice {
+            Var(name=request)
+            Var(name=pathStart)
+            Call(target=sub) { Var(name=secondSpace) Var(name=pathStart) }
+          }
+        }
+        Let(name=queryAt) { StringFind { Var(name=rawPath) Lit(value="?") Lit(value=0) } }
+        If {
+          Eq { Var(name=queryAt) Lit(value=-1) }
+          Block { Return { Var(name=rawPath) } }
+          Block { Return { StringSlice { Var(name=rawPath) Lit(value=0) Var(name=queryAt) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=contentType) {
+    Fn(params=path) {
+      Block {
+        If { Eq { StringFind { Var(name=path) Lit(value=".wasm") Lit(value=0) } Lit(value=-1) } Block { Lit(value=0) } Block { Return { Lit(value="application/wasm") } } }
+        If { Eq { StringFind { Var(name=path) Lit(value=".mjs") Lit(value=0) } Lit(value=-1) } Block { Lit(value=0) } Block { Return { Lit(value="text/javascript; charset=utf-8") } } }
+        If { Eq { StringFind { Var(name=path) Lit(value=".js") Lit(value=0) } Lit(value=-1) } Block { Lit(value=0) } Block { Return { Lit(value="text/javascript; charset=utf-8") } } }
+        If { Eq { StringFind { Var(name=path) Lit(value=".css") Lit(value=0) } Lit(value=-1) } Block { Lit(value=0) } Block { Return { Lit(value="text/css; charset=utf-8") } } }
+        If { Eq { StringFind { Var(name=path) Lit(value=".html") Lit(value=0) } Lit(value=-1) } Block { Lit(value=0) } Block { Return { Lit(value="text/html; charset=utf-8") } } }
+        Return { Lit(value="application/octet-stream") }
+      }
+    }
+  }
+
+  Let(name=writeResponse) {
+    Fn(params=connection,status,contentTypeValue,body) {
+      Block {
+        Let(name=header) {
+          StrConcat {
+            Lit(value="HTTP/1.1 ")
+            StrConcat {
+              Var(name=status)
+              StrConcat {
+                Lit(value="\r\nContent-Type: ")
+                StrConcat {
+                  Var(name=contentTypeValue)
+                  StrConcat {
+                    Lit(value="\r\nContent-Length: ")
+                    StrConcat {
+                      ToString { Call(target=bytes.length) { Var(name=body) } }
+                      Lit(value="\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n")
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+        Return {
+          Call(target=sys.net.tcp.write) {
+            Var(name=connection)
+            Call(target=bytes.concat) { Call(target=bytes.fromUtf8String) { Var(name=header) } Var(name=body) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=writeFileChunk) {
+    Fn(params=connection,chunk) {
+      Block { Return { Call(target=sys.net.tcp.write) { Var(name=connection) Var(name=chunk) } } }
+    }
+  }
+
+  Let(name=streamFile) {
+    Fn(params=connection,fileHandle) {
+      Block {
+        Loop {
+          Block {
+            Let(name=chunk) { Call(target=sys.fs.file.readChunk) { Var(name=fileHandle) Lit(value=16384) } }
+            If {
+              Eq { Call(target=bytes.length) { Var(name=chunk) } Lit(value=0) }
+              Block {
+                Call(target=sys.fs.file.close) { Var(name=fileHandle) }
+                Return { Lit(value=0) }
+              }
+              Block { Call(target=writeFileChunk) { Var(name=connection) Var(name=chunk) } }
+            }
+          }
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=writeFileResponse) {
+    Fn(params=connection,path,filePath) {
+      Block {
+        Let(name=stat) { Call(target=sys.fs.path.stat) { Var(name=filePath) } }
+        Let(name=size) { Call(target=attrInt) { Var(name=stat) Lit(value="size") Lit(value=0) Lit(value=0) } }
+        Let(name=header) {
+          StrConcat {
+            Lit(value="HTTP/1.1 200 OK\r\nContent-Type: ")
+            StrConcat {
+              Call(target=contentType) { Var(name=path) }
+              StrConcat {
+                Lit(value="\r\nContent-Length: ")
+                StrConcat {
+                  ToString { Var(name=size) }
+                  Lit(value="\r\nCache-Control: no-store\r\nConnection: close\r\n\r\n")
+                }
+              }
+            }
+          }
+        }
+        Call(target=sys.net.tcp.write) {
+          Var(name=connection)
+          Call(target=bytes.fromUtf8String) { Var(name=header) }
+        }
+        Let(name=fileHandle) { Call(target=sys.fs.file.openRead) { Var(name=filePath) } }
+        If {
+          Eq { Var(name=fileHandle) Lit(value=-1) }
+          Block { Return { Lit(value=-1) } }
+          Block { Return { Call(target=streamFile) { Var(name=connection) Var(name=fileHandle) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=serveConnection) {
+    Fn(params=connection,root) {
+      Block {
+        Let(name=requestBytes) { Call(target=sys.net.tcp.read) { Var(name=connection) Lit(value=16384) } }
+        Let(name=request) { Call(target=bytes.toUtf8String) { Var(name=requestBytes) } }
+        If {
+          Eq { StringFind { Var(name=request) Lit(value="GET ") Lit(value=0) } Lit(value=0) }
+          Block { Lit(value=0) }
+          Block {
+            Return {
+              Call(target=writeResponse) {
+                Var(name=connection)
+                Lit(value="405 Method Not Allowed")
+                Lit(value="text/plain; charset=utf-8")
+                Call(target=bytes.fromUtf8String) { Lit(value="Only GET is supported\n") }
+              }
+            }
+          }
+        }
+        Let(name=path) { Call(target=requestPath) { Var(name=request) } }
+        Let(name=resolvedPath) {
+          If {
+            Eq { Var(name=path) Lit(value="/") }
+            Block { Lit(value="/index.html") }
+            Block { Var(name=path) }
+          }
+        }
+        If {
+          Eq { StringFind { Var(name=resolvedPath) Lit(value="..") Lit(value=0) } Lit(value=-1) }
+          Block {
+            Let(name=filePath) { StrConcat { Var(name=root) Var(name=resolvedPath) } }
+            If {
+              Call(target=sys.fs.path.exists) { Var(name=filePath) }
+              Block {
+                Return { Call(target=writeFileResponse) { Var(name=connection) Var(name=resolvedPath) Var(name=filePath) } }
+              }
+              Block {
+                Return {
+                  Call(target=writeResponse) {
+                    Var(name=connection)
+                    Lit(value="404 Not Found")
+                    Lit(value="text/plain; charset=utf-8")
+                    Call(target=bytes.fromUtf8String) { Lit(value="Not found\n") }
+                  }
+                }
+              }
+            }
+          }
+          Block {
+            Return {
+              Call(target=writeResponse) {
+                Var(name=connection)
+                Lit(value="400 Bad Request")
+                Lit(value="text/plain; charset=utf-8")
+                Call(target=bytes.fromUtf8String) { Lit(value="Invalid path\n") }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=start) {
+    Fn(params=args) {
+      Block {
+        Let(name=root) { Call(target=argString) { Var(name=args) Lit(value=0) Lit(value=".") } }
+        Let(name=portText) { Call(target=argString) { Var(name=args) Lit(value=1) Lit(value="8768") } }
+        Let(name=port) { Call(target=parseWholeOr) { Var(name=portText) Lit(value=0) } }
+        If { Eq { Var(name=port) Lit(value=0) } Block { Return { Lit(value=2) } } Block { Lit(value=0) } }
+        Let(name=listener) { Call(target=sys.net.tcp.listen) { Lit(value="127.0.0.1") Var(name=port) } }
+        If { Eq { Var(name=listener) Lit(value=-1) } Block { Return { Lit(value=2) } } Block { Lit(value=0) } }
+        Call(target=sys.stdout.writeLine) { StrConcat { Lit(value="AiLang WASM server: http://127.0.0.1:") Var(name=portText) } }
+        Loop {
+          Block {
+            Let(name=connection) { Call(target=sys.net.tcp.accept) { Var(name=listener) } }
+            If { Eq { Var(name=connection) Lit(value=-1) } Block { Continue } Block { Lit(value=0) } }
+            Call(target=serveConnection) { Var(name=connection) Var(name=root) }
+            Call(target=sys.net.tcp.close) { Var(name=connection) }
+          }
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+}

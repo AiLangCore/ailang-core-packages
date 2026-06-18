@@ -1,0 +1,175 @@
+Program {
+  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(path="button.aos")
+
+  Export(name=popupHalfFloor)
+  Export(name=popupCenterX)
+  Export(name=popupCenterY)
+  Export(name=modalOverlay)
+  Export(name=modalPanel)
+  Export(name=modalPanelCentered)
+  Export(name=alertPresentation)
+  Export(name=alertUsesWindow)
+  Export(name=alertModal)
+  Export(name=alertWindow)
+  Export(name=alert)
+
+  Let(name=popupHalfFloor) {
+    Fn(params=value,acc) {
+      Block {
+        Return { Call(target=divFloor) { Var(name=value) Lit(value=2) Var(name=acc) } }
+      }
+    }
+  }
+
+  Let(name=popupCenterX) {
+    Fn(params=screenW,panelW) {
+      Block {
+        Return {
+          Call(target=popupHalfFloor) {
+            Call(target=sub) { Var(name=screenW) Var(name=panelW) }
+            Lit(value=0)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=popupCenterY) {
+    Fn(params=screenH,panelH) {
+      Block {
+        Return {
+          Call(target=popupHalfFloor) {
+            Call(target=sub) { Var(name=screenH) Var(name=panelH) }
+            Lit(value=0)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=modalOverlay) {
+    Fn(params=handle,w,h) {
+      Block {
+        Call(target=sys.ui.drawRect) { Var(name=handle) Lit(value=0) Lit(value=0) Var(name=w) Var(name=h) Lit(value="#020617") }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=modalPanel) {
+    Fn(params=handle,x,y,w,h,title) {
+      Block {
+        Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=h) Lit(value="#0f172a") }
+        Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Lit(value=1) Lit(value="#334155") }
+        Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Add { Var(name=y) Add { Var(name=h) Lit(value=-1) } } Var(name=w) Lit(value=1) Lit(value="#020617") }
+        Call(target=sys.ui.drawText) { Var(name=handle) Add { Var(name=x) Lit(value=32) } Add { Var(name=y) Lit(value=30) } Var(name=title) Lit(value="#ffffff") Lit(value=22) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=modalPanelCentered) {
+    Fn(params=handle,screenW,screenH,panelW,panelH,title) {
+      Block {
+        Return {
+          Call(target=modalPanel) {
+            Var(name=handle)
+            Call(target=popupCenterX) { Var(name=screenW) Var(name=panelW) }
+            Call(target=popupCenterY) { Var(name=screenH) Var(name=panelH) }
+            Var(name=panelW)
+            Var(name=panelH)
+            Var(name=title)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=alertPresentation) {
+    Fn(params=platform) {
+      Block {
+        If {
+          Eq { Var(name=platform) Lit(value="desktop") }
+          Block { Return { Lit(value="window") } }
+          Block { Return { Lit(value="modal") } }
+        }
+      }
+    }
+  }
+
+  Let(name=alertUsesWindow) {
+    Fn(params=platform) {
+      Block {
+        Return {
+          Eq {
+            Call(target=alertPresentation) { Var(name=platform) }
+            Lit(value="window")
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=alertModal) {
+    Fn(params=handle,screenW,screenH,title,message,buttonId,buttonLabel) {
+      Block {
+        Let(name=panelW) { Lit(value=380) }
+        Let(name=panelH) { Lit(value=220) }
+        Let(name=x) { Call(target=popupCenterX) { Var(name=screenW) Var(name=panelW) } }
+        Let(name=y) { Call(target=popupCenterY) { Var(name=screenH) Var(name=panelH) } }
+        Call(target=modalOverlay) { Var(name=handle) Var(name=screenW) Var(name=screenH) }
+        Call(target=modalPanel) { Var(name=handle) Var(name=x) Var(name=y) Var(name=panelW) Var(name=panelH) Var(name=title) }
+        Call(target=sys.ui.drawText) { Var(name=handle) Add { Var(name=x) Lit(value=32) } Add { Var(name=y) Lit(value=82) } Var(name=message) Lit(value="#cbd5e1") Lit(value=16) }
+        Call(target=buttonRender) {
+          Var(name=handle)
+          Call(target=buttonElement) {
+            Var(name=buttonId)
+            Add { Var(name=x) Lit(value=236) }
+            Add { Var(name=y) Lit(value=154) }
+            Lit(value=112)
+            Lit(value=38)
+            Var(name=buttonLabel)
+            Lit(value="normal")
+          }
+        }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  Let(name=alertWindow) {
+    Fn(params=title,message,buttonId,buttonLabel) {
+      Block {
+        Let(name=handle) { Call(target=sys.ui.createWindow) { Var(name=title) Lit(value=380) Lit(value=220) } }
+        Call(target=modalPanel) { Var(name=handle) Lit(value=0) Lit(value=0) Lit(value=380) Lit(value=220) Var(name=title) }
+        Call(target=sys.ui.drawText) { Var(name=handle) Lit(value=32) Lit(value=82) Var(name=message) Lit(value="#cbd5e1") Lit(value=16) }
+        Call(target=buttonRender) {
+          Var(name=handle)
+          Call(target=buttonElement) {
+            Var(name=buttonId)
+            Lit(value=236)
+            Lit(value=154)
+            Lit(value=112)
+            Lit(value=38)
+            Var(name=buttonLabel)
+            Lit(value="normal")
+          }
+        }
+        Return { Var(name=handle) }
+      }
+    }
+  }
+
+  Let(name=alert) {
+    Fn(params=handle,screenW,screenH,platform,title,message,buttonId,buttonLabel) {
+      Block {
+        If {
+          Call(target=alertUsesWindow) { Var(name=platform) }
+          Block { Return { Call(target=alertWindow) { Var(name=title) Var(name=message) Var(name=buttonId) Var(name=buttonLabel) } } }
+          Block { Return { Call(target=alertModal) { Var(name=handle) Var(name=screenW) Var(name=screenH) Var(name=title) Var(name=message) Var(name=buttonId) Var(name=buttonLabel) } } }
+        }
+      }
+    }
+  }
+}

@@ -67,6 +67,21 @@ exports = [
   "radioElement",
   "radioRender",
   "radioHitElement",
+  "gearIcon",
+  "gearButton",
+  "gearButtonElement",
+  "gearButtonHitElement",
+  "popupHalfFloor",
+  "popupCenterX",
+  "popupCenterY",
+  "modalOverlay",
+  "modalPanel",
+  "modalPanelCentered",
+  "alertPresentation",
+  "alertUsesWindow",
+  "alertModal",
+  "alertWindow",
+  "alert",
 ]
 
 [libraries.button]
@@ -107,4 +122,31 @@ exports = [
   "radioElement",
   "radioRender",
   "radioHitElement",
+]
+
+[libraries.icon]
+namespace = "vectra.ui.icon"
+entry = "src/vectra/ui/icon.aos"
+exports = [
+  "gearIcon",
+  "gearButton",
+  "gearButtonElement",
+  "gearButtonHitElement",
+]
+
+[libraries.popup]
+namespace = "vectra.ui.popup"
+entry = "src/vectra/ui/popup.aos"
+exports = [
+  "popupHalfFloor",
+  "popupCenterX",
+  "popupCenterY",
+  "modalOverlay",
+  "modalPanel",
+  "modalPanelCentered",
+  "alertPresentation",
+  "alertUsesWindow",
+  "alertModal",
+  "alertWindow",
+  "alert",
 ]
