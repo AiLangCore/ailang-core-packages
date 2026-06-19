@@ -8,6 +8,7 @@ Program {
   Export(name=horizontalScrollerMaxOffset)
   Export(name=horizontalScrollerClampOffset)
   Export(name=horizontalScrollerEventOffset)
+  Export(name=horizontalScrollerEventOffsetInBounds)
 
   Let(name=scrollerDivPositive) {
     Fn(params=n,d,acc) {
@@ -72,12 +73,57 @@ Program {
                 Block { Call(target=scrollerDivFloor) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) } }
               }
             }
+            Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Add { Var(name=y) Lit(value=-8) } Lit(value=24) Lit(value=24) Lit(value="#2563eb") }
+            Call(target=sys.ui.drawText) { Var(name=handle) Add { Var(name=x) Lit(value=8) } Add { Var(name=y) Lit(value=-6) } Lit(value="<") Lit(value="#ffffff") Lit(value=14) }
             Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=trackH) Lit(value="#334155") }
             Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Var(name=thumbX) } Var(name=y) Var(name=thumbW) Var(name=trackH) Lit(value="#93c5fd") }
+            Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Lit(value=-24) } } Add { Var(name=y) Lit(value=-8) } Lit(value=24) Lit(value=24) Lit(value="#2563eb") }
+            Call(target=sys.ui.drawText) { Var(name=handle) Add { Var(name=x) Add { Var(name=w) Lit(value=-16) } } Add { Var(name=y) Lit(value=-6) } Lit(value=">") Lit(value="#ffffff") Lit(value=14) }
             Return { Lit(value=0) }
           }
         }
       }
+    }
+  }
+
+  Let(name=scrollerHit) {
+    Fn(params=x,y,w,h,event) {
+      Block {
+        Let(name=ex) { Call(target=inputEventX) { Var(name=event) } }
+        Let(name=ey) { Call(target=inputEventY) { Var(name=event) } }
+        If {
+          Call(target=lt) { Var(name=ex) Var(name=x) }
+          Block { Return { Lit(value=false) } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=lt) { Var(name=ey) Var(name=y) }
+          Block { Return { Lit(value=false) } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=gte) { Var(name=ex) Add { Var(name=x) Var(name=w) } }
+          Block { Return { Lit(value=false) } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=gte) { Var(name=ey) Add { Var(name=y) Var(name=h) } }
+          Block { Return { Lit(value=false) } }
+          Block { Return { Lit(value=true) } }
+        }
+      }
+    }
+  }
+
+  Let(name=scrollerLeftButtonHit) {
+    Fn(params=x,y,event) {
+      Block { Return { Call(target=scrollerHit) { Var(name=x) Add { Var(name=y) Lit(value=-8) } Lit(value=24) Lit(value=24) Var(name=event) } } }
+    }
+  }
+
+  Let(name=scrollerRightButtonHit) {
+    Fn(params=x,y,w,event) {
+      Block { Return { Call(target=scrollerHit) { Add { Var(name=x) Add { Var(name=w) Lit(value=-24) } } Add { Var(name=y) Lit(value=-8) } Lit(value=24) Lit(value=24) Var(name=event) } } }
     }
   }
 
@@ -160,6 +206,47 @@ Program {
           Eq { Var(name=key) Lit(value="left") }
           Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Lit(value=-80) } } } }
           Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Var(name=offset) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=horizontalScrollerEventOffsetInBounds) {
+    Fn(params=x,y,w,h,contentW,offset,event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        Let(name=key) { Call(target=inputEventKey) { Var(name=event) } }
+        If {
+          Eq { Var(name=key) Lit(value="right") }
+          Block { Return { Call(target=horizontalScrollerEventOffset) { Var(name=w) Var(name=contentW) Var(name=offset) Var(name=event) } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=key) Lit(value="left") }
+          Block { Return { Call(target=horizontalScrollerEventOffset) { Var(name=w) Var(name=contentW) Var(name=offset) Var(name=event) } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=eventType) Lit(value="click") }
+          Block {
+            If {
+              Call(target=scrollerLeftButtonHit) { Var(name=x) Var(name=y) Var(name=event) }
+              Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Call(target=sub) { Var(name=offset) Lit(value=160) } } } }
+              Block {
+                If {
+                  Call(target=scrollerRightButtonHit) { Var(name=x) Var(name=y) Var(name=w) Var(name=event) }
+                  Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Lit(value=160) } } } }
+                  Block { Return { Var(name=offset) } }
+                }
+              }
+            }
+          }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=scrollerHit) { Var(name=x) Add { Var(name=y) Lit(value=-24) } Var(name=w) Add { Var(name=h) Lit(value=48) } Var(name=event) }
+          Block { Return { Call(target=horizontalScrollerEventOffset) { Var(name=w) Var(name=contentW) Var(name=offset) Var(name=event) } } }
+          Block { Return { Var(name=offset) } }
         }
       }
     }

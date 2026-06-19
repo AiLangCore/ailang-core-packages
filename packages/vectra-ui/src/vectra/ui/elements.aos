@@ -64,6 +64,7 @@ Program {
   Export(name=horizontalScrollerMaxOffset)
   Export(name=horizontalScrollerClampOffset)
   Export(name=horizontalScrollerEventOffset)
+  Export(name=horizontalScrollerEventOffsetInBounds)
 
   Let(name=renderElement) {
     Fn(params=handle,element) {
