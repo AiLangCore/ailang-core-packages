@@ -1,6 +1,5 @@
 Program {
   Import(sdk="ailang" path="std/number.aos")
-  Import(sdk="ailang" path="std/math.aos")
   Import(package="aivectra" path="src/AiVectra/src/aisvg.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
 
@@ -10,17 +9,55 @@ Program {
   Export(name=horizontalScrollerClampOffset)
   Export(name=horizontalScrollerEventOffset)
 
+  Let(name=scrollerDivPositive) {
+    Fn(params=n,d,acc) {
+      Block {
+        If {
+          Call(target=lt) { Var(name=n) Var(name=d) }
+          Block { Return { Var(name=acc) } }
+          Block {
+            Return {
+              Call(target=scrollerDivPositive) {
+                Call(target=sub) { Var(name=n) Var(name=d) }
+                Var(name=d)
+                Add { Var(name=acc) Lit(value=1) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=scrollerDivFloor) {
+    Fn(params=n,d) {
+      Block {
+        If {
+          Eq { Var(name=d) Lit(value=0) }
+          Block { Return { Lit(value=0) } }
+          Block {
+            If {
+              Call(target=lt) { Var(name=n) Lit(value=0) }
+              Block { Return { Lit(value=0) } }
+              Block { Return { Call(target=scrollerDivPositive) { Var(name=n) Var(name=d) Lit(value=0) } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
   Let(name=horizontalScroller) {
     Fn(params=handle,x,y,w,contentW,offset) {
       Block {
         If {
-          Call(target=intGte) { Var(name=w) Var(name=contentW) }
+          Call(target=gte) { Var(name=w) Var(name=contentW) }
           Block { Return { Lit(value=0) } }
           Block {
             Let(name=trackH) { Lit(value=8) }
             Let(name=thumbW) {
               If {
-                Call(target=intLt) { Var(name=w) Lit(value=240) }
+                Call(target=lt) { Var(name=w) Lit(value=240) }
                 Block { Lit(value=72) }
                 Block { Lit(value=112) }
               }
@@ -32,7 +69,7 @@ Program {
               If {
                 Eq { Var(name=maxContentOffset) Lit(value=0) }
                 Block { Lit(value=0) }
-                Block { Call(target=divFloor) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) Lit(value=0) } }
+                Block { Call(target=scrollerDivFloor) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) } }
               }
             }
             Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=trackH) Lit(value="#334155") }
@@ -48,7 +85,7 @@ Program {
     Fn(params=w,contentW) {
       Block {
         If {
-          Call(target=intGte) { Var(name=w) Var(name=contentW) }
+          Call(target=gte) { Var(name=w) Var(name=contentW) }
           Block { Return { Lit(value=0) } }
           Block { Return { Call(target=sub) { Var(name=contentW) Var(name=w) } } }
         }
@@ -61,11 +98,11 @@ Program {
       Block {
         Let(name=maxOffset) { Call(target=horizontalScrollerMaxOffset) { Var(name=w) Var(name=contentW) } }
         If {
-          Call(target=intLt) { Var(name=offset) Lit(value=0) }
+          Call(target=lt) { Var(name=offset) Lit(value=0) }
           Block { Return { Lit(value=0) } }
           Block {
             If {
-              Call(target=intLt) { Var(name=maxOffset) Var(name=offset) }
+              Call(target=lt) { Var(name=maxOffset) Var(name=offset) }
               Block { Return { Var(name=maxOffset) } }
               Block { Return { Var(name=offset) } }
             }
@@ -133,7 +170,7 @@ Program {
       Block {
         Return {
           If {
-            Call(target=intLt) { Var(name=w) Lit(value=240) }
+            Call(target=lt) { Var(name=w) Lit(value=240) }
             Block { Lit(value=72) }
             Block { Lit(value=112) }
           }
@@ -146,7 +183,7 @@ Program {
     Fn(params=handle,x,y,w,contentW,tick,duration) {
       Block {
         If {
-          Call(target=intGte) { Var(name=w) Var(name=contentW) }
+          Call(target=gte) { Var(name=w) Var(name=contentW) }
           Block { Return { Lit(value=0) } }
           Block {
             Let(name=thumbW) { Call(target=scrollerThumbWidth) { Var(name=w) } }
