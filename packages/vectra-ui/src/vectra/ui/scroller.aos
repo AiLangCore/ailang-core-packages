@@ -1,5 +1,6 @@
 Program {
   Import(sdk="ailang" path="std/number.aos")
+  Import(sdk="ailang" path="std/math.aos")
   Import(package="aivectra" path="src/AiVectra/src/aisvg.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
 
@@ -31,7 +32,7 @@ Program {
               If {
                 Eq { Var(name=maxContentOffset) Lit(value=0) }
                 Block { Lit(value=0) }
-                Block { Call(target=div) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) } }
+                Block { Call(target=divFloor) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) Lit(value=0) } }
               }
             }
             Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=trackH) Lit(value="#334155") }
