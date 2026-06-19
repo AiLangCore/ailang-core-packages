@@ -1,10 +1,10 @@
 schema = "ailang.package-source.v1"
 name = "vectra-ui"
-version = "0.0.1-alpha.19"
+version = "0.0.1-alpha.20"
 types = ["library"]
 
 [dependencies]
-aivectra = "0.0.1-beta.14"
+aivectra = "0.0.1-beta.15"
 std-ui-input = "0.0.1-alpha.7"
 
 [libraries.element]
@@ -84,6 +84,9 @@ exports = [
   "alert",
   "horizontalScroller",
   "horizontalScrollerAnimated",
+  "horizontalScrollerMaxOffset",
+  "horizontalScrollerClampOffset",
+  "horizontalScrollerEventOffset",
 ]
 
 [libraries.scroller]
@@ -92,6 +95,9 @@ entry = "src/vectra/ui/scroller.aos"
 exports = [
   "horizontalScroller",
   "horizontalScrollerAnimated",
+  "horizontalScrollerMaxOffset",
+  "horizontalScrollerClampOffset",
+  "horizontalScrollerEventOffset",
 ]
 
 [libraries.button]

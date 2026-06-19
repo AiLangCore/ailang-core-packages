@@ -1,9 +1,13 @@
 Program {
   Import(sdk="ailang" path="std/number.aos")
   Import(package="aivectra" path="src/AiVectra/src/aisvg.aos")
+  Import(package="std-ui-input" path="src/ui/input.aos")
 
   Export(name=horizontalScroller)
   Export(name=horizontalScrollerAnimated)
+  Export(name=horizontalScrollerMaxOffset)
+  Export(name=horizontalScrollerClampOffset)
+  Export(name=horizontalScrollerEventOffset)
 
   Let(name=horizontalScroller) {
     Fn(params=handle,x,y,w,contentW,offset) {
@@ -21,23 +25,103 @@ Program {
               }
             }
             Let(name=maxThumbX) { Call(target=sub) { Var(name=w) Var(name=thumbW) } }
+            Let(name=maxContentOffset) { Call(target=horizontalScrollerMaxOffset) { Var(name=w) Var(name=contentW) } }
+            Let(name=clampedOffset) { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Var(name=offset) } }
             Let(name=thumbX) {
               If {
-                Call(target=intLt) { Var(name=offset) Lit(value=0) }
+                Eq { Var(name=maxContentOffset) Lit(value=0) }
                 Block { Lit(value=0) }
-                Block {
-                  If {
-                    Call(target=intLt) { Var(name=maxThumbX) Var(name=offset) }
-                    Block { Var(name=maxThumbX) }
-                    Block { Var(name=offset) }
-                  }
-                }
+                Block { Call(target=div) { Call(target=mul) { Var(name=clampedOffset) Var(name=maxThumbX) } Var(name=maxContentOffset) } }
               }
             }
             Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=trackH) Lit(value="#334155") }
             Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Var(name=thumbX) } Var(name=y) Var(name=thumbW) Var(name=trackH) Lit(value="#93c5fd") }
             Return { Lit(value=0) }
           }
+        }
+      }
+    }
+  }
+
+  Let(name=horizontalScrollerMaxOffset) {
+    Fn(params=w,contentW) {
+      Block {
+        If {
+          Call(target=intGte) { Var(name=w) Var(name=contentW) }
+          Block { Return { Lit(value=0) } }
+          Block { Return { Call(target=sub) { Var(name=contentW) Var(name=w) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=horizontalScrollerClampOffset) {
+    Fn(params=w,contentW,offset) {
+      Block {
+        Let(name=maxOffset) { Call(target=horizontalScrollerMaxOffset) { Var(name=w) Var(name=contentW) } }
+        If {
+          Call(target=intLt) { Var(name=offset) Lit(value=0) }
+          Block { Return { Lit(value=0) } }
+          Block {
+            If {
+              Call(target=intLt) { Var(name=maxOffset) Var(name=offset) }
+              Block { Return { Var(name=maxOffset) } }
+              Block { Return { Var(name=offset) } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=horizontalScrollerEventOffset) {
+    Fn(params=w,contentW,offset,event) {
+      Block {
+        Let(name=eventType) { Call(target=inputEventType) { Var(name=event) } }
+        Let(name=key) { Call(target=inputEventKey) { Var(name=event) } }
+        Let(name=dx) { Call(target=inputEventDeltaX) { Var(name=event) } }
+        Let(name=dy) { Call(target=inputEventDeltaY) { Var(name=event) } }
+        If {
+          Eq { Var(name=eventType) Lit(value="wheel") }
+          Block {
+            If {
+              Eq { Var(name=dx) Lit(value=0) }
+              Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dy) } } } }
+              Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+            }
+          }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=eventType) Lit(value="scroll") }
+          Block {
+            If {
+              Eq { Var(name=dx) Lit(value=0) }
+              Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dy) } } } }
+              Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+            }
+          }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=eventType) Lit(value="drag") }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=eventType) Lit(value="pointerdrag") }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=key) Lit(value="right") }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Lit(value=80) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Var(name=key) Lit(value="left") }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Lit(value=-80) } } } }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Var(name=offset) } } }
         }
       }
     }
@@ -65,11 +149,11 @@ Program {
           Block { Return { Lit(value=0) } }
           Block {
             Let(name=thumbW) { Call(target=scrollerThumbWidth) { Var(name=w) } }
-            Let(name=maxThumbX) { Call(target=sub) { Var(name=w) Var(name=thumbW) } }
+            Let(name=maxThumbX) { Call(target=horizontalScrollerMaxOffset) { Var(name=w) Var(name=contentW) } }
             Let(name=animation) {
               Call(target=aisvgAnimate) {
                 Lit(value="horizontalScroller.thumb")
-                Lit(value="thumb.x")
+                Lit(value="content.offset")
                 Lit(value=0)
                 Var(name=maxThumbX)
                 Var(name=duration)

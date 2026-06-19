@@ -61,6 +61,9 @@ Program {
   Export(name=alert)
   Export(name=horizontalScroller)
   Export(name=horizontalScrollerAnimated)
+  Export(name=horizontalScrollerMaxOffset)
+  Export(name=horizontalScrollerClampOffset)
+  Export(name=horizontalScrollerEventOffset)
 
   Let(name=renderElement) {
     Fn(params=handle,element) {
