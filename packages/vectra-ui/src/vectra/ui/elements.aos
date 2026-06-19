@@ -60,6 +60,7 @@ Program {
   Export(name=alertWindow)
   Export(name=alert)
   Export(name=horizontalScroller)
+  Export(name=horizontalScrollerAnimated)
 
   Let(name=renderElement) {
     Fn(params=handle,element) {
