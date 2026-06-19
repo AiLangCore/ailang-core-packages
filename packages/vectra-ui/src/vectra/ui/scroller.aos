@@ -143,12 +143,12 @@ Program {
         }
         If {
           Eq { Var(name=eventType) Lit(value="drag") }
-          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Call(target=sub) { Var(name=offset) Var(name=dx) } } } }
           Block { Lit(value=0) }
         }
         If {
           Eq { Var(name=eventType) Lit(value="pointerdrag") }
-          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Add { Var(name=offset) Var(name=dx) } } } }
+          Block { Return { Call(target=horizontalScrollerClampOffset) { Var(name=w) Var(name=contentW) Call(target=sub) { Var(name=offset) Var(name=dx) } } } }
           Block { Lit(value=0) }
         }
         If {

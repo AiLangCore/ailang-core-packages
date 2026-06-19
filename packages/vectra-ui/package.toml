@@ -1,6 +1,6 @@
 schema = "ailang.package-source.v1"
 name = "vectra-ui"
-version = "0.0.1-alpha.22"
+version = "0.0.1-alpha.23"
 types = ["library"]
 
 [dependencies]
