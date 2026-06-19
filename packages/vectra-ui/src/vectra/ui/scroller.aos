@@ -1,0 +1,43 @@
+Program {
+  Import(sdk="ailang" path="std/number.aos")
+
+  Export(name=horizontalScroller)
+
+  Let(name=horizontalScroller) {
+    Fn(params=handle,x,y,w,contentW,offset) {
+      Block {
+        If {
+          Call(target=intGte) { Var(name=w) Var(name=contentW) }
+          Block { Return { Lit(value=0) } }
+          Block {
+            Let(name=trackH) { Lit(value=8) }
+            Let(name=thumbW) {
+              If {
+                Call(target=intLt) { Var(name=w) Lit(value=240) }
+                Block { Lit(value=72) }
+                Block { Lit(value=112) }
+              }
+            }
+            Let(name=maxThumbX) { Call(target=sub) { Var(name=w) Var(name=thumbW) } }
+            Let(name=thumbX) {
+              If {
+                Call(target=intLt) { Var(name=offset) Lit(value=0) }
+                Block { Lit(value=0) }
+                Block {
+                  If {
+                    Call(target=intLt) { Var(name=maxThumbX) Var(name=offset) }
+                    Block { Var(name=maxThumbX) }
+                    Block { Var(name=offset) }
+                  }
+                }
+              }
+            }
+            Call(target=sys.ui.drawRect) { Var(name=handle) Var(name=x) Var(name=y) Var(name=w) Var(name=trackH) Lit(value="#334155") }
+            Call(target=sys.ui.drawRect) { Var(name=handle) Add { Var(name=x) Var(name=thumbX) } Var(name=y) Var(name=thumbW) Var(name=trackH) Lit(value="#93c5fd") }
+            Return { Lit(value=0) }
+          }
+        }
+      }
+    }
+  }
+}

@@ -17,7 +17,24 @@ Program {
   Let(name=popupHalfFloor) {
     Fn(params=value,acc) {
       Block {
-        Return { Call(target=divFloor) { Var(name=value) Lit(value=2) Var(name=acc) } }
+        If {
+          Eq { Var(name=value) Lit(value=0) }
+          Block { Return { Var(name=acc) } }
+          Block {
+            If {
+              Eq { Var(name=value) Lit(value=1) }
+              Block { Return { Var(name=acc) } }
+              Block {
+                Return {
+                  Call(target=popupHalfFloor) {
+                    Add { Var(name=value) Lit(value=-2) }
+                    Add { Var(name=acc) Lit(value=1) }
+                  }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }

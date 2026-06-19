@@ -5,6 +5,7 @@ Program {
   Import(path="radio.aos")
   Import(path="icon.aos")
   Import(path="popup.aos")
+  Import(path="scroller.aos")
 
   Export(name=uiElement)
   Export(name=elementId)
@@ -58,6 +59,7 @@ Program {
   Export(name=alertModal)
   Export(name=alertWindow)
   Export(name=alert)
+  Export(name=horizontalScroller)
 
   Let(name=renderElement) {
     Fn(params=handle,element) {
