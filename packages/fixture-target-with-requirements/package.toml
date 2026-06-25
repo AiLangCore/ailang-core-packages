@@ -1,0 +1,22 @@
+schema = "ailang.package-source.v1"
+name = "fixture-target-with-requirements"
+version = "0.0.1-test.1"
+types = ["target"]
+
+[targets.fixture-req]
+id = "fixture-req"
+description = "Fixture target requiring external tool"
+runtime = "aivm"
+profile = "generic"
+artifactTypes = ["img"]
+defaultRunner = "fixture-req-runner"
+
+[requirements.tools.fixture-tool]
+name = "fixture-tool"
+requiredFor = ["run", "publish"]
+commands = ["fixture-cmd-binary"]
+
+[requirements.tools.fixture-tool.installHints]
+macos = "brew install fixture-tool"
+linux = "apt-get install fixture-tool"
+windows = "winget install fixture-tool"
