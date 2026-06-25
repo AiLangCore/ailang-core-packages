@@ -1,0 +1,12 @@
+schema = "ailang.package-source.v1"
+name = "fixture-target-with-runner"
+version = "0.0.1-test.1"
+types = ["target"]
+
+[targets.fixture-runner]
+id = "fixture-runner"
+description = "Fixture target with default runner"
+runtime = "aivm"
+profile = "generic"
+artifactTypes = ["dir", "img"]
+defaultRunner = "fixture-runner-vm"
