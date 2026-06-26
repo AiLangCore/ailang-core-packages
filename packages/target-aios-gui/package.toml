@@ -1,0 +1,42 @@
+schema = "ailang.package-source.v1"
+name = "target-aios-gui"
+version = "0.0.1-alpha.1"
+types = ["target", "tool", "template"]
+
+[targets.aios-gui]
+id = "aios-gui"
+description = "AiVectra visual shell image"
+runtime = "aivm"
+profile = "linux-shellless-posix-gui"
+defaultRunner = "qemu"
+artifactTypes = ["img", "initramfs"]
+
+[targets.aios-gui.capabilities]
+required = [
+  "time.monotonic",
+  "input.keyboard",
+  "input.pointer",
+  "gfx.framebuffer",
+  "gfx.present",
+  "gfx.resize",
+  "font.rasterize",
+  "log.console",
+  "signal.shutdown",
+  "fs.read",
+  "random.bytes"
+]
+optional = [
+  "input.touch",
+  "gfx.drm_kms",
+  "audio.output"
+]
+
+[requirements.tools.qemu]
+name = "qemu"
+requiredFor = ["run", "test"]
+commands = ["qemu-system-x86_64"]
+
+[requirements.tools.qemu.installHints]
+macos = "brew install qemu"
+linux = "Install qemu-system with the distro package manager."
+windows = "winget install SoftwareFreedomConservancy.QEMU"
