@@ -135,6 +135,11 @@ It does not require X11, Wayland, or a desktop shell in the base image. Generic
 Linux desktop targets may use an X11 backend separately; AiOS intentionally
 draws directly to `/dev/fb0`.
 
+The `x86_64` Buildroot base applies a kernel fragment that enables the QEMU
+VGA framebuffer path (`/dev/fb0`) and framebuffer console support. If this
+fragment changes, rebuild or import a fresh cached AiOS base before testing
+application changes.
+
 Implemented:
 
 ```text

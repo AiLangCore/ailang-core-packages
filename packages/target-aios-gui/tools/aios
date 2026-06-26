@@ -287,8 +287,16 @@ case "$command" in
     fi
     defconfig_template=$(defconfig_for)
     defconfig="$build_dir/aios.defconfig"
+    kernel_fragment="$package_root/buildroot/kernel/aios_gui_x86_64.fragment"
+    if [ ! -f "$kernel_fragment" ]; then
+      echo "Err#err1(code=AIOS006 message=\"AiOS kernel fragment is missing: $kernel_fragment\" nodeId=aios)" >&2
+      exit 2
+    fi
     mkdir -p "$build_dir" "$base_dir"
-    sed "s|@AIOS_ROOTFS_OVERLAY@|$package_root/buildroot/overlays/rootfs|g" "$defconfig_template" > "$defconfig"
+    sed \
+      -e "s|@AIOS_ROOTFS_OVERLAY@|$package_root/buildroot/overlays/rootfs|g" \
+      -e "s|@AIOS_KERNEL_FRAGMENT@|$kernel_fragment|g" \
+      "$defconfig_template" > "$defconfig"
     "$make_bin" -C "$buildroot_dir" O="$build_dir" HOSTCC="$cc_bin" BR2_DEFCONFIG="$defconfig" defconfig
     "$make_bin" -C "$buildroot_dir" O="$build_dir" HOSTCC="$cc_bin"
     if [ ! -f "$build_dir/images/bzImage" ] || [ ! -f "$build_dir/images/rootfs.cpio.gz" ]; then
@@ -305,6 +313,7 @@ arch = "$arch"
 buildrootDir = "$buildroot_dir"
 buildrootVersion = "$buildroot_version"
 defconfig = "$defconfig"
+kernelFragment = "$kernel_fragment"
 libc = "glibc"
 kernel = "bzImage"
 initramfs = "rootfs.cpio.gz"
