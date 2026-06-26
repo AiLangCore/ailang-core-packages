@@ -17,6 +17,7 @@ image_format="cpio.gz"
 partition="none"
 features=""
 debug_console="${AIOS_DEBUG_CONSOLE:-none}"
+network_enabled=0
 
 apply_target_option() {
   assignment="$1"
@@ -205,6 +206,7 @@ esac
 for feature in $features; do
   case "$feature" in
     network)
+      network_enabled=1
       ;;
     printer|audio|wifi|bluetooth|gpu|storage)
       echo "Err#err1(code=AIOS014 message=\"AiOS feature is declared but not implemented yet: $feature\" nodeId=aios)" >&2
@@ -275,23 +277,34 @@ has_qemu_arg() {
 
 emit_launcher() {
   launcher="$1"
-  cat > "$launcher" <<'EOF'
+  cat > "$launcher" <<EOF
 #!/bin/sh
 mount -t proc proc /proc 2>/dev/null || true
 mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+mkdir -p /run /tmp /opt/aios
 
-export AILANG_RUNTIME_TARGET="${AILANG_RUNTIME_TARGET:-aios-gui}"
-export AILANG_RUNTIME_PLATFORM="${AILANG_RUNTIME_PLATFORM:-desktop}"
+export AILANG_RUNTIME_TARGET="\${AILANG_RUNTIME_TARGET:-aios-gui}"
+export AILANG_RUNTIME_PLATFORM="\${AILANG_RUNTIME_PLATFORM:-desktop}"
+export AIOS_FEATURE_NETWORK="\${AIOS_FEATURE_NETWORK:-$network_enabled}"
+
+if [ "\${AIOS_FEATURE_NETWORK:-0}" = "1" ]; then
+  ip link set lo up 2>/dev/null || ifconfig lo up 2>/dev/null || true
+  ip link set eth0 up 2>/dev/null || ifconfig eth0 up 2>/dev/null || true
+  udhcpc -i eth0 -n -q -s /usr/share/udhcpc/default.script 2>/dev/null || true
+  if [ ! -s /etc/resolv.conf ]; then
+    echo "nameserver 10.0.2.3" > /run/resolv.conf 2>/dev/null || true
+  fi
+fi
 
 if [ -x /opt/aios/bin/aivectra ]; then
   /opt/aios/bin/aivectra run /opt/aios/app/app.aibc1
-  echo "AiOS launch warning: AiVectra exited with status $?" >&2
+  echo "AiOS launch warning: AiVectra exited with status \$?" >&2
 fi
 
 if [ -x /opt/aios/bin/aivm ]; then
   /opt/aios/bin/aivm /opt/aios/app/app.aibc1
-  echo "AiOS launch warning: AiVM exited with status $?" >&2
+  echo "AiOS launch warning: AiVM exited with status \$?" >&2
 fi
 
 echo "AiOS launch stopped. Dropping to shell for diagnostics." >&2
@@ -446,8 +459,12 @@ EOF
 
 if [ "$operation" = "run" ]; then
   debug_console_args=""
+  network_args=""
   if [ "$debug_console" = "stdio" ] && ! has_qemu_arg "-serial" "$@"; then
     debug_console_args="-serial stdio"
+  fi
+  if [ "$network_enabled" = "1" ] && ! has_qemu_arg "-netdev" "$@"; then
+    network_args="-netdev user,id=aiosnet -device e1000,netdev=aiosnet"
   fi
   # shellcheck disable=SC2086
   exec qemu-system-x86_64 \
@@ -455,6 +472,7 @@ if [ "$operation" = "run" ]; then
     -initrd "$out_dir/rootfs.cpio.gz" \
     -append "console=ttyS0 loglevel=3 vt.global_cursor_default=0 ailang.target=aios-gui ailang.app=app.aibc1" \
     $debug_console_args \
+    $network_args \
     "$@"
 fi
 
