@@ -256,14 +256,16 @@ export AILANG_RUNTIME_TARGET="${AILANG_RUNTIME_TARGET:-aios-gui}"
 export AILANG_RUNTIME_PLATFORM="${AILANG_RUNTIME_PLATFORM:-desktop}"
 
 if [ -x /opt/aios/bin/aivectra ]; then
-  exec /opt/aios/bin/aivectra run /opt/aios/app/app.aibc1
+  /opt/aios/bin/aivectra run /opt/aios/app/app.aibc1
+  echo "AiOS launch warning: AiVectra exited with status $?" >&2
 fi
 
 if [ -x /opt/aios/bin/aivm ]; then
-  exec /opt/aios/bin/aivm /opt/aios/app/app.aibc1
+  /opt/aios/bin/aivm /opt/aios/app/app.aibc1
+  echo "AiOS launch warning: AiVM exited with status $?" >&2
 fi
 
-echo "AiOS launch failed: no executable AiVectra or AiVM runtime in /opt/aios/bin" >&2
+echo "AiOS launch stopped. Dropping to shell for diagnostics." >&2
 exec sh
 EOF
   chmod +x "$launcher"
@@ -417,7 +419,7 @@ if [ "$operation" = "run" ]; then
   exec qemu-system-x86_64 \
     -kernel "$out_dir/bzImage" \
     -initrd "$out_dir/rootfs.cpio.gz" \
-    -append "console=ttyS0 ailang.target=aios-gui ailang.app=app.aibc1" \
+    -append "console=tty0 console=ttyS0 ailang.target=aios-gui ailang.app=app.aibc1" \
     "$@"
 fi
 
