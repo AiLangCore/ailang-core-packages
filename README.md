@@ -26,9 +26,12 @@ An AiLang package can contain one or more package item types:
 - `library`: importable AiLang source.
 - `tool`: executable command or project tool.
 - `template`: project, file, or agent template content.
+- `target`: build/publish/run target metadata, runner recipes, and host tool requirements.
 
 For example, AiVectra is expected to expose UI libraries, design/build tools,
-and application templates from the same package.
+and application templates from the same package. AiOS targets are expected to
+expose target metadata plus package tools/templates for service or GUI image
+creation.
 
 ## Layout
 
@@ -39,6 +42,8 @@ packages/
     src/
       net/
         http.aos
+  target-aios-service/
+    package.toml
 ```
 
 Current packages:
@@ -50,6 +55,8 @@ Current packages:
 - `std-json`: `std.format.json`, `src/format/json.aos`
 - `std-net`: `std.net.udp`, `src/net/udp.aos`
 - `std-ui-input`: `std.ui.input`, `src/ui/input.aos`
+- `target-aios-service`: `aios-service` target metadata and QEMU runner requirement contract
+- `target-aios-gui`: `aios-gui` target metadata and QEMU runner requirement contract
 
 ## Rules
 
@@ -61,6 +68,9 @@ Current packages:
   live under `src/media/`, and UI helpers live under `src/ui/`.
 - Library descriptors must declare a dotted semantic `namespace`. Package names
   remain dashed for registry identity; source namespaces use dots.
+- Target descriptors must declare stable target ids, supported artifact types,
+  and any external tool requirements needed by `build`, `publish`, `run`,
+  `test`, `doctor`, or device flows.
 - Package source must be reachable-code friendly: examples, tests, templates,
   and tools are not included in app output unless explicitly referenced or
   selected by publish/template commands.
@@ -76,6 +86,24 @@ Current packages:
   into `std-app` events and consume `std-app` commands. AiVM and host code own
   only mechanical scheduling, syscall execution, and transport plumbing.
 
+## Target Package Requirement Shape
+
+Target packages may declare external tool requirements. The CLI must detect
+missing requirements and print deterministic install hints, but it must not
+silently install host tools.
+
+```toml
+[requirements.tools.qemu]
+name = "qemu"
+requiredFor = ["run", "test"]
+commands = ["qemu-system-x86_64"]
+
+[requirements.tools.qemu.installHints]
+macos = "brew install qemu"
+linux = "Install qemu-system with the distro package manager."
+windows = "winget install SoftwareFreedomConservancy.QEMU"
+```
+
 ## Publishing Workflow
 
 1. Update the package under `packages/<name>/`.
@@ -83,7 +111,7 @@ Current packages:
 3. Keep optional package templates under `templates/projects/` or
    `templates/files/`.
 4. Update `packages/<name>/package.toml` with the package version and exposed
-   library/tool/template metadata.
+   library/tool/template/target metadata.
 5. Run package validation and any example that imports the package.
 6. Commit and tag the source repository.
 7. Update `AiLangCore/ailang-packages` with the package version, readable ref,
