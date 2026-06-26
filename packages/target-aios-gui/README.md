@@ -128,6 +128,13 @@ ailang publish . \
 
 ## Target Options
 
+## Runtime Backend
+
+AiOS GUI uses the SDK `runtimes/linux-*/aivectra` slot as a framebuffer host.
+It does not require X11, Wayland, or a desktop shell in the base image. Generic
+Linux desktop targets may use an X11 backend separately; AiOS intentionally
+draws directly to `/dev/fb0`.
+
 Implemented:
 
 ```text
