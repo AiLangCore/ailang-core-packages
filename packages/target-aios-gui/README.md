@@ -94,13 +94,23 @@ The QEMU window should show kernel and AiOS launch diagnostics during boot. If
 the app runtime exits, AiOS drops to a shell instead of panicking so the boot
 state can be inspected.
 
-For terminal diagnostics, pass QEMU serial flags after `--`:
+To keep the QEMU window and mirror the serial boot/app log into the terminal:
 
 ```sh
 ailang run . \
   --target aios-gui \
   --target-version 0.0.1-alpha.1 \
-  -- -display none -serial stdio -no-reboot
+  --target-option debug-console=stdio
+```
+
+For terminal-only diagnostics, pass QEMU display flags after `--`:
+
+```sh
+ailang run . \
+  --target aios-gui \
+  --target-version 0.0.1-alpha.1 \
+  --target-option debug-console=stdio \
+  -- -display none -no-reboot
 ```
 
 Publish an app image without starting QEMU:
@@ -128,6 +138,7 @@ Implemented:
 --feature network
 --splash-background <svg>
 --splash-foreground <svg>
+--target-option debug-console=stdio
 ```
 
 Generic target-option spelling is also supported:

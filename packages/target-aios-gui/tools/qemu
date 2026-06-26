@@ -16,6 +16,7 @@ boot_mode="qemu-kernel"
 image_format="cpio.gz"
 partition="none"
 features=""
+debug_console="${AIOS_DEBUG_CONSOLE:-none}"
 
 apply_target_option() {
   assignment="$1"
@@ -33,6 +34,7 @@ apply_target_option() {
     feature) features="$features $value" ;;
     splash-background) splash_background="$value" ;;
     splash-foreground) splash_foreground="$value" ;;
+    debug-console) debug_console="$value" ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
       exit 2
@@ -112,6 +114,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --splash-foreground=*)
       splash_foreground="${1#--splash-foreground=}"
+      shift
+      ;;
+    --debug-console)
+      debug_console="${2:-}"
+      shift 2
+      ;;
+    --debug-console=*)
+      debug_console="${1#--debug-console=}"
       shift
       ;;
     --target-option)
@@ -207,6 +217,14 @@ for feature in $features; do
   esac
 done
 
+case "$debug_console" in
+  none|stdio) ;;
+  *)
+    echo "Err#err1(code=AIOS016 message=\"Unsupported AiOS debug console: $debug_console\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
 ailang_bin="${AILANG_BIN:-ailang}"
 cache_root="${AIOS_CACHE_ROOT:-${HOME:-.}/.ailang/cache/aios}"
 base_dir="$cache_root/base/$target/$target_version/$arch"
@@ -241,6 +259,17 @@ resolve_runtime_bin() {
     command -v "$default_name"
     return 0
   fi
+  return 1
+}
+
+has_qemu_arg() {
+  wanted="$1"
+  shift
+  for arg in "$@"; do
+    if [ "$arg" = "$wanted" ]; then
+      return 0
+    fi
+  done
   return 1
 }
 
@@ -416,10 +445,16 @@ splashForeground = "$published_splash_foreground"
 EOF
 
 if [ "$operation" = "run" ]; then
+  debug_console_args=""
+  if [ "$debug_console" = "stdio" ] && ! has_qemu_arg "-serial" "$@"; then
+    debug_console_args="-serial stdio"
+  fi
+  # shellcheck disable=SC2086
   exec qemu-system-x86_64 \
     -kernel "$out_dir/bzImage" \
     -initrd "$out_dir/rootfs.cpio.gz" \
     -append "console=tty0 console=ttyS0 ailang.target=aios-gui ailang.app=app.aibc1" \
+    $debug_console_args \
     "$@"
 fi
 
