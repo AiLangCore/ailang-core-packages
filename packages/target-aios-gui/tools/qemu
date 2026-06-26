@@ -1,0 +1,417 @@
+#!/bin/sh
+set -eu
+
+operation="${1:-}"
+project="${2:-}"
+shift 2 || true
+
+target="aios-gui"
+artifact_type="img"
+out_dir="dist-aios"
+target_version="0.0.1-alpha.1"
+arch="${AIOS_ARCH:-x86_64}"
+splash_background=""
+splash_foreground=""
+boot_mode="qemu-kernel"
+image_format="cpio.gz"
+partition="none"
+features=""
+
+apply_target_option() {
+  assignment="$1"
+  name="${assignment%%=*}"
+  value="${assignment#*=}"
+  if [ "$name" = "$assignment" ]; then
+    echo "Err#err1(code=AIOS001 message=\"Invalid target option. Expected name=value: $assignment\" nodeId=aios)" >&2
+    exit 2
+  fi
+  case "$name" in
+    arch) arch="$value" ;;
+    boot) boot_mode="$value" ;;
+    image) image_format="$value" ;;
+    partition) partition="$value" ;;
+    feature) features="$features $value" ;;
+    splash-background) splash_background="$value" ;;
+    splash-foreground) splash_foreground="$value" ;;
+    *)
+      echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
+      exit 2
+      ;;
+  esac
+}
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      target="${2:-}"
+      shift 2
+      ;;
+    --artifact-type|--type)
+      artifact_type="${2:-}"
+      shift 2
+      ;;
+    --target-version|--aios-version)
+      target_version="${2:-}"
+      shift 2
+      ;;
+    --arch)
+      arch="${2:-}"
+      shift 2
+      ;;
+    --arch=*)
+      arch="${1#--arch=}"
+      shift
+      ;;
+    --boot)
+      boot_mode="${2:-}"
+      shift 2
+      ;;
+    --boot=*)
+      boot_mode="${1#--boot=}"
+      shift
+      ;;
+    --image)
+      image_format="${2:-}"
+      shift 2
+      ;;
+    --image=*)
+      image_format="${1#--image=}"
+      shift
+      ;;
+    --partition)
+      partition="${2:-}"
+      shift 2
+      ;;
+    --partition=*)
+      partition="${1#--partition=}"
+      shift
+      ;;
+    --feature)
+      features="$features ${2:-}"
+      shift 2
+      ;;
+    --feature=*)
+      features="$features ${1#--feature=}"
+      shift
+      ;;
+    --out)
+      out_dir="${2:-}"
+      shift 2
+      ;;
+    --splash-background)
+      splash_background="${2:-}"
+      shift 2
+      ;;
+    --splash-background=*)
+      splash_background="${1#--splash-background=}"
+      shift
+      ;;
+    --splash-foreground)
+      splash_foreground="${2:-}"
+      shift 2
+      ;;
+    --splash-foreground=*)
+      splash_foreground="${1#--splash-foreground=}"
+      shift
+      ;;
+    --target-option)
+      apply_target_option "${2:-}"
+      shift 2
+      ;;
+    --target-option=*)
+      apply_target_option "${1#--target-option=}"
+      shift
+      ;;
+    --package-target)
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+if [ -z "$operation" ] || [ -z "$project" ]; then
+  echo 'Err#err1(code=AIOS001 message="target-aios-gui qemu runner requires operation and project." nodeId=aios)' >&2
+  exit 2
+fi
+
+case "$artifact_type" in
+  img|initramfs) ;;
+  *)
+    echo "Err#err1(code=AIOS001 message=\"aios-gui does not support artifact type: $artifact_type\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+case "$arch" in
+  x86_64|aarch64) ;;
+  *)
+    echo "Err#err1(code=AIOS010 message=\"Unsupported AiOS architecture: $arch\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+case "$boot_mode" in
+  qemu-kernel) ;;
+  disk|iso|uefi)
+    echo "Err#err1(code=AIOS011 message=\"AiOS boot mode is declared but not implemented yet: $boot_mode\" nodeId=aios)" >&2
+    exit 2
+    ;;
+  *)
+    echo "Err#err1(code=AIOS011 message=\"Unsupported AiOS boot mode: $boot_mode\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+case "$image_format" in
+  cpio.gz) ;;
+  ext4|squashfs|tar.gz|iso)
+    echo "Err#err1(code=AIOS012 message=\"AiOS image format is declared but not implemented yet: $image_format\" nodeId=aios)" >&2
+    exit 2
+    ;;
+  *)
+    echo "Err#err1(code=AIOS012 message=\"Unsupported AiOS image format: $image_format\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+case "$partition" in
+  none) ;;
+  mbr|gpt)
+    echo "Err#err1(code=AIOS013 message=\"AiOS partition mode is declared but not implemented yet: $partition\" nodeId=aios)" >&2
+    exit 2
+    ;;
+  *)
+    echo "Err#err1(code=AIOS013 message=\"Unsupported AiOS partition mode: $partition\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+for feature in $features; do
+  case "$feature" in
+    network)
+      ;;
+    printer|audio|wifi|bluetooth|gpu|storage)
+      echo "Err#err1(code=AIOS014 message=\"AiOS feature is declared but not implemented yet: $feature\" nodeId=aios)" >&2
+      exit 2
+      ;;
+    *)
+      echo "Err#err1(code=AIOS014 message=\"Unsupported AiOS feature: $feature\" nodeId=aios)" >&2
+      exit 2
+      ;;
+  esac
+done
+
+ailang_bin="${AILANG_BIN:-ailang}"
+cache_root="${AIOS_CACHE_ROOT:-${HOME:-.}/.ailang/cache/aios}"
+base_dir="$cache_root/base/$target/$target_version/$arch"
+base_manifest="$base_dir/manifest.toml"
+base_kernel="$base_dir/bzImage"
+base_initramfs="$base_dir/rootfs.cpio.gz"
+tmp_root=""
+published_splash_background=""
+published_splash_foreground=""
+
+cleanup() {
+  if [ -n "$tmp_root" ] && [ -d "$tmp_root" ]; then
+    rm -rf "$tmp_root"
+  fi
+}
+trap cleanup EXIT INT TERM
+
+resolve_runtime_bin() {
+  env_name="$1"
+  default_name="$2"
+  candidate="${3:-}"
+  eval "env_value=\${$env_name:-}"
+  if [ -n "$env_value" ] && [ -f "$env_value" ]; then
+    printf '%s\n' "$env_value"
+    return 0
+  fi
+  if [ -n "$candidate" ] && [ -f "$candidate" ]; then
+    printf '%s\n' "$candidate"
+    return 0
+  fi
+  if command -v "$default_name" >/dev/null 2>&1; then
+    command -v "$default_name"
+    return 0
+  fi
+  return 1
+}
+
+emit_launcher() {
+  launcher="$1"
+  cat > "$launcher" <<'EOF'
+#!/bin/sh
+mount -t proc proc /proc 2>/dev/null || true
+mount -t sysfs sysfs /sys 2>/dev/null || true
+mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
+
+export AILANG_RUNTIME_TARGET="${AILANG_RUNTIME_TARGET:-aios-gui}"
+export AILANG_RUNTIME_PLATFORM="${AILANG_RUNTIME_PLATFORM:-desktop}"
+
+if [ -x /opt/aios/bin/aivectra ]; then
+  exec /opt/aios/bin/aivectra run /opt/aios/app/app.aibc1
+fi
+
+if [ -x /opt/aios/bin/aivm ]; then
+  exec /opt/aios/bin/aivm /opt/aios/app/app.aibc1
+fi
+
+echo "AiOS launch failed: no executable AiVectra or AiVM runtime in /opt/aios/bin" >&2
+exec sh
+EOF
+  chmod +x "$launcher"
+}
+
+inject_payload_initramfs() {
+  runtime_aivm="$1"
+  runtime_aivectra="$2"
+  output_initramfs="$3"
+
+  if ! command -v gzip >/dev/null 2>&1 || ! command -v cpio >/dev/null 2>&1; then
+    echo 'Err#err1(code=AIOS007 message="AiOS payload injection requires gzip and cpio." nodeId=aios)' >&2
+    exit 2
+  fi
+
+  tmp_root="$(mktemp -d "${TMPDIR:-/tmp}/aios-rootfs-XXXXXX")"
+  gzip -dc "$base_initramfs" | (cd "$tmp_root" && cpio -idmu >/dev/null 2>&1)
+
+  mkdir -p "$tmp_root/opt/aios/app" "$tmp_root/opt/aios/bin" "$tmp_root/opt/aios/etc"
+  cp "$app_aibc1" "$tmp_root/opt/aios/app/app.aibc1"
+  cp "$runtime_aivm" "$tmp_root/opt/aios/bin/aivm"
+  cp "$runtime_aivectra" "$tmp_root/opt/aios/bin/aivectra"
+  chmod +x "$tmp_root/opt/aios/bin/aivm" "$tmp_root/opt/aios/bin/aivectra"
+  image_splash_background=""
+  image_splash_foreground=""
+  if [ -n "$splash_background" ] && [ -f "$splash_background" ]; then
+    mkdir -p "$tmp_root/opt/aios/splash"
+    cp "$splash_background" "$tmp_root/opt/aios/splash/background.svg"
+    image_splash_background="/opt/aios/splash/background.svg"
+  fi
+  if [ -n "$splash_foreground" ] && [ -f "$splash_foreground" ]; then
+    mkdir -p "$tmp_root/opt/aios/splash"
+    cp "$splash_foreground" "$tmp_root/opt/aios/splash/foreground.svg"
+    image_splash_foreground="/opt/aios/splash/foreground.svg"
+  fi
+  emit_launcher "$tmp_root/opt/aios/bin/aios-launch"
+  emit_launcher "$tmp_root/init"
+
+  cat > "$tmp_root/opt/aios/etc/image.toml" <<EOF
+schema = "ailang.aios.runtime-image.v1"
+target = "$target"
+aiosVersion = "$target_version"
+arch = "$arch"
+profile = "gui"
+app = "/opt/aios/app/app.aibc1"
+aivm = "/opt/aios/bin/aivm"
+aivectra = "/opt/aios/bin/aivectra"
+boot = "$boot_mode"
+image = "$image_format"
+partition = "$partition"
+splashBackground = "$image_splash_background"
+splashForeground = "$image_splash_foreground"
+EOF
+
+  (cd "$tmp_root" && find . | sort | cpio -o -H newc 2>/dev/null | gzip -n > "$output_initramfs")
+}
+
+if [ ! -f "$base_manifest" ] || [ ! -f "$base_kernel" ] || [ ! -f "$base_initramfs" ]; then
+  echo "Err#err1(code=AIOS004 message=\"AiOS GUI base image is not built. Run: ailang aios build-base --target $target --version $target_version --arch $arch\" nodeId=aios)" >&2
+  exit 2
+fi
+
+mkdir -p "$out_dir"
+out_dir="$(CDPATH= cd -- "$out_dir" && pwd)"
+
+"$ailang_bin" build "$project" >/dev/null
+
+app_aibc1="$project/app.aibc1"
+if [ ! -f "$app_aibc1" ]; then
+  echo 'Err#err1(code=AIOS002 message="aios-gui publish expected app.aibc1 after build." nodeId=aios)' >&2
+  exit 2
+fi
+
+if [ -z "$splash_background" ] && [ -f "$project/src/Assets/Splash/background.svg" ]; then
+  splash_background="$project/src/Assets/Splash/background.svg"
+fi
+if [ -z "$splash_foreground" ] && [ -f "$project/src/Assets/Splash/foreground.svg" ]; then
+  splash_foreground="$project/src/Assets/Splash/foreground.svg"
+fi
+
+cp "$app_aibc1" "$out_dir/app.aibc1"
+cp "$base_manifest" "$out_dir/base.manifest.toml"
+cp "$base_kernel" "$out_dir/bzImage"
+if [ -n "$splash_background" ]; then
+  published_splash_background="rootfs:/opt/aios/splash/background.svg"
+fi
+if [ -n "$splash_foreground" ]; then
+  published_splash_foreground="rootfs:/opt/aios/splash/foreground.svg"
+fi
+
+sdk_root="$(CDPATH= cd -- "$(dirname -- "$ailang_bin")/.." 2>/dev/null && pwd || true)"
+default_aivm=""
+default_aivectra=""
+if [ "$arch" = "x86_64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/.artifacts/ailang-linux-x64/aivm-runtime" ]; then
+  default_aivm="$sdk_root/.artifacts/ailang-linux-x64/aivm-runtime"
+elif [ "$arch" = "aarch64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/.artifacts/ailang-linux-arm64/aivm-runtime" ]; then
+  default_aivm="$sdk_root/.artifacts/ailang-linux-arm64/aivm-runtime"
+fi
+if [ "$arch" = "x86_64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/runtimes/linux-x64/aivectra" ]; then
+  default_aivectra="$sdk_root/runtimes/linux-x64/aivectra"
+elif [ "$arch" = "aarch64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/runtimes/linux-arm64/aivectra" ]; then
+  default_aivectra="$sdk_root/runtimes/linux-arm64/aivectra"
+fi
+if [ -z "$default_aivm" ] && [ "$arch" = "x86_64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/runtimes/linux-x64/aivm-runtime" ]; then
+  default_aivm="$sdk_root/runtimes/linux-x64/aivm-runtime"
+elif [ -z "$default_aivm" ] && [ "$arch" = "aarch64" ] && [ -n "$sdk_root" ] && [ -f "$sdk_root/runtimes/linux-arm64/aivm-runtime" ]; then
+  default_aivm="$sdk_root/runtimes/linux-arm64/aivm-runtime"
+fi
+
+runtime_aivm="$(resolve_runtime_bin AIOS_AIVM_BIN aivm "$default_aivm" || true)"
+runtime_aivectra="$(resolve_runtime_bin AIOS_AIVECTRA_BIN aivectra "$default_aivectra" || true)"
+if [ -z "$runtime_aivm" ]; then
+  echo "Err#err1(code=AIOS008 message=\"AiOS GUI image needs a Linux AiVM runtime. Set AIOS_AIVM_BIN or build SDK runtime artifacts for $arch.\" nodeId=aios)" >&2
+  exit 2
+fi
+if [ -z "$runtime_aivectra" ]; then
+  echo "Err#err1(code=AIOS009 message=\"AiOS GUI image needs a Linux AiVectra host. Expected SDK runtime slot runtimes/linux-x64/aivectra or runtimes/linux-arm64/aivectra, or set AIOS_AIVECTRA_BIN.\" nodeId=aios)" >&2
+  exit 2
+fi
+
+inject_payload_initramfs "$runtime_aivm" "$runtime_aivectra" "$out_dir/rootfs.cpio.gz"
+
+cat > "$out_dir/manifest.toml" <<EOF
+schema = "ailang.aios.image.v1"
+target = "$target"
+aiosVersion = "$target_version"
+arch = "$arch"
+profile = "gui"
+artifactType = "$artifact_type"
+boot = "$boot_mode"
+image = "$image_format"
+partition = "$partition"
+app = "app.aibc1"
+baseManifest = "base.manifest.toml"
+kernel = "bzImage"
+initramfs = "rootfs.cpio.gz"
+aivm = "rootfs:/opt/aios/bin/aivm"
+aivectra = "rootfs:/opt/aios/bin/aivectra"
+splashBackground = "$published_splash_background"
+splashForeground = "$published_splash_foreground"
+EOF
+
+if [ "$operation" = "run" ]; then
+  exec qemu-system-x86_64 \
+    -kernel "$out_dir/bzImage" \
+    -initrd "$out_dir/rootfs.cpio.gz" \
+    -append "console=ttyS0 ailang.target=aios-gui ailang.app=app.aibc1" \
+    "$@"
+fi
+
+echo "Ok#ok1(type=string value=\"$out_dir\")"

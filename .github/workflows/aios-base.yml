@@ -1,0 +1,90 @@
+name: AiOS Base
+
+on:
+  workflow_dispatch:
+    inputs:
+      aios_version:
+        description: AiOS base version
+        required: true
+        default: 0.0.1-alpha.1
+      buildroot_version:
+        description: Buildroot tag
+        required: true
+        default: 2026.02.3
+      arch:
+        description: AiOS architecture
+        required: true
+        default: x86_64
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - packages/target-aios-gui/**
+      - .github/workflows/aios-base.yml
+  pull_request:
+    paths:
+      - packages/target-aios-gui/**
+      - .github/workflows/aios-base.yml
+
+jobs:
+  build-aios-gui-base:
+    name: Build AiOS GUI Base
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    env:
+      AIOS_CACHE_ROOT: ${{ github.workspace }}/.aios-cache
+      AIOS_VERSION: ${{ inputs.aios_version || '0.0.1-alpha.1' }}
+      AIOS_BUILDROOT_VERSION: ${{ inputs.buildroot_version || '2026.02.3' }}
+      AIOS_ARCH: ${{ inputs.arch || 'x86_64' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Install Buildroot host dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            bc \
+            bison \
+            build-essential \
+            cpio \
+            file \
+            flex \
+            libelf-dev \
+            libncurses-dev \
+            libssl-dev \
+            perl \
+            python3 \
+            rsync \
+            unzip \
+            wget
+
+      - name: Fetch Buildroot
+        run: packages/target-aios-gui/tools/aios fetch-buildroot --buildroot-version "$AIOS_BUILDROOT_VERSION"
+
+      - name: Build cached AiOS base
+        run: |
+          packages/target-aios-gui/tools/aios build-base \
+            --target aios-gui \
+            --version "$AIOS_VERSION" \
+            --arch "$AIOS_ARCH" \
+            --buildroot-version "$AIOS_BUILDROOT_VERSION"
+
+      - name: Verify cached AiOS base
+        run: |
+          packages/target-aios-gui/tools/aios verify-base \
+            --target aios-gui \
+            --version "$AIOS_VERSION" \
+            --arch "$AIOS_ARCH" \
+            --buildroot-version "$AIOS_BUILDROOT_VERSION"
+
+      - name: Upload AiOS base artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: aios-gui-${{ env.AIOS_VERSION }}-${{ env.AIOS_ARCH }}
+          path: |
+            .aios-cache/base/aios-gui/${{ env.AIOS_VERSION }}/${{ env.AIOS_ARCH }}/manifest.toml
+            .aios-cache/base/aios-gui/${{ env.AIOS_VERSION }}/${{ env.AIOS_ARCH }}/bzImage
+            .aios-cache/base/aios-gui/${{ env.AIOS_VERSION }}/${{ env.AIOS_ARCH }}/rootfs.cpio.gz
+          if-no-files-found: error

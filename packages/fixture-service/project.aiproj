@@ -1,0 +1,7 @@
+Program#p1 {
+  Project#proj1(name="fixture-service" version="0.0.1" type="target") {
+    Target#t1(id="fixture-service" defaultRunner="qemu" artifactTypes=["img", "initramfs", "oci"]) {
+      Requires#r1(tool="qemu" for=["run", "test"] commands=["qemu-system-x86_64"])
+    }
+  }
+}

@@ -1,0 +1,17 @@
+schema = "ailang.package-source.v1"
+name = "target-aios-gui"
+version = "0.0.1-alpha.1"
+types = ["target", "tool", "template"]
+
+[dependencies]
+aivectra = "0.0.1-beta.15"
+
+[targets.aios-gui]
+aliases = ["aios"]
+defaultRunner = "qemu"
+artifactTypes = ["img", "initramfs"]
+options = ["arch", "boot", "image", "partition", "feature", "splash-background", "splash-foreground"]
+
+[targets.aios-gui.tools]
+run = ["qemu-system-x86_64"]
+publish = []

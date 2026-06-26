@@ -1,0 +1,103 @@
+#!/bin/sh
+set -eu
+
+operation="${1:-}"
+project="${2:-}"
+shift 2 || true
+
+target="aios-service"
+artifact_type="img"
+out_dir="dist-aios"
+target_version="0.0.1-alpha.1"
+arch="${AIOS_ARCH:-x86_64}"
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --target)
+      target="${2:-}"
+      shift 2
+      ;;
+    --artifact-type|--type)
+      artifact_type="${2:-}"
+      shift 2
+      ;;
+    --target-version|--aios-version)
+      target_version="${2:-}"
+      shift 2
+      ;;
+    --arch)
+      arch="${2:-}"
+      shift 2
+      ;;
+    --out)
+      out_dir="${2:-}"
+      shift 2
+      ;;
+    --package-target)
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      shift
+      ;;
+  esac
+done
+
+case "$artifact_type" in
+  img|initramfs|oci) ;;
+  *)
+    echo "Err#err1(code=AIOS001 message=\"aios-service does not support artifact type: $artifact_type\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+ailang_bin="${AILANG_BIN:-ailang}"
+cache_root="${AIOS_CACHE_ROOT:-${HOME:-.}/.ailang/cache/aios}"
+base_dir="$cache_root/base/$target/$target_version/$arch"
+base_manifest="$base_dir/manifest.toml"
+base_kernel="$base_dir/bzImage"
+base_initramfs="$base_dir/rootfs.cpio.gz"
+
+if [ ! -f "$base_manifest" ] || [ ! -f "$base_kernel" ] || [ ! -f "$base_initramfs" ]; then
+  echo "Err#err1(code=AIOS004 message=\"AiOS service base image is not built. Run: ailang aios build-base --target $target --version $target_version --arch $arch\" nodeId=aios)" >&2
+  exit 2
+fi
+
+mkdir -p "$out_dir"
+"$ailang_bin" build "$project" >/dev/null
+
+app_aibc1="$project/app.aibc1"
+if [ ! -f "$app_aibc1" ]; then
+  echo 'Err#err1(code=AIOS002 message="aios-service publish expected app.aibc1 after build." nodeId=aios)' >&2
+  exit 2
+fi
+
+cp "$app_aibc1" "$out_dir/app.aibc1"
+cp "$base_manifest" "$out_dir/base.manifest.toml"
+cp "$base_kernel" "$out_dir/bzImage"
+cp "$base_initramfs" "$out_dir/rootfs.cpio.gz"
+cat > "$out_dir/manifest.toml" <<EOF
+schema = "ailang.aios.image.v1"
+target = "$target"
+aiosVersion = "$target_version"
+arch = "$arch"
+profile = "service"
+artifactType = "$artifact_type"
+app = "app.aibc1"
+baseManifest = "base.manifest.toml"
+kernel = "bzImage"
+initramfs = "rootfs.cpio.gz"
+EOF
+
+if [ "$operation" = "run" ]; then
+  exec qemu-system-x86_64 \
+    -kernel "$out_dir/bzImage" \
+    -initrd "$out_dir/rootfs.cpio.gz" \
+    -append "console=ttyS0 ailang.target=aios-service ailang.app=app.aibc1" \
+    "$@"
+fi
+
+echo "Ok#ok1(type=string value=\"$out_dir\")"
