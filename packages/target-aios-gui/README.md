@@ -5,6 +5,10 @@
 The target publishes an AiLang/AiVectra app into a small Linux initramfs and
 runs it with QEMU. The guest boots directly into the app instead of a shell.
 
+The current `x86_64` base uses glibc so it can run the Linux x64 runtime
+artifacts staged by the AiLang SDK. A musl/static runtime profile can be added
+later, but the base and runtime libc must match.
+
 ## Splash Assets
 
 AiOS consumes the canonical AiVectra splash asset pair when present:

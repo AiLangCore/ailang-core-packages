@@ -282,6 +282,13 @@ inject_payload_initramfs() {
   tmp_root="$(mktemp -d "${TMPDIR:-/tmp}/aios-rootfs-XXXXXX")"
   gzip -dc "$base_initramfs" | (cd "$tmp_root" && cpio -idmu >/dev/null 2>&1)
 
+  runtime_info="$(file "$runtime_aivectra" 2>/dev/null || true)"
+  if printf '%s\n' "$runtime_info" | grep -Fq '/lib64/ld-linux-x86-64.so.2' &&
+     [ ! -f "$tmp_root/lib64/ld-linux-x86-64.so.2" ]; then
+    echo 'Err#err1(code=AIOS015 message="AiOS base is missing glibc loader required by the Linux AiVectra runtime. Rebuild/import a glibc AiOS base." nodeId=aios)' >&2
+    exit 2
+  fi
+
   mkdir -p "$tmp_root/opt/aios/app" "$tmp_root/opt/aios/bin" "$tmp_root/opt/aios/etc"
   cp "$app_aibc1" "$tmp_root/opt/aios/app/app.aibc1"
   cp "$runtime_aivm" "$tmp_root/opt/aios/bin/aivm"
