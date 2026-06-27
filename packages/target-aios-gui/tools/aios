@@ -219,10 +219,35 @@ defconfig_for() {
     aios-gui:x86_64)
       printf '%s\n' "$package_root/buildroot/configs/aios_gui_x86_64_defconfig"
       ;;
+    aios-gui:aarch64)
+      printf '%s\n' "$package_root/buildroot/configs/aios_gui_aarch64_defconfig"
+      ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"No Buildroot defconfig for $target/$arch\" nodeId=aios)" >&2
       exit 2
       ;;
+  esac
+}
+
+kernel_fragment_for() {
+  case "$target:$arch" in
+    aios-gui:x86_64)
+      printf '%s\n' "$package_root/buildroot/kernel/aios_gui_x86_64.fragment"
+      ;;
+    aios-gui:aarch64)
+      printf '%s\n' "$package_root/buildroot/kernel/aios_gui_aarch64.fragment"
+      ;;
+    *)
+      echo "Err#err1(code=AIOS001 message=\"No AiOS kernel fragment for $target/$arch\" nodeId=aios)" >&2
+      exit 2
+      ;;
+  esac
+}
+
+kernel_image_for() {
+  case "$arch" in
+    x86_64) printf '%s\n' "bzImage" ;;
+    aarch64) printf '%s\n' "Image" ;;
   esac
 }
 
@@ -287,7 +312,8 @@ case "$command" in
     fi
     defconfig_template=$(defconfig_for)
     defconfig="$build_dir/aios.defconfig"
-    kernel_fragment="$package_root/buildroot/kernel/aios_gui_x86_64.fragment"
+    kernel_fragment=$(kernel_fragment_for)
+    kernel_image=$(kernel_image_for)
     if [ ! -f "$kernel_fragment" ]; then
       echo "Err#err1(code=AIOS006 message=\"AiOS kernel fragment is missing: $kernel_fragment\" nodeId=aios)" >&2
       exit 2
@@ -299,11 +325,11 @@ case "$command" in
       "$defconfig_template" > "$defconfig"
     "$make_bin" -C "$buildroot_dir" O="$build_dir" HOSTCC="$cc_bin" BR2_DEFCONFIG="$defconfig" defconfig
     "$make_bin" -C "$buildroot_dir" O="$build_dir" HOSTCC="$cc_bin"
-    if [ ! -f "$build_dir/images/bzImage" ] || [ ! -f "$build_dir/images/rootfs.cpio.gz" ]; then
-      echo 'Err#err1(code=AIOS006 message="Buildroot completed without expected bzImage/rootfs.cpio.gz outputs." nodeId=aios)' >&2
+    if [ ! -f "$build_dir/images/$kernel_image" ] || [ ! -f "$build_dir/images/rootfs.cpio.gz" ]; then
+      echo "Err#err1(code=AIOS006 message=\"Buildroot completed without expected $kernel_image/rootfs.cpio.gz outputs.\" nodeId=aios)" >&2
       exit 2
     fi
-    cp "$build_dir/images/bzImage" "$base_dir/bzImage"
+    cp "$build_dir/images/$kernel_image" "$base_dir/bzImage"
     cp "$build_dir/images/rootfs.cpio.gz" "$base_dir/rootfs.cpio.gz"
     cat > "$base_dir/manifest.toml" <<EOF
 schema = "ailang.aios.base.v1"
@@ -316,6 +342,7 @@ defconfig = "$defconfig"
 kernelFragment = "$kernel_fragment"
 libc = "glibc"
 kernel = "bzImage"
+kernelImage = "$kernel_image"
 initramfs = "rootfs.cpio.gz"
 kernelHash = "$(hash_file "$base_dir/bzImage")"
 initramfsHash = "$(hash_file "$base_dir/rootfs.cpio.gz")"
@@ -325,7 +352,7 @@ EOF
     ;;
 
   *)
-    echo 'Usage: ailang aios <fetch-buildroot|build-base|verify-base|import-base|list-base|base-dir> [--target aios-gui] [--version 0.0.1-alpha.1] [--arch x86_64] [--buildroot-version 2026.02.3] [--from artifact-dir]' >&2
+    echo 'Usage: ailang aios <fetch-buildroot|build-base|verify-base|import-base|list-base|base-dir> [--target aios-gui] [--version 0.0.1-alpha.1] [--arch x86_64|aarch64] [--buildroot-version 2026.02.3] [--from artifact-dir]' >&2
     exit 2
     ;;
 esac
