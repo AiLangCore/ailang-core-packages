@@ -13,5 +13,5 @@ artifactTypes = ["img", "initramfs"]
 options = ["arch", "boot", "image", "partition", "feature", "splash-background", "splash-foreground", "debug-console", "framebuffer-trace", "event-loop-trace", "evdev-trace", "evdev-deep-trace", "ca-bundle"]
 
 [targets.aios-gui.tools]
-run = ["qemu-system-x86_64"]
+run = ["qemu-system-x86_64", "qemu-system-aarch64"]
 publish = []
