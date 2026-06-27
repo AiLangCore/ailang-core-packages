@@ -1982,7 +1982,7 @@ Program#std_http_p1 {
             Let#std_http_l50a(name=response) { Call#std_http_c49(target=bytes.toUtf8String) { Var#std_http_v120a(name=responseBytesText) } }
             Let#std_http_l50b(name=responseBytesBase64) {
               Call#std_http_c49a(target=bytes.toBase64) {
-                Call#std_http_c108a(target=sys.net.async.resultBytes) { Var#std_http_v120b(name=op) }
+                Var#std_http_v120b(name=responseBytesText)
               }
             }
             Call#std_http_c50(target=sys.net.tcp.close) { Var#std_http_v121(name=connection) }
