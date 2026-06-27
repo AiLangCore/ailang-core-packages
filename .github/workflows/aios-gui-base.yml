@@ -16,7 +16,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Install Buildroot host dependencies
-        run: sudo apt-get update && sudo apt-get install -y bc bison build-essential cpio file flex git gzip libncurses-dev rsync unzip wget
+        run: sudo apt-get update && sudo apt-get install -y bc bison build-essential cpio file flex git gzip libelf-dev libncurses-dev rsync unzip wget
 
       - name: Fetch Buildroot
         run: packages/target-aios-gui/tools/aios fetch-buildroot --buildroot-version 2026.02.3 --arch "${{ matrix.arch }}"
