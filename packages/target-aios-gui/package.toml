@@ -10,7 +10,7 @@ aivectra = "0.0.1-beta.15"
 aliases = ["aios"]
 defaultRunner = "qemu"
 artifactTypes = ["img", "initramfs"]
-options = ["arch", "boot", "image", "partition", "feature", "splash-background", "splash-foreground", "debug-console", "framebuffer-trace", "ca-bundle"]
+options = ["arch", "boot", "image", "partition", "feature", "splash-background", "splash-foreground", "debug-console", "framebuffer-trace", "event-loop-trace", "ca-bundle"]
 
 [targets.aios-gui.tools]
 run = ["qemu-system-x86_64"]
