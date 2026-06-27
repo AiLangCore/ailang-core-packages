@@ -17,6 +17,7 @@ image_format="cpio.gz"
 partition="none"
 features=""
 debug_console="${AIOS_DEBUG_CONSOLE:-none}"
+framebuffer_trace="${AIOS_FRAMEBUFFER_TRACE:-0}"
 network_enabled=0
 
 apply_target_option() {
@@ -36,6 +37,7 @@ apply_target_option() {
     splash-background) splash_background="$value" ;;
     splash-foreground) splash_foreground="$value" ;;
     debug-console) debug_console="$value" ;;
+    framebuffer-trace) framebuffer_trace="$value" ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
       exit 2
@@ -227,6 +229,14 @@ case "$debug_console" in
     ;;
 esac
 
+case "$framebuffer_trace" in
+  0|1|false|true) ;;
+  *)
+    echo "Err#err1(code=AIOS017 message=\"Unsupported AiOS framebuffer trace value: $framebuffer_trace\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
 ailang_bin="${AILANG_BIN:-ailang}"
 cache_root="${AIOS_CACHE_ROOT:-${HOME:-.}/.ailang/cache/aios}"
 base_dir="$cache_root/base/$target/$target_version/$arch"
@@ -284,9 +294,15 @@ mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 mkdir -p /run /tmp /opt/aios
 
+if [ "$debug_console" = "stdio" ] && [ -c /dev/ttyS0 ]; then
+  exec >/dev/ttyS0 2>&1
+  echo "AiOS launcher: stdio debug console attached"
+fi
+
 export AILANG_RUNTIME_TARGET="\${AILANG_RUNTIME_TARGET:-aios-gui}"
 export AILANG_RUNTIME_PLATFORM="\${AILANG_RUNTIME_PLATFORM:-desktop}"
 export AIOS_FEATURE_NETWORK="\${AIOS_FEATURE_NETWORK:-$network_enabled}"
+export AILANG_FB_TRACE="\${AILANG_FB_TRACE:-$framebuffer_trace}"
 
 if [ "\${AIOS_FEATURE_NETWORK:-0}" = "1" ]; then
   ip link set lo up 2>/dev/null || ifconfig lo up 2>/dev/null || true
@@ -455,6 +471,9 @@ aivm = "rootfs:/opt/aios/bin/aivm"
 aivectra = "rootfs:/opt/aios/bin/aivectra"
 splashBackground = "$published_splash_background"
 splashForeground = "$published_splash_foreground"
+debugConsole = "$debug_console"
+framebufferTrace = "$framebuffer_trace"
+network = "$network_enabled"
 EOF
 
 if [ "$operation" = "run" ]; then
@@ -466,11 +485,14 @@ if [ "$operation" = "run" ]; then
   if [ "$network_enabled" = "1" ] && ! has_qemu_arg "-netdev" "$@"; then
     network_args="-netdev user,id=aiosnet -device e1000,netdev=aiosnet"
   fi
+  if [ "$debug_console" = "stdio" ]; then
+    echo "AiOS debug console: stdio serial enabled for $target $target_version" >&2
+  fi
   # shellcheck disable=SC2086
   exec qemu-system-x86_64 \
     -kernel "$out_dir/bzImage" \
     -initrd "$out_dir/rootfs.cpio.gz" \
-    -append "console=ttyS0 loglevel=3 vt.global_cursor_default=0 ailang.target=aios-gui ailang.app=app.aibc1" \
+    -append "console=tty0 console=ttyS0 loglevel=3 vt.global_cursor_default=0 ailang.target=aios-gui ailang.app=app.aibc1" \
     $debug_console_args \
     $network_args \
     "$@"
