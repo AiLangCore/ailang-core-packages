@@ -19,6 +19,7 @@ features=""
 debug_console="${AIOS_DEBUG_CONSOLE:-none}"
 framebuffer_trace="${AIOS_FRAMEBUFFER_TRACE:-0}"
 network_enabled=0
+ca_bundle="${AIOS_CA_BUNDLE:-}"
 
 apply_target_option() {
   assignment="$1"
@@ -38,6 +39,7 @@ apply_target_option() {
     splash-foreground) splash_foreground="$value" ;;
     debug-console) debug_console="$value" ;;
     framebuffer-trace) framebuffer_trace="$value" ;;
+    ca-bundle) ca_bundle="$value" ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
       exit 2
@@ -125,6 +127,14 @@ while [ "$#" -gt 0 ]; do
       ;;
     --debug-console=*)
       debug_console="${1#--debug-console=}"
+      shift
+      ;;
+    --ca-bundle)
+      ca_bundle="${2:-}"
+      shift 2
+      ;;
+    --ca-bundle=*)
+      ca_bundle="${1#--ca-bundle=}"
       shift
       ;;
     --target-option)
@@ -237,6 +247,11 @@ case "$framebuffer_trace" in
     ;;
 esac
 
+if [ -n "$ca_bundle" ] && [ ! -f "$ca_bundle" ]; then
+  echo "Err#err1(code=AIOS018 message=\"AiOS CA bundle does not exist: $ca_bundle\" nodeId=aios)" >&2
+  exit 2
+fi
+
 ailang_bin="${AILANG_BIN:-ailang}"
 cache_root="${AIOS_CACHE_ROOT:-${HOME:-.}/.ailang/cache/aios}"
 base_dir="$cache_root/base/$target/$target_version/$arch"
@@ -329,6 +344,25 @@ EOF
   chmod +x "$launcher"
 }
 
+resolve_ca_bundle() {
+  if [ -n "$ca_bundle" ] && [ -f "$ca_bundle" ]; then
+    printf '%s\n' "$ca_bundle"
+    return 0
+  fi
+  for candidate in \
+    /etc/ssl/cert.pem \
+    /etc/ssl/certs/ca-certificates.crt \
+    /opt/homebrew/etc/openssl@3/cert.pem \
+    /usr/local/etc/openssl@3/cert.pem
+  do
+    if [ -f "$candidate" ]; then
+      printf '%s\n' "$candidate"
+      return 0
+    fi
+  done
+  return 1
+}
+
 inject_payload_initramfs() {
   runtime_aivm="$1"
   runtime_aivectra="$2"
@@ -354,6 +388,16 @@ inject_payload_initramfs() {
   cp "$runtime_aivm" "$tmp_root/opt/aios/bin/aivm"
   cp "$runtime_aivectra" "$tmp_root/opt/aios/bin/aivectra"
   chmod +x "$tmp_root/opt/aios/bin/aivm" "$tmp_root/opt/aios/bin/aivectra"
+  if [ "$network_enabled" = "1" ]; then
+    resolved_ca_bundle="$(resolve_ca_bundle || true)"
+    if [ -n "$resolved_ca_bundle" ]; then
+      mkdir -p "$tmp_root/etc/ssl/certs" "$tmp_root/usr/lib/ssl"
+      cp "$resolved_ca_bundle" "$tmp_root/etc/ssl/certs/ca-certificates.crt"
+      ln -sf /etc/ssl/certs/ca-certificates.crt "$tmp_root/usr/lib/ssl/cert.pem"
+    else
+      echo 'Warn#warn1(code=AIOS018 message="AiOS network image has no CA bundle; HTTPS certificate verification may fail." nodeId=aios)' >&2
+    fi
+  fi
   image_splash_background=""
   image_splash_foreground=""
   if [ -n "$splash_background" ] && [ -f "$splash_background" ]; then
