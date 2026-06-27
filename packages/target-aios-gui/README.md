@@ -5,9 +5,9 @@
 The target publishes an AiLang/AiVectra app into a small Linux initramfs and
 runs it with QEMU. The guest boots directly into the app instead of a shell.
 
-The current `x86_64` base uses glibc so it can run the Linux x64 runtime
-artifacts staged by the AiLang SDK. A musl/static runtime profile can be added
-later, but the base and runtime libc must match.
+The current `x86_64` and `aarch64` bases use glibc so they can run the matching
+Linux runtime artifacts staged by the AiLang SDK. A musl/static runtime profile
+can be added later, but the base and runtime libc must match.
 
 ## Splash Assets
 
@@ -33,6 +33,9 @@ $AIOS_CACHE_ROOT/base/aios-gui/<aios-version>/<arch>/
   rootfs.cpio.gz
 ```
 
+`bzImage` is the stable cached kernel filename used by the target package. For
+`aarch64` builds, the Buildroot `Image` output is copied into that slot.
+
 Application publish/run injects the current app payload and Linux runtime
 artifacts into that cached base. It does not rebuild Buildroot for every app.
 
@@ -50,13 +53,19 @@ Fetch the pinned Buildroot checkout:
 ailang aios fetch-buildroot --buildroot-version 2026.02.3
 ```
 
-Build a reusable AiOS GUI base on Linux:
+Build reusable AiOS GUI bases on Linux:
 
 ```sh
 ailang aios build-base \
   --target aios-gui \
   --version 0.0.1-alpha.1 \
   --arch x86_64 \
+  --buildroot-version 2026.02.3
+
+ailang aios build-base \
+  --target aios-gui \
+  --version 0.0.1-alpha.1 \
+  --arch aarch64 \
   --buildroot-version 2026.02.3
 ```
 
@@ -67,6 +76,11 @@ ailang aios verify-base \
   --target aios-gui \
   --version 0.0.1-alpha.1 \
   --arch x86_64
+
+ailang aios verify-base \
+  --target aios-gui \
+  --version 0.0.1-alpha.1 \
+  --arch aarch64
 ```
 
 Import a base artifact downloaded from CI:
@@ -77,6 +91,12 @@ ailang aios import-base \
   --version 0.0.1-alpha.1 \
   --arch x86_64 \
   --from ./aios-gui-0.0.1-alpha.1-x86_64
+
+ailang aios import-base \
+  --target aios-gui \
+  --version 0.0.1-alpha.1 \
+  --arch aarch64 \
+  --from ./aios-gui-0.0.1-alpha.1-aarch64
 ```
 
 Run an app with the cached base:
@@ -135,15 +155,16 @@ It does not require X11, Wayland, or a desktop shell in the base image. Generic
 Linux desktop targets may use an X11 backend separately; AiOS intentionally
 draws directly to `/dev/fb0`.
 
-The `x86_64` Buildroot base applies a kernel fragment that enables the QEMU
-VGA framebuffer path (`/dev/fb0`) and framebuffer console support. If this
-fragment changes, rebuild or import a fresh cached AiOS base before testing
+The Buildroot bases apply architecture-specific kernel fragments that enable the
+QEMU framebuffer path (`/dev/fb0`) and framebuffer console support. If these
+fragments change, rebuild or import a fresh cached AiOS base before testing
 application changes.
 
 Implemented:
 
 ```text
 --arch x86_64
+--arch aarch64
 --boot qemu-kernel
 --image cpio.gz
 --partition none
@@ -166,7 +187,6 @@ ailang publish . \
 Declared but not implemented yet:
 
 ```text
---arch aarch64
 --boot disk
 --boot iso
 --boot uefi
