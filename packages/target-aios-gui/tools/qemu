@@ -23,6 +23,7 @@ evdev_trace="${AIOS_EVDEV_TRACE:-0}"
 evdev_deep_trace="${AIOS_EVDEV_DEEP_TRACE:-0}"
 network_enabled=0
 ca_bundle="${AIOS_CA_BUNDLE:-}"
+serial_console="ttyS0"
 
 apply_target_option() {
   assignment="$1"
@@ -178,7 +179,12 @@ case "$artifact_type" in
 esac
 
 case "$arch" in
-  x86_64|aarch64) ;;
+  x86_64)
+    serial_console="ttyS0"
+    ;;
+  aarch64)
+    serial_console="ttyAMA0"
+    ;;
   *)
     echo "Err#err1(code=AIOS010 message=\"Unsupported AiOS architecture: $arch\" nodeId=aios)" >&2
     exit 2
@@ -339,8 +345,8 @@ mount -t sysfs sysfs /sys 2>/dev/null || true
 mount -t devtmpfs devtmpfs /dev 2>/dev/null || true
 mkdir -p /run /tmp /opt/aios
 
-if [ "$debug_console" = "stdio" ] && [ -c /dev/ttyS0 ]; then
-  exec >/dev/ttyS0 2>&1
+if [ "$debug_console" = "stdio" ] && [ -c /dev/$serial_console ]; then
+  exec >/dev/$serial_console 2>&1
   echo "AiOS launcher: stdio debug console attached"
 fi
 
@@ -559,20 +565,42 @@ EOF
 if [ "$operation" = "run" ]; then
   debug_console_args=""
   network_args=""
+  qemu_bin=""
+  qemu_machine_args=""
+  qemu_append_console=""
+  case "$arch" in
+    x86_64)
+      qemu_bin="qemu-system-x86_64"
+      qemu_append_console="console=tty0 console=ttyS0"
+      if [ "$network_enabled" = "1" ] && ! has_qemu_arg "-netdev" "$@"; then
+        network_args="-netdev user,id=aiosnet -device e1000,netdev=aiosnet"
+      fi
+      ;;
+    aarch64)
+      qemu_bin="qemu-system-aarch64"
+      qemu_machine_args="-machine virt -cpu max"
+      qemu_append_console="console=ttyAMA0"
+      if [ "$network_enabled" = "1" ] && ! has_qemu_arg "-netdev" "$@"; then
+        network_args="-netdev user,id=aiosnet -device virtio-net-device,netdev=aiosnet"
+      fi
+      ;;
+  esac
+  if ! command -v "$qemu_bin" >/dev/null 2>&1; then
+    echo "Err#err1(code=AIOS022 message=\"Required QEMU runner is not installed for AiOS $arch: $qemu_bin\" nodeId=aios)" >&2
+    exit 2
+  fi
   if [ "$debug_console" = "stdio" ] && ! has_qemu_arg "-serial" "$@"; then
     debug_console_args="-serial stdio"
-  fi
-  if [ "$network_enabled" = "1" ] && ! has_qemu_arg "-netdev" "$@"; then
-    network_args="-netdev user,id=aiosnet -device e1000,netdev=aiosnet"
   fi
   if [ "$debug_console" = "stdio" ]; then
     echo "AiOS debug console: stdio serial enabled for $target $target_version" >&2
   fi
   # shellcheck disable=SC2086
-  exec qemu-system-x86_64 \
+  exec "$qemu_bin" \
+    $qemu_machine_args \
     -kernel "$out_dir/bzImage" \
     -initrd "$out_dir/rootfs.cpio.gz" \
-    -append "console=tty0 console=ttyS0 loglevel=3 vt.global_cursor_default=0 ailang.target=aios-gui ailang.app=app.aibc1" \
+    -append "$qemu_append_console loglevel=3 vt.global_cursor_default=0 ailang.target=aios-gui ailang.app=app.aibc1" \
     $debug_console_args \
     $network_args \
     "$@"
