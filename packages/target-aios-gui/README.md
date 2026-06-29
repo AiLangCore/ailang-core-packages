@@ -206,3 +206,13 @@ Declared but not implemented yet:
 
 Unsupported or not-yet-implemented options fail deterministically before image
 publish or base build begins.
+
+## Known Follow-Ups
+
+- `ailang debug .` does not yet route QEMU package targets correctly. Until
+  that is fixed, use `ailang debug run . --target aios-gui ...` or
+  `ailang run . --target aios-gui ...` for AiOS target testing.
+- AiOS Linux bases must remain runnable under QEMU for every supported
+  architecture. When adding or changing Linux base options, verify that the
+  resulting base can boot with the matching `qemu-system-*` runner before
+  treating the target as ready.
