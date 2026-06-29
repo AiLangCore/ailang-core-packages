@@ -22,6 +22,8 @@ event_loop_trace="${AIOS_EVENT_LOOP_TRACE:-0}"
 evdev_trace="${AIOS_EVDEV_TRACE:-0}"
 evdev_deep_trace="${AIOS_EVDEV_DEEP_TRACE:-0}"
 runtime_log_level="${AIOS_RUNTIME_LOG_LEVEL:-}"
+display_backend="${AIOS_DISPLAY_BACKEND:-auto}"
+drm_trace="${AIOS_DRM_TRACE:-0}"
 network_enabled=0
 ca_bundle="${AIOS_CA_BUNDLE:-}"
 serial_console="ttyS0"
@@ -48,6 +50,8 @@ apply_target_option() {
     evdev-trace) evdev_trace="$value" ;;
     evdev-deep-trace) evdev_deep_trace="$value" ;;
     runtime-log-level) runtime_log_level="$value" ;;
+    display-backend) display_backend="$value" ;;
+    drm-trace) drm_trace="$value" ;;
     ca-bundle) ca_bundle="$value" ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
@@ -285,6 +289,22 @@ case "$evdev_deep_trace" in
     ;;
 esac
 
+case "$display_backend" in
+  auto|framebuffer|drm) ;;
+  *)
+    echo "Err#err1(code=AIOS023 message=\"Unsupported AiOS display backend: $display_backend\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
+case "$drm_trace" in
+  0|1|false|true) ;;
+  *)
+    echo "Err#err1(code=AIOS024 message=\"Unsupported AiOS DRM trace value: $drm_trace\" nodeId=aios)" >&2
+    exit 2
+    ;;
+esac
+
 if [ -n "$ca_bundle" ] && [ ! -f "$ca_bundle" ]; then
   echo "Err#err1(code=AIOS018 message=\"AiOS CA bundle does not exist: $ca_bundle\" nodeId=aios)" >&2
   exit 2
@@ -359,6 +379,17 @@ export AILANG_FB_TRACE="\${AILANG_FB_TRACE:-$framebuffer_trace}"
 export AILANG_EVENT_LOOP_TRACE="\${AILANG_EVENT_LOOP_TRACE:-$event_loop_trace}"
 export AILANG_EVDEV_TRACE="\${AILANG_EVDEV_TRACE:-$evdev_trace}"
 export AILANG_EVDEV_DEEP_TRACE="\${AILANG_EVDEV_DEEP_TRACE:-$evdev_deep_trace}"
+if [ "$display_backend" = "auto" ]; then
+  if [ -e /dev/dri/card0 ]; then
+    export AILANG_AIOS_DISPLAY_BACKEND="\${AILANG_AIOS_DISPLAY_BACKEND:-drm}"
+  else
+    export AILANG_AIOS_DISPLAY_BACKEND="\${AILANG_AIOS_DISPLAY_BACKEND:-framebuffer}"
+  fi
+else
+  export AILANG_AIOS_DISPLAY_BACKEND="\${AILANG_AIOS_DISPLAY_BACKEND:-$display_backend}"
+fi
+export AILANG_DRM_TRACE="\${AILANG_DRM_TRACE:-$drm_trace}"
+echo "AiOS display backend requested: \$AILANG_AIOS_DISPLAY_BACKEND"
 if [ -n "$runtime_log_level" ]; then
   export AIVM_LOG_LEVEL="\${AIVM_LOG_LEVEL:-$runtime_log_level}"
 fi
@@ -600,6 +631,8 @@ framebufferTrace = "$framebuffer_trace"
 eventLoopTrace = "$event_loop_trace"
 evdevTrace = "$evdev_trace"
 evdevDeepTrace = "$evdev_deep_trace"
+displayBackend = "$display_backend"
+drmTrace = "$drm_trace"
 network = "$network_enabled"
 EOF
 
