@@ -359,12 +359,45 @@ export AILANG_EVDEV_TRACE="\${AILANG_EVDEV_TRACE:-$evdev_trace}"
 export AILANG_EVDEV_DEEP_TRACE="\${AILANG_EVDEV_DEEP_TRACE:-$evdev_deep_trace}"
 
 if [ "\${AIOS_FEATURE_NETWORK:-0}" = "1" ]; then
+  network_iface=""
+  for candidate in eth0 ens3 enp0s1 enp0s2; do
+    if [ -d "/sys/class/net/\$candidate" ]; then
+      network_iface="\$candidate"
+      break
+    fi
+  done
+  if [ -z "\$network_iface" ]; then
+    for candidate_path in /sys/class/net/*; do
+      candidate="\${candidate_path##*/}"
+      if [ "\$candidate" != "lo" ] && [ -d "\$candidate_path" ]; then
+        network_iface="\$candidate"
+        break
+      fi
+    done
+  fi
   ip link set lo up 2>/dev/null || ifconfig lo up 2>/dev/null || true
-  ip link set eth0 up 2>/dev/null || ifconfig eth0 up 2>/dev/null || true
-  udhcpc -i eth0 -n -q -s /usr/share/udhcpc/default.script 2>/dev/null || true
+  if [ -n "\$network_iface" ]; then
+    echo "AiOS network: using interface \$network_iface"
+    ip link set "\$network_iface" up 2>/dev/null || ifconfig "\$network_iface" up 2>/dev/null || true
+    if [ -f /usr/share/udhcpc/default.script ]; then
+      udhcpc -i "\$network_iface" -n -q -s /usr/share/udhcpc/default.script 2>/dev/null || true
+    else
+      udhcpc -i "\$network_iface" -n -q 2>/dev/null || true
+    fi
+  else
+    echo "AiOS network warning: no non-loopback interface found" >&2
+  fi
   if [ ! -s /etc/resolv.conf ]; then
     echo "nameserver 10.0.2.3" > /run/resolv.conf 2>/dev/null || true
+    ln -sf /run/resolv.conf /etc/resolv.conf 2>/dev/null || cp /run/resolv.conf /etc/resolv.conf 2>/dev/null || true
   fi
+fi
+
+if [ -f "/etc/ssl/certs/ca-certificates.crt" ]; then
+    echo "CA bundle found at /etc/ssl/certs/ca-certificates.crt"
+    export SSL_CERT_FILE="/etc/ssl/certs/ca-certificates.crt"
+else
+    echo "CA bundle not found."
 fi
 
 if [ -x /opt/aios/bin/aivectra ]; then
@@ -392,7 +425,9 @@ resolve_ca_bundle() {
     /etc/ssl/cert.pem \
     /etc/ssl/certs/ca-certificates.crt \
     /opt/homebrew/etc/openssl@3/cert.pem \
-    /usr/local/etc/openssl@3/cert.pem
+    /usr/local/etc/openssl@3/cert.pem \
+    /usr/local/share/ca-certificates/ca-bundle.crt \
+    /etc/pki/tls/certs/ca-bundle.crt
   do
     if [ -f "$candidate" ]; then
       printf '%s\n' "$candidate"
@@ -434,7 +469,8 @@ inject_payload_initramfs() {
       cp "$resolved_ca_bundle" "$tmp_root/etc/ssl/certs/ca-certificates.crt"
       ln -sf /etc/ssl/certs/ca-certificates.crt "$tmp_root/usr/lib/ssl/cert.pem"
     else
-      echo 'Warn#warn1(code=AIOS018 message="AiOS network image has no CA bundle; HTTPS certificate verification may fail." nodeId=aios)' >&2
+      echo 'Err#err1(code=AIOS018 message="AiOS network image requires a CA bundle for HTTPS, but none was found on the host system. Install a CA bundle (e.g., via Homebrew) or set AIOS_CA_BUNDLE to a valid path." nodeId=aios)' >&2
+      exit 1
     fi
   fi
   image_splash_background=""
