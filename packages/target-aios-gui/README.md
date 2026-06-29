@@ -172,6 +172,7 @@ Implemented:
 --splash-background <svg>
 --splash-foreground <svg>
 --target-option debug-console=stdio
+--target-option runtime-log-level=<off|error|info|trace>
 ```
 
 Generic target-option spelling is also supported:
@@ -209,10 +210,18 @@ publish or base build begins.
 
 ## Known Follow-Ups
 
-- `ailang debug .` does not yet route QEMU package targets correctly. Until
-  that is fixed, use `ailang debug run . --target aios-gui ...` or
-  `ailang run . --target aios-gui ...` for AiOS target testing.
+- `ailang debug .` and `ailang debug run .` do not yet route QEMU package
+  targets correctly. Until that is fixed, use `ailang run . --target
+  aios-gui ...` with `--target-option runtime-log-level=trace` for AiOS target
+  testing.
 - AiOS Linux bases must remain runnable under QEMU for every supported
   architecture. When adding or changing Linux base options, verify that the
   resulting base can boot with the matching `qemu-system-*` runner before
   treating the target as ready.
+- Add an AiOS-only DRM/KMS presentation backend after the framebuffer path is
+  stable. The backend should be selected by `AILANG_AIOS_DISPLAY_BACKEND=drm`,
+  open `/dev/dri/card0`, choose a connector/mode, allocate dumb buffers, render
+  with the existing CPU rasterizer, and present through KMS/page flip. Keep the
+  normal Linux desktop backend unchanged, keep framebuffer fallback, preserve
+  existing trace flags, add `AILANG_DRM_TRACE=1` if useful, and enable the
+  required virtio DRM kernel options in the AiOS Buildroot fragments.

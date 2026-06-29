@@ -21,6 +21,7 @@ framebuffer_trace="${AIOS_FRAMEBUFFER_TRACE:-0}"
 event_loop_trace="${AIOS_EVENT_LOOP_TRACE:-0}"
 evdev_trace="${AIOS_EVDEV_TRACE:-0}"
 evdev_deep_trace="${AIOS_EVDEV_DEEP_TRACE:-0}"
+runtime_log_level="${AIOS_RUNTIME_LOG_LEVEL:-}"
 network_enabled=0
 ca_bundle="${AIOS_CA_BUNDLE:-}"
 serial_console="ttyS0"
@@ -46,6 +47,7 @@ apply_target_option() {
     event-loop-trace) event_loop_trace="$value" ;;
     evdev-trace) evdev_trace="$value" ;;
     evdev-deep-trace) evdev_deep_trace="$value" ;;
+    runtime-log-level) runtime_log_level="$value" ;;
     ca-bundle) ca_bundle="$value" ;;
     *)
       echo "Err#err1(code=AIOS001 message=\"Unsupported aios-gui target option: $name\" nodeId=aios)" >&2
@@ -357,6 +359,9 @@ export AILANG_FB_TRACE="\${AILANG_FB_TRACE:-$framebuffer_trace}"
 export AILANG_EVENT_LOOP_TRACE="\${AILANG_EVENT_LOOP_TRACE:-$event_loop_trace}"
 export AILANG_EVDEV_TRACE="\${AILANG_EVDEV_TRACE:-$evdev_trace}"
 export AILANG_EVDEV_DEEP_TRACE="\${AILANG_EVDEV_DEEP_TRACE:-$evdev_deep_trace}"
+if [ -n "$runtime_log_level" ]; then
+  export AIVM_LOG_LEVEL="\${AIVM_LOG_LEVEL:-$runtime_log_level}"
+fi
 
 if [ "\${AIOS_FEATURE_NETWORK:-0}" = "1" ]; then
   network_iface=""
