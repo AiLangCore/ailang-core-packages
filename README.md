@@ -26,6 +26,7 @@ An AiLang package can contain one or more package item types:
 - `library`: importable AiLang source.
 - `tool`: executable command or project tool.
 - `template`: project, file, or agent template content.
+- `target`: platform target metadata, tools, and host integration.
 
 For example, AiVectra is expected to expose UI libraries, design/build tools,
 and application templates from the same package.
@@ -75,6 +76,23 @@ Current packages:
 - GUI runtimes such as AiVectra are profile adapters: they adapt GUI host events
   into `std-app` events and consume `std-app` commands. AiVM and host code own
   only mechanical scheduling, syscall execution, and transport plumbing.
+
+## Target Package Staging
+
+Official platform targets are moving to dedicated repositories:
+
+```text
+ailang-target-windows
+ailang-target-macos
+ailang-target-linux
+ailang-target-wasm
+ailang-target-aios
+```
+
+Any `target-*` package still present here is migration staging while the target
+package contract and host ABI are hardened. Final platform target ownership
+belongs in the target repository, with registry records pointing at immutable
+commits in that repository.
 
 ## Publishing Workflow
 
