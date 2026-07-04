@@ -1,9 +1,12 @@
 .DS_Store
+bin/
+obj/
+**/bin/
+**/obj/
 .tmp/
 .artifacts/
 .local/
 .toolchain/
-bin/
 dist/
 *.local.*
 config.local.toml
