@@ -1,13 +1,13 @@
-Program#gjsontk_p1 {
-  Import#gjsontk_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsontk_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsontk_c1(target=NodeKind) {
-    ChildAt#gjsontk_ca1 {
-      Call#gjsontk_c2(target=resultNodeOr) {
-        Call#gjsontk_c3(target=parseNode) { Lit#gjsontk_l1(value="{\"a\":[1]}") }
-        Call#gjsontk_c4(target=nodeEmpty) { Lit#gjsontk_l2(value="fallback") }
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=NodeKind) {
+    ChildAt {
+      Call(target=resultNodeOr) {
+        Call(target=parseNode) { Lit(value="{\"a\":[1]}") }
+        Call(target=nodeEmpty) { Lit(value="fallback") }
       }
-      Lit#gjsontk_l3(value=0)
+      Lit(value=0)
     }
   }
 }

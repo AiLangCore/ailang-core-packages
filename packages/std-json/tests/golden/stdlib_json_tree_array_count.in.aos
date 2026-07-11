@@ -1,10 +1,10 @@
-Program#gjsontc_p1 {
-  Import#gjsontc_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsontc_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsontc_c1(target=ChildCount) {
-    Call#gjsontc_c2(target=resultNodeOr) {
-      Call#gjsontc_c3(target=parseNode) { Lit#gjsontc_l1(value="[1,true,{\"a\":2}]") }
-      Call#gjsontc_c4(target=nodeEmpty) { Lit#gjsontc_l2(value="fallback") }
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=ChildCount) {
+    Call(target=resultNodeOr) {
+      Call(target=parseNode) { Lit(value="[1,true,{\"a\":2}]") }
+      Call(target=nodeEmpty) { Lit(value="fallback") }
     }
   }
 }

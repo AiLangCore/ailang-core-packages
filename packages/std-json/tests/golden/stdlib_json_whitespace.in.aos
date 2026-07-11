@@ -1,8 +1,8 @@
-Program#gjsonw_p1 {
-  Import#gjsonw_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsonw_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsonw_c1(target=resultValueOr) {
-    Call#gjsonw_c2(target=parse) { Lit#gjsonw_l1(value=" \n\t\"ok\"  ") }
-    Lit#gjsonw_l2(value="fallback")
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=resultValueOr) {
+    Call(target=parse) { Lit(value=" \n\t\"ok\"  ") }
+    Lit(value="fallback")
   }
 }

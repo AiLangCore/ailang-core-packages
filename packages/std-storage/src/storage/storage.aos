@@ -1,131 +1,131 @@
-Program#std_storage_p1 {
-  Export#std_storage_e1(name=localAvailable)
-  Export#std_storage_e2(name=localGet)
-  Export#std_storage_e3(name=localSet)
-  Export#std_storage_e4(name=localDelete)
-  Export#std_storage_e5(name=localExists)
-  Export#std_storage_e6(name=secureAvailable)
-  Export#std_storage_e7(name=secureGet)
-  Export#std_storage_e8(name=secureSet)
-  Export#std_storage_e9(name=secureDelete)
-  Export#std_storage_e10(name=secureExists)
+Program {
+  Export(name=localAvailable)
+  Export(name=localGet)
+  Export(name=localSet)
+  Export(name=localDelete)
+  Export(name=localExists)
+  Export(name=secureAvailable)
+  Export(name=secureGet)
+  Export(name=secureSet)
+  Export(name=secureDelete)
+  Export(name=secureExists)
 
-  Let#std_storage_l1(name=localAvailable) {
-    Fn#std_storage_f1(params=_) {
-      Block#std_storage_b1 {
-        Return#std_storage_r1 { Call#std_storage_c1(target=sys.storage.local.available) { } }
+  Let(name=localAvailable) {
+    Fn(params=_) {
+      Block {
+        Return { Call(target=sys.storage.local.available) { } }
       }
     }
   }
 
-  Let#std_storage_l2(name=localGet) {
-    Fn#std_storage_f2(params=appId,key) {
-      Block#std_storage_b2 {
-        Return#std_storage_r2 {
-          Call#std_storage_c2(target=sys.storage.local.get) {
-            Var#std_storage_v1(name=appId)
-            Var#std_storage_v2(name=key)
+  Let(name=localGet) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.local.get) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l3(name=localSet) {
-    Fn#std_storage_f3(params=appId,key,value) {
-      Block#std_storage_b3 {
-        Return#std_storage_r3 {
-          Call#std_storage_c3(target=sys.storage.local.set) {
-            Var#std_storage_v3(name=appId)
-            Var#std_storage_v4(name=key)
-            Var#std_storage_v5(name=value)
+  Let(name=localSet) {
+    Fn(params=appId,key,value) {
+      Block {
+        Return {
+          Call(target=sys.storage.local.set) {
+            Var(name=appId)
+            Var(name=key)
+            Var(name=value)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l4(name=localDelete) {
-    Fn#std_storage_f4(params=appId,key) {
-      Block#std_storage_b4 {
-        Return#std_storage_r4 {
-          Call#std_storage_c4(target=sys.storage.local.delete) {
-            Var#std_storage_v6(name=appId)
-            Var#std_storage_v7(name=key)
+  Let(name=localDelete) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.local.delete) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l5(name=localExists) {
-    Fn#std_storage_f5(params=appId,key) {
-      Block#std_storage_b5 {
-        Return#std_storage_r5 {
-          Call#std_storage_c5(target=sys.storage.local.exists) {
-            Var#std_storage_v8(name=appId)
-            Var#std_storage_v9(name=key)
+  Let(name=localExists) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.local.exists) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l6(name=secureAvailable) {
-    Fn#std_storage_f6(params=_) {
-      Block#std_storage_b6 {
-        Return#std_storage_r6 { Call#std_storage_c6(target=sys.storage.secure.available) { } }
+  Let(name=secureAvailable) {
+    Fn(params=_) {
+      Block {
+        Return { Call(target=sys.storage.secure.available) { } }
       }
     }
   }
 
-  Let#std_storage_l7(name=secureGet) {
-    Fn#std_storage_f7(params=appId,key) {
-      Block#std_storage_b7 {
-        Return#std_storage_r7 {
-          Call#std_storage_c7(target=sys.storage.secure.get) {
-            Var#std_storage_v10(name=appId)
-            Var#std_storage_v11(name=key)
+  Let(name=secureGet) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.secure.get) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l8(name=secureSet) {
-    Fn#std_storage_f8(params=appId,key,value) {
-      Block#std_storage_b8 {
-        Return#std_storage_r8 {
-          Call#std_storage_c8(target=sys.storage.secure.set) {
-            Var#std_storage_v12(name=appId)
-            Var#std_storage_v13(name=key)
-            Var#std_storage_v14(name=value)
+  Let(name=secureSet) {
+    Fn(params=appId,key,value) {
+      Block {
+        Return {
+          Call(target=sys.storage.secure.set) {
+            Var(name=appId)
+            Var(name=key)
+            Var(name=value)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l9(name=secureDelete) {
-    Fn#std_storage_f9(params=appId,key) {
-      Block#std_storage_b9 {
-        Return#std_storage_r9 {
-          Call#std_storage_c9(target=sys.storage.secure.delete) {
-            Var#std_storage_v15(name=appId)
-            Var#std_storage_v16(name=key)
+  Let(name=secureDelete) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.secure.delete) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }
     }
   }
 
-  Let#std_storage_l10(name=secureExists) {
-    Fn#std_storage_f10(params=appId,key) {
-      Block#std_storage_b10 {
-        Return#std_storage_r10 {
-          Call#std_storage_c10(target=sys.storage.secure.exists) {
-            Var#std_storage_v17(name=appId)
-            Var#std_storage_v18(name=key)
+  Let(name=secureExists) {
+    Fn(params=appId,key) {
+      Block {
+        Return {
+          Call(target=sys.storage.secure.exists) {
+            Var(name=appId)
+            Var(name=key)
           }
         }
       }

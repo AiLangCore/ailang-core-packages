@@ -1,17 +1,17 @@
-Program#gjsoneb_p1 {
-  Import#gjsoneb_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsoneb_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsoneb_c1(target=AttrValueString) {
-    ChildAt#gjsoneb_ca1 {
-      ChildAt#gjsoneb_ca2 {
-        Call#gjsoneb_c2(target=resultNodeOr) {
-          Call#gjsoneb_c3(target=parseNode) { Lit#gjsoneb_l1(value="\"x\\by\\fz\"") }
-          Call#gjsoneb_c4(target=nodeEmpty) { Lit#gjsoneb_l2(value="fallback") }
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=AttrValueString) {
+    ChildAt {
+      ChildAt {
+        Call(target=resultNodeOr) {
+          Call(target=parseNode) { Lit(value="\"x\\by\\fz\"") }
+          Call(target=nodeEmpty) { Lit(value="fallback") }
         }
-        Lit#gjsoneb_l3(value=0)
+        Lit(value=0)
       }
-      Lit#gjsoneb_l4(value=0)
+      Lit(value=0)
     }
-    Lit#gjsoneb_l5(value=0)
+    Lit(value=0)
   }
 }

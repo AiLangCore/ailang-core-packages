@@ -1,14 +1,14 @@
-Program#gjsonnb_p1 {
-  Import#gjsonnb_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsonnb_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsonnb_c1(target=AttrValueBool) {
-    ChildAt#gjsonnb_ca1 {
-      Call#gjsonnb_c2(target=resultNodeOr) {
-        Call#gjsonnb_c3(target=parseNode) { Lit#gjsonnb_l1(value="true") }
-        Call#gjsonnb_c4(target=nodeEmpty) { Lit#gjsonnb_l2(value="fallback") }
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=AttrValueBool) {
+    ChildAt {
+      Call(target=resultNodeOr) {
+        Call(target=parseNode) { Lit(value="true") }
+        Call(target=nodeEmpty) { Lit(value="fallback") }
       }
-      Lit#gjsonnb_l3(value=0)
+      Lit(value=0)
     }
-    Lit#gjsonnb_l4(value=0)
+    Lit(value=0)
   }
 }

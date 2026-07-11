@@ -1,17 +1,17 @@
-Program#gjsoneu_p1 {
-  Import#gjsoneu_i1(sdk="ailang" path="std/core.aos")
-  Import#gjsoneu_i2(package="std-json" path="src/format/json.aos")
-  Call#gjsoneu_c1(target=AttrValueString) {
-    ChildAt#gjsoneu_ca1 {
-      ChildAt#gjsoneu_ca2 {
-        Call#gjsoneu_c2(target=resultNodeOr) {
-          Call#gjsoneu_c3(target=parseNode) { Lit#gjsoneu_l1(value="\"x\\qy\"") }
-          Call#gjsoneu_c4(target=nodeEmpty) { Lit#gjsoneu_l2(value="fallback") }
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(package="std-json" path="src/format/json.aos")
+  Call(target=AttrValueString) {
+    ChildAt {
+      ChildAt {
+        Call(target=resultNodeOr) {
+          Call(target=parseNode) { Lit(value="\"x\\qy\"") }
+          Call(target=nodeEmpty) { Lit(value="fallback") }
         }
-        Lit#gjsoneu_l3(value=0)
+        Lit(value=0)
       }
-      Lit#gjsoneu_l4(value=0)
+      Lit(value=0)
     }
-    Lit#gjsoneu_l5(value=0)
+    Lit(value=0)
   }
 }
