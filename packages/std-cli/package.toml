@@ -1,0 +1,45 @@
+schema = "ailang.package-source.v1"
+name = "std-cli"
+version = "0.0.1-alpha.1"
+types = ["library"]
+description = "Command-line interface framework for AiLang applications"
+
+[libraries.cli]
+namespace = "std.cli"
+entry = "src/cli/common.aos"
+exports = ["writeTextFile", "readTextFile", "readOptionalLockText", "missingPath", "buildError", "unknownCommand", "notImplemented"]
+
+[libraries.parser]
+namespace = "std.cli.parser"
+entry = "src/cli/parser.aos"
+exports = ["parseCommandMetadata", "extractFrontMatter", "extractMarkdownBody", "parseCommandName", "parseSummary", "parseUsage", "parseOptions"]
+
+[libraries.scanner]
+namespace = "std.cli.scanner"
+entry = "src/cli/scanner.aos"
+exports = ["scanCommandDirectories", "findCommandDirs", "loadCommandMetadata"]
+
+[libraries.codegen]
+namespace = "std.cli.codegen"
+entry = "src/cli/codegen.aos"
+exports = ["generateCommandRegistry", "generateImports", "generateRegistryFunction", "generateHelpFunction", "generateDispatchFunction"]
+
+[libraries.args]
+namespace = "std.cli.args"
+entry = "src/cli/args.aos"
+exports = ["parseArgs", "getOption", "hasFlag", "getPositional", "getPositionalCount", "getAllPositional", "isHelpRequested", "isVersionRequested"]
+
+[libraries.help]
+namespace = "std.cli.help"
+entry = "src/cli/help.aos"
+exports = ["formatHelp", "formatCommandList", "formatUsage", "formatVersion", "showHelp", "showVersion"]
+
+[libraries.dispatch]
+namespace = "std.cli.dispatch"
+entry = "src/cli/dispatch.aos"
+exports = ["dispatch", "createDispatcher"]
+
+[libraries.build]
+namespace = "std.cli.build"
+entry = "src/cli/build.aos"
+exports = ["buildSubcommands", "buildSubcommand", "getSubcommandOutputPath", "buildMainExecutable"]

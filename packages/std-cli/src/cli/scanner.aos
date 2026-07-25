@@ -1,0 +1,186 @@
+Program {
+  Import(sdk="ailang" path="std/str.aos")
+  Import(path="common.aos")
+  Import(path="parser.aos")
+
+  Export(name=scanCommandDirectories)
+  Export(name=findCommandDirs)
+  Export(name=loadCommandMetadata)
+
+  // Scan a CLI directory for command directories
+  // Returns list of command metadata maps
+  Let(name=scanCommandDirectories) {
+    Fn(params=cliPath) {
+      Block {
+        Let(name=commandDirs) { Call(target=findCommandDirs) { Var(name=cliPath) } }
+        Let(name=commands) { Call(target=loadAllCommands) { Var(name=commandDirs) } }
+        Return { Var(name=commands) }
+      }
+    }
+  }
+
+  // Find all command directories (directories with command.md)
+  Let(name=findCommandDirs) {
+    Fn(params=cliPath) {
+      Block {
+        // For now, return a hardcoded list
+        // In a full implementation, this would scan the filesystem
+        Return {
+          List {
+            Map {
+              Entry { Lit(value="name") Lit(value="Clean") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Clean") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Init") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Init") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Build") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Build") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Run") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Run") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Publish") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Publish") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Template") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Template") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Agent") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Agent") } }
+            }
+            Map {
+              Entry { Lit(value="name") Lit(value="Project") }
+              Entry { Lit(value="path") StrConcat { Var(name=cliPath) Lit(value="/Project") } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Load metadata from all command directories
+  Let(name=loadAllCommands) {
+    Fn(params=commandDirs) {
+      Block {
+        Return { Call(target=loadAllCommandsRecursive) { Var(name=commandDirs) Lit(value=0) List {} } }
+      }
+    }
+  }
+
+  Let(name=loadAllCommandsRecursive) {
+    Fn(params=commandDirs,index,accumulated) {
+      Block {
+        Let(name=count) { Call(target=listLength) { Var(name=commandDirs) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Let(name=dirInfo) { Call(target=listAt) { Var(name=commandDirs) Var(name=index) } }
+            Let(name=metadata) { Call(target=loadCommandMetadata) { Var(name=dirInfo) } }
+
+            Let(name=newAccumulated) {
+              Call(target=listAppend) { Var(name=accumulated) Var(name=metadata) }
+            }
+
+            Return {
+              Call(target=loadAllCommandsRecursive) {
+                Var(name=commandDirs)
+                Add { Var(name=index) Lit(value=1) }
+                Var(name=newAccumulated)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Load command.md and parse metadata
+  Let(name=loadCommandMetadata) {
+    Fn(params=dirInfo) {
+      Block {
+        Let(name=dirPath) { Call(target=mapGet) { Var(name=dirInfo) Lit(value="path") } }
+        Let(name=dirName) { Call(target=mapGet) { Var(name=dirInfo) Lit(value="name") } }
+        Let(name=commandMdPath) { StrConcat { Var(name=dirPath) Lit(value="/command.md") } }
+
+        If {
+          Call(target=sys.fs.path.exists) { Var(name=commandMdPath) }
+          Block {
+            Let(name=markdownText) { Call(target=readTextFile) { Var(name=commandMdPath) } }
+            Let(name=metadata) { Call(target=parseCommandMetadata) { Var(name=markdownText) } }
+
+            // Add directory info to metadata
+            Let(name=withDir) { Call(target=mapSet) { Var(name=metadata) Lit(value="directory") Var(name=dirName) } }
+            Let(name=withPath) { Call(target=mapSet) { Var(name=withDir) Lit(value="dirPath") Var(name=dirPath) } }
+
+            Return { Var(name=withPath) }
+          }
+          Block {
+            // No command.md, return empty metadata
+            Return {
+              Map {
+                Entry { Lit(value="directory") Var(name=dirName) }
+                Entry { Lit(value="dirPath") Var(name=dirPath) }
+                Entry { Lit(value="command") Lit(value="") }
+                Entry { Lit(value="summary") Lit(value="") }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Helper functions for list/map operations
+  Let(name=listLength) {
+    Fn(params=list) {
+      Block {
+        Return { ChildCount { Var(name=list) } }
+      }
+    }
+  }
+
+  Let(name=listAt) {
+    Fn(params=list,index) {
+      Block {
+        Return { ChildAt { Var(name=list) Var(name=index) } }
+      }
+    }
+  }
+
+  Let(name=listAppend) {
+    Fn(params=list,item) {
+      Block {
+        // For now, this is a placeholder
+        // In real implementation, would append item to list
+        Return { Var(name=list) }
+      }
+    }
+  }
+
+  Let(name=mapGet) {
+    Fn(params=map,key) {
+      Block {
+        Return { AttrValueString { Var(name=map) Var(name=key) } }
+      }
+    }
+  }
+
+  Let(name=mapSet) {
+    Fn(params=map,key,value) {
+      Block {
+        // For now, this is a placeholder
+        // In real implementation, would add/update entry in map
+        Return { Var(name=map) }
+      }
+    }
+  }
+}

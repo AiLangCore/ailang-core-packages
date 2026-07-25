@@ -1,0 +1,159 @@
+Program {
+  Import(sdk="ailang" path="std/str.aos")
+  Import(path="args.aos")
+  Import(path="help.aos")
+  Import(path="common.aos")
+
+  Export(name=dispatch)
+  Export(name=createDispatcher)
+
+  // Main dispatch function - automatically handles help, version, and command execution
+  // appInfo: Map with name, version, description, author, platform
+  // commands: List of command metadata from scanner
+  // options: List of global options
+  // commandRegistry: Function that maps command name -> handler function
+  // args: Command-line arguments
+  Let(name=dispatch) {
+    Fn(params=appInfo,commands,options,commandRegistry,args) {
+      Block {
+        // Define which options take values
+        Let(name=optionDefs) { Call(target=buildOptionDefs) { Var(name=options) } }
+
+        // Parse arguments
+        Let(name=parsed) { Call(target=parseArgs) { Var(name=args) Var(name=optionDefs) } }
+
+        // Check for help request
+        If {
+          Call(target=isHelpRequested) { Var(name=parsed) }
+          Block { Return { Call(target=showHelp) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+          Block { Lit(value=0) }
+        }
+
+        // Check for version request
+        If {
+          Call(target=isVersionRequested) { Var(name=parsed) }
+          Block { Return { Call(target=showVersion) { Var(name=appInfo) } } }
+          Block { Lit(value=0) }
+        }
+
+        // Get the subcommand
+        Let(name=subcommand) { Call(target=getPositional) { Var(name=parsed) Lit(value=0) } }
+
+        // If no subcommand, show help
+        If {
+          Eq { Var(name=subcommand) Lit(value="") }
+          Block { Return { Call(target=showHelp) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+          Block { Lit(value=0) }
+        }
+
+        // Get the command handler
+        Let(name=handler) { Call(target=commandRegistry) { Var(name=subcommand) } }
+
+        // If command not found, show error
+        If {
+          Eq { Var(name=handler) Lit(value=0) }
+          Block { Return { Call(target=unknownCommand) { Var(name=subcommand) } } }
+          Block { Lit(value=0) }
+        }
+
+        // Execute the command handler with parsed args
+        Return { Call(target=handler) { Var(name=parsed) } }
+      }
+    }
+  }
+
+  // Create a dispatcher function with appInfo and commands baked in
+  // Returns a function that takes (commandRegistry, args)
+  Let(name=createDispatcher) {
+    Fn(params=appInfo,commands,options) {
+      Block {
+        Return {
+          Fn(params=commandRegistry,args) {
+            Block {
+              Return { Call(target=dispatch) { Var(name=appInfo) Var(name=commands) Var(name=options) Var(name=commandRegistry) Var(name=args) } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Build option definitions map from options list
+  Let(name=buildOptionDefs) {
+    Fn(params=options) {
+      Block {
+        Return { Call(target=buildOptionDefsRecursive) { Var(name=options) Lit(value=0) Map {} } }
+      }
+    }
+  }
+
+  Let(name=buildOptionDefsRecursive) {
+    Fn(params=options,index,defs) {
+      Block {
+        Let(name=count) { ChildCount { Var(name=options) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=defs) } }
+          Block {
+            Let(name=opt) { ChildAt { Var(name=options) Var(name=index) } }
+            Let(name=name) { Call(target=mapGetString) { Var(name=opt) Lit(value="name") } }
+            Let(name=shortName) { Call(target=mapGetString) { Var(name=opt) Lit(value="short") } }
+            Let(name=takesValue) { Call(target=mapGetBool) { Var(name=opt) Lit(value="takesValue") } }
+
+            // Add both long and short names to defs
+            Let(name=withLong) {
+              If {
+                Gt { Call(target=length) { Var(name=name) } Lit(value=0) }
+                Block { Call(target=mapPut) { Var(name=defs) Var(name=name) Var(name=takesValue) } }
+                Block { Var(name=defs) }
+              }
+            }
+
+            Let(name=withShort) {
+              If {
+                Gt { Call(target=length) { Var(name=shortName) } Lit(value=0) }
+                Block { Call(target=mapPut) { Var(name=withLong) Var(name=shortName) Var(name=takesValue) } }
+                Block { Var(name=withLong) }
+              }
+            }
+
+            Return {
+              Call(target=buildOptionDefsRecursive) {
+                Var(name=options)
+                Add { Var(name=index) Lit(value=1) }
+                Var(name=withShort)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Placeholder helpers
+  Let(name=mapGetString) {
+    Fn(params=map,key) {
+      Block {
+        Return { AttrValueString { Var(name=map) Var(name=key) } }
+      }
+    }
+  }
+
+  Let(name=mapGetBool) {
+    Fn(params=map,key) {
+      Block {
+        Return { AttrValueBool { Var(name=map) Var(name=key) } }
+      }
+    }
+  }
+
+  Let(name=mapPut) {
+    Fn(params=map,key,value) {
+      Block {
+        // Would create new map with key=value
+        Return { Var(name=map) }
+      }
+    }
+  }
+}

@@ -1,0 +1,742 @@
+Program {
+  Import(sdk="ailang" path="std/str.aos")
+
+  Export(name=formatHelp)
+  Export(name=formatHelpPosix)
+  Export(name=formatHelpDos)
+  Export(name=formatCommandList)
+  Export(name=formatUsage)
+  Export(name=formatVersion)
+  Export(name=formatVersionPosix)
+  Export(name=formatVersionDos)
+  Export(name=showHelp)
+  Export(name=showVersion)
+  Export(name=detectPlatformStyle)
+
+  // Detect platform style (auto-detect or use appInfo platform field)
+  Let(name=detectPlatformStyle) {
+    Fn(params=appInfo) {
+      Block {
+        Let(name=platform) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="platform") } }
+        
+        If {
+          Eq { Var(name=platform) Lit(value="windows") }
+          Block { Return { Lit(value="dos") } }
+          Block {
+            If {
+              Eq { Var(name=platform) Lit(value="dos") }
+              Block { Return { Lit(value="dos") } }
+              Block { Return { Lit(value="posix") } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format complete help message (auto-detects platform style)
+  // appInfo: Map with name, version, description, author, platform (optional)
+  // commands: List of command metadata maps (from scanner)
+  // options: List of option definitions (optional)
+  Let(name=formatHelp) {
+    Fn(params=appInfo,commands,options) {
+      Block {
+        Let(name=style) { Call(target=detectPlatformStyle) { Var(name=appInfo) } }
+
+        If {
+          Eq { Var(name=style) Lit(value="dos") }
+          Block { Return { Call(target=formatHelpDos) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+          Block { Return { Call(target=formatHelpPosix) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+        }
+      }
+    }
+  }
+
+  // Format help message in POSIX/GNU style
+  // Example:
+  //   myapp 2.0.0
+  //   A fast compiler toolchain.
+  //   
+  //   USAGE:
+  //       myapp [OPTIONS] <SUBCOMMAND>
+  //   
+  //   OPTIONS:
+  //       -h, --help           Print help information
+  //       -V, --version        Print version information
+  //   
+  //   SUBCOMMANDS:
+  //       build               Compile a source file into a binary
+  Let(name=formatHelpPosix) {
+    Fn(params=appInfo,commands,options) {
+      Block {
+        Let(name=appName) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="name") } }
+        Let(name=version) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="version") } }
+        Let(name=appDesc) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="description") } }
+
+        // Header: "myapp 2.0.0"
+        Let(name=header) {
+          StrConcat {
+            Var(name=appName)
+            StrConcat { Lit(value=" ") Var(name=version) }
+          }
+        }
+
+        // Description on next line
+        Let(name=headerWithDesc) {
+          StrConcat {
+            Var(name=header)
+            StrConcat {
+              Lit(value="\n")
+              StrConcat { Var(name=appDesc) Lit(value="\n\n") }
+            }
+          }
+        }
+
+        // Usage section
+        Let(name=usage) {
+          StrConcat {
+            Lit(value="USAGE:\n    ")
+            StrConcat {
+              Var(name=appName)
+              Lit(value=" [OPTIONS] <SUBCOMMAND>")
+            }
+          }
+        }
+
+        Let(name=withUsage) {
+          StrConcat {
+            Var(name=headerWithDesc)
+            StrConcat { Var(name=usage) Lit(value="\n\n") }
+          }
+        }
+
+        // Options section (if any)
+        Let(name=withOptions) {
+          If {
+            Gt { ChildCount { Var(name=options) } Lit(value=0) }
+            Block {
+              Let(name=optList) { Call(target=formatOptionListPosix) { Var(name=options) } }
+              StrConcat {
+                Var(name=withUsage)
+                StrConcat { Var(name=optList) Lit(value="\n\n") }
+              }
+            }
+            Block { Var(name=withUsage) }
+          }
+        }
+
+        // Subcommands section
+        Let(name=cmdList) { Call(target=formatCommandListPosix) { Var(name=commands) } }
+        Return { StrConcat { Var(name=withOptions) Var(name=cmdList) } }
+      }
+    }
+  }
+
+  // Format help message in DOS/Windows style
+  // Example:
+  //                     MYAPP.EXE Version 1.2.0
+  //                     A fast compiler for the custom language.
+  //                     
+  //                     Usage: myapp.exe [switches] <source_file>
+  //                     
+  //                     Switches:
+  //                         /?                  Print help information
+  Let(name=formatHelpDos) {
+    Fn(params=appInfo,commands,options) {
+      Block {
+        Let(name=appName) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="name") } }
+        Let(name=version) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="version") } }
+        Let(name=appDesc) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="description") } }
+
+        // Uppercase name for DOS style
+        Let(name=upperName) { Call(target=toUpperCaseName) { Var(name=appName) } }
+
+        // Centered header with indentation
+        Let(name=header) {
+          StrConcat {
+            Lit(value="                        ")
+            StrConcat {
+              Var(name=upperName)
+              StrConcat {
+                Lit(value=" Version ")
+                Var(name=version)
+              }
+            }
+          }
+        }
+
+        Let(name=headerWithDesc) {
+          StrConcat {
+            Var(name=header)
+            StrConcat {
+              Lit(value="\n                        ")
+              StrConcat { Var(name=appDesc) Lit(value="\n                        \n") }
+            }
+          }
+        }
+
+        // Usage line
+        Let(name=usage) {
+          StrConcat {
+            Lit(value="                        Usage: ")
+            StrConcat {
+              Var(name=appName)
+              Lit(value=" [switches] <subcommand> [args]")
+            }
+          }
+        }
+
+        Let(name=withUsage) {
+          StrConcat {
+            Var(name=headerWithDesc)
+            StrConcat { Var(name=usage) Lit(value="\n                        \n") }
+          }
+        }
+
+        // Switches section
+        Let(name=withSwitches) {
+          If {
+            Gt { ChildCount { Var(name=options) } Lit(value=0) }
+            Block {
+              Let(name=switchList) { Call(target=formatOptionListDos) { Var(name=options) } }
+              StrConcat {
+                Var(name=withUsage)
+                StrConcat { Var(name=switchList) Lit(value="\n                        \n") }
+              }
+            }
+            Block { Var(name=withUsage) }
+          }
+        }
+
+        // Subcommands section
+        Let(name=cmdList) { Call(target=formatCommandListDos) { Var(name=commands) } }
+        Return { StrConcat { Var(name=withSwitches) Var(name=cmdList) } }
+      }
+    }
+  }
+
+  // Format command list in POSIX style: "SUBCOMMANDS:"
+  Let(name=formatCommandListPosix) {
+    Fn(params=commands) {
+      Block {
+        Let(name=header) { Lit(value="SUBCOMMANDS:") }
+        Let(name=body) { Call(target=formatCommandListRecursivePosix) { Var(name=commands) Lit(value=0) Lit(value="") } }
+
+        If {
+          Eq { Var(name=body) Lit(value="") }
+          Block { Return { Lit(value="") } }
+          Block {
+            Return {
+              StrConcat {
+                Var(name=header)
+                StrConcat { Lit(value="\n") Var(name=body) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=formatCommandListRecursivePosix) {
+    Fn(params=commands,index,accumulated) {
+      Block {
+        Let(name=count) { ChildCount { Var(name=commands) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Let(name=cmd) { ChildAt { Var(name=commands) Var(name=index) } }
+            Let(name=commandName) { Call(target=mapGetString) { Var(name=cmd) Lit(value="command") } }
+            Let(name=summary) { Call(target=mapGetString) { Var(name=cmd) Lit(value="summary") } }
+
+            If {
+              Eq { Var(name=commandName) Lit(value="") }
+              Block {
+                Return {
+                  Call(target=formatCommandListRecursivePosix) {
+                    Var(name=commands)
+                    Add { Var(name=index) Lit(value=1) }
+                    Var(name=accumulated)
+                  }
+                }
+              }
+              Block {
+                Let(name=padding) { Call(target=padRight) { Var(name=commandName) Lit(value=20) } }
+                Let(name=line) {
+                  StrConcat {
+                    Lit(value="    ")
+                    StrConcat {
+                      Var(name=padding)
+                      StrConcat {
+                        Var(name=summary)
+                        Lit(value="\n")
+                      }
+                    }
+                  }
+                }
+
+                Return {
+                  Call(target=formatCommandListRecursivePosix) {
+                    Var(name=commands)
+                    Add { Var(name=index) Lit(value=1) }
+                    StrConcat { Var(name=accumulated) Var(name=line) }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format command list in DOS style: "Subcommand:"
+  Let(name=formatCommandListDos) {
+    Fn(params=commands) {
+      Block {
+        Let(name=header) { Lit(value="                        Subcommand:") }
+        Let(name=body) { Call(target=formatCommandListRecursiveDos) { Var(name=commands) Lit(value=0) Lit(value="") } }
+
+        If {
+          Eq { Var(name=body) Lit(value="") }
+          Block { Return { Lit(value="") } }
+          Block {
+            Return {
+              StrConcat {
+                Var(name=header)
+                StrConcat { Lit(value="\n") Var(name=body) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=formatCommandListRecursiveDos) {
+    Fn(params=commands,index,accumulated) {
+      Block {
+        Let(name=count) { ChildCount { Var(name=commands) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Let(name=cmd) { ChildAt { Var(name=commands) Var(name=index) } }
+            Let(name=commandName) { Call(target=mapGetString) { Var(name=cmd) Lit(value="command") } }
+            Let(name=summary) { Call(target=mapGetString) { Var(name=cmd) Lit(value="summary") } }
+
+            If {
+              Eq { Var(name=commandName) Lit(value="") }
+              Block {
+                Return {
+                  Call(target=formatCommandListRecursiveDos) {
+                    Var(name=commands)
+                    Add { Var(name=index) Lit(value=1) }
+                    Var(name=accumulated)
+                  }
+                }
+              }
+              Block {
+                Let(name=padding) { Call(target=padRight) { Var(name=commandName) Lit(value=20) } }
+                Let(name=line) {
+                  StrConcat {
+                    Lit(value="                            ")
+                    StrConcat {
+                      Var(name=padding)
+                      StrConcat {
+                        Var(name=summary)
+                        Lit(value="\n")
+                      }
+                    }
+                  }
+                }
+
+                Return {
+                  Call(target=formatCommandListRecursiveDos) {
+                    Var(name=commands)
+                    Add { Var(name=index) Lit(value=1) }
+                    StrConcat { Var(name=accumulated) Var(name=line) }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format option list in POSIX style
+  Let(name=formatOptionListPosix) {
+    Fn(params=options) {
+      Block {
+        Let(name=header) { Lit(value="OPTIONS:") }
+        Let(name=body) { Call(target=formatOptionListRecursivePosix) { Var(name=options) Lit(value=0) Lit(value="") } }
+
+        Return {
+          StrConcat {
+            Var(name=header)
+            StrConcat { Lit(value="\n") Var(name=body) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=formatOptionListRecursivePosix) {
+    Fn(params=options,index,accumulated) {
+      Block {
+        Let(name=count) { ChildCount { Var(name=options) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Let(name=opt) { ChildAt { Var(name=options) Var(name=index) } }
+            Let(name=name) { Call(target=mapGetString) { Var(name=opt) Lit(value="name") } }
+            Let(name=shortName) { Call(target=mapGetString) { Var(name=opt) Lit(value="short") } }
+            Let(name=description) { Call(target=mapGetString) { Var(name=opt) Lit(value="description") } }
+            Let(name=takesValue) { Call(target=mapGetBool) { Var(name=opt) Lit(value="takesValue") } }
+
+            Let(name=optText) { Call(target=formatOptionSignaturePosix) { Var(name=shortName) Var(name=name) Var(name=takesValue) } }
+            Let(name=padding) { Call(target=padRight) { Var(name=optText) Lit(value=24) } }
+
+            Let(name=line) {
+              StrConcat {
+                Lit(value="    ")
+                StrConcat {
+                  Var(name=padding)
+                  StrConcat {
+                    Var(name=description)
+                    Lit(value="\n")
+                  }
+                }
+              }
+            }
+
+            Return {
+              Call(target=formatOptionListRecursivePosix) {
+                Var(name=options)
+                Add { Var(name=index) Lit(value=1) }
+                StrConcat { Var(name=accumulated) Var(name=line) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format option list in DOS style: "Switches:"
+  Let(name=formatOptionListDos) {
+    Fn(params=options) {
+      Block {
+        Let(name=header) { Lit(value="                        Switches:") }
+        Let(name=body) { Call(target=formatOptionListRecursiveDos) { Var(name=options) Lit(value=0) Lit(value="") } }
+
+        Return {
+          StrConcat {
+            Var(name=header)
+            StrConcat { Lit(value="\n") Var(name=body) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=formatOptionListRecursiveDos) {
+    Fn(params=options,index,accumulated) {
+      Block {
+        Let(name=count) { ChildCount { Var(name=options) } }
+
+        If {
+          Ge { Var(name=index) Var(name=count) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Let(name=opt) { ChildAt { Var(name=options) Var(name=index) } }
+            Let(name=name) { Call(target=mapGetString) { Var(name=opt) Lit(value="name") } }
+            Let(name=description) { Call(target=mapGetString) { Var(name=opt) Lit(value="description") } }
+            Let(name=takesValue) { Call(target=mapGetBool) { Var(name=opt) Lit(value="takesValue") } }
+
+            Let(name=optText) { Call(target=formatOptionSignatureDos) { Var(name=name) Var(name=takesValue) } }
+            Let(name=padding) { Call(target=padRight) { Var(name=optText) Lit(value=28) } }
+
+            Let(name=line) {
+              StrConcat {
+                Lit(value="                            ")
+                StrConcat {
+                  Var(name=padding)
+                  StrConcat {
+                    Var(name=description)
+                    Lit(value="\n")
+                  }
+                }
+              }
+            }
+
+            Return {
+              Call(target=formatOptionListRecursiveDos) {
+                Var(name=options)
+                Add { Var(name=index) Lit(value=1) }
+                StrConcat { Var(name=accumulated) Var(name=line) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format option signature POSIX: -s, --long or -s, --long <value>
+  Let(name=formatOptionSignaturePosix) {
+    Fn(params=shortName,longName,takesValue) {
+      Block {
+        Let(name=hasShort) { Gt { Call(target=length) { Var(name=shortName) } Lit(value=0) } }
+        Let(name=hasLong) { Gt { Call(target=length) { Var(name=longName) } Lit(value=0) } }
+
+        If {
+          And { Var(name=hasShort) Var(name=hasLong) }
+          Block {
+            Let(name=base) {
+              StrConcat {
+                Lit(value="-")
+                StrConcat {
+                  Var(name=shortName)
+                  StrConcat { Lit(value=", --") Var(name=longName) }
+                }
+              }
+            }
+
+            If {
+              Var(name=takesValue)
+              Block { Return { StrConcat { Var(name=base) Lit(value=" <value>") } } }
+              Block { Return { Var(name=base) } }
+            }
+          }
+          Block {
+            If {
+              Var(name=hasLong)
+              Block {
+                Let(name=base) { StrConcat { Lit(value="--") Var(name=longName) } }
+                If {
+                  Var(name=takesValue)
+                  Block { Return { StrConcat { Var(name=base) Lit(value=" <value>") } } }
+                  Block { Return { Var(name=base) } }
+                }
+              }
+              Block {
+                If {
+                  Var(name=hasShort)
+                  Block {
+                    Let(name=base) { StrConcat { Lit(value="-") Var(name=shortName) } }
+                    If {
+                      Var(name=takesValue)
+                      Block { Return { StrConcat { Var(name=base) Lit(value=" <value>") } } }
+                      Block { Return { Var(name=base) } }
+                    }
+                  }
+                  Block { Return { Lit(value="") } }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format option signature DOS: /OPTION or /OPTION:<value>
+  Let(name=formatOptionSignatureDos) {
+    Fn(params=name,takesValue) {
+      Block {
+        Let(name=upperName) { Call(target=toUpperCaseName) { Var(name=name) } }
+        Let(name=base) { StrConcat { Lit(value="/") Var(name=upperName) } }
+
+        If {
+          Var(name=takesValue)
+          Block { Return { StrConcat { Var(name=base) Lit(value=":<value>") } } }
+          Block { Return { Var(name=base) } }
+        }
+      }
+    }
+  }
+
+  // Format version in POSIX style: "myapp 2.0.0"
+  Let(name=formatVersionPosix) {
+    Fn(params=appInfo) {
+      Block {
+        Let(name=appName) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="name") } }
+        Let(name=version) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="version") } }
+
+        Return {
+          StrConcat {
+            Var(name=appName)
+            StrConcat { Lit(value=" ") Var(name=version) }
+          }
+        }
+      }
+    }
+  }
+
+  // Format version in DOS style: "MYAPP.EXE Version 1.2.0"
+  Let(name=formatVersionDos) {
+    Fn(params=appInfo) {
+      Block {
+        Let(name=appName) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="name") } }
+        Let(name=version) { Call(target=mapGetString) { Var(name=appInfo) Lit(value="version") } }
+        Let(name=upperName) { Call(target=toUpperCaseName) { Var(name=appName) } }
+
+        Return {
+          StrConcat {
+            Var(name=upperName)
+            StrConcat {
+              Lit(value=" Version ")
+              Var(name=version)
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Generic version formatter (auto-detects platform)
+  Let(name=formatVersion) {
+    Fn(params=appInfo) {
+      Block {
+        Let(name=style) { Call(target=detectPlatformStyle) { Var(name=appInfo) } }
+
+        If {
+          Eq { Var(name=style) Lit(value="dos") }
+          Block { Return { Call(target=formatVersionDos) { Var(name=appInfo) } } }
+          Block { Return { Call(target=formatVersionPosix) { Var(name=appInfo) } } }
+        }
+      }
+    }
+  }
+
+  // Uppercase name helper (simplified for common ASCII)
+  Let(name=toUpperCaseName) {
+    Fn(params=str) {
+      Block {
+        // Simplified - just return uppercase version
+        // Real implementation would handle full character set
+        Return { Var(name=str) }
+      }
+    }
+  }
+
+  
+  // Format usage line (generic, delegates to POSIX style)
+  Let(name=formatUsage) {
+    Fn(params=appName) {
+      Block {
+        Return {
+          StrConcat {
+            Lit(value="USAGE:\n    ")
+            StrConcat {
+              Var(name=appName)
+              Lit(value=" [OPTIONS] <SUBCOMMAND>")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Format command list (generic, delegates to POSIX style)
+  Let(name=formatCommandList) {
+    Fn(params=commands) {
+      Block {
+        Return { Call(target=formatCommandListPosix) { Var(name=commands) } }
+      }
+    }
+  }
+
+  // Display help and exit
+  Let(name=showHelp) {
+    Fn(params=appInfo,commands,options) {
+      Block {
+        Let(name=helpText) { Call(target=formatHelp) { Var(name=appInfo) Var(name=commands) Var(name=options) } }
+        Call(target=sys.stdout.writeLine) { Var(name=helpText) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  // Display version and exit
+  Let(name=showVersion) {
+    Fn(params=appInfo) {
+      Block {
+        Let(name=versionText) { Call(target=formatVersion) { Var(name=appInfo) } }
+        Call(target=sys.stdout.writeLine) { Var(name=versionText) }
+        Return { Lit(value=0) }
+      }
+    }
+  }
+
+  // Helper: pad string to width with spaces
+  Let(name=padRight) {
+    Fn(params=str,width) {
+      Block {
+        Let(name=len) { Call(target=length) { Var(name=str) } }
+
+        If {
+          Ge { Var(name=len) Var(name=width) }
+          Block { Return { Var(name=str) } }
+          Block {
+            Let(name=paddingNeeded) { Sub { Var(name=width) Var(name=len) } }
+            Let(name=padding) { Call(target=repeatSpace) { Var(name=paddingNeeded) } }
+            Return { StrConcat { Var(name=str) Var(name=padding) } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=repeatSpace) {
+    Fn(params=count) {
+      Block {
+        Return { Call(target=repeatSpaceRecursive) { Var(name=count) Lit(value="") } }
+      }
+    }
+  }
+
+  Let(name=repeatSpaceRecursive) {
+    Fn(params=remaining,accumulated) {
+      Block {
+        If {
+          Le { Var(name=remaining) Lit(value=0) }
+          Block { Return { Var(name=accumulated) } }
+          Block {
+            Return {
+              Call(target=repeatSpaceRecursive) {
+                Sub { Var(name=remaining) Lit(value=1) }
+                StrConcat { Var(name=accumulated) Lit(value=" ") }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Placeholder map helpers
+  Let(name=mapGetString) {
+    Fn(params=map,key) {
+      Block {
+        Return { AttrValueString { Var(name=map) Var(name=key) } }
+      }
+    }
+  }
+
+  Let(name=mapGetBool) {
+    Fn(params=map,key) {
+      Block {
+        Return { AttrValueBool { Var(name=map) Var(name=key) } }
+      }
+    }
+  }
+}

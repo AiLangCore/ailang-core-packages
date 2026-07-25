@@ -1,0 +1,320 @@
+Program {
+  Import(sdk="ailang" path="std/str.aos")
+
+  Export(name=parseCommandMetadata)
+  Export(name=extractFrontMatter)
+  Export(name=extractMarkdownBody)
+  Export(name=parseCommandName)
+  Export(name=parseSummary)
+  Export(name=parseUsage)
+  Export(name=parseOptions)
+
+  // Parse command.md and extract metadata
+  Let(name=parseCommandMetadata) {
+    Fn(params=markdownText) {
+      Block {
+        Let(name=frontMatter) { Call(target=extractFrontMatter) { Var(name=markdownText) } }
+        Let(name=body) { Call(target=extractMarkdownBody) { Var(name=markdownText) } }
+        Let(name=commandName) { Call(target=parseCommandName) { Var(name=frontMatter) } }
+        Let(name=summary) { Call(target=parseSummary) { Var(name=frontMatter) } }
+        Let(name=usage) { Call(target=parseUsage) { Var(name=frontMatter) } }
+        Let(name=options) { Call(target=parseOptions) { Var(name=frontMatter) } }
+
+        Return {
+          Map {
+            Entry { Lit(value="command") Var(name=commandName) }
+            Entry { Lit(value="summary") Var(name=summary) }
+            Entry { Lit(value="usage") Var(name=usage) }
+            Entry { Lit(value="options") Var(name=options) }
+            Entry { Lit(value="body") Var(name=body) }
+          }
+        }
+      }
+    }
+  }
+
+  // Extract YAML front matter between --- markers
+  Let(name=extractFrontMatter) {
+    Fn(params=text) {
+      Block {
+        Let(name=firstMarker) { Call(target=find) { Var(name=text) Lit(value="---") Lit(value=0) } }
+
+        If {
+          Eq { Var(name=firstMarker) Lit(value=-1) }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=afterFirst) { Add { Var(name=firstMarker) Lit(value=3) } }
+            Let(name=secondMarker) { Call(target=find) { Var(name=text) Lit(value="---") Var(name=afterFirst) } }
+
+            If {
+              Eq { Var(name=secondMarker) Lit(value=-1) }
+              Block { Return { Lit(value="") } }
+              Block {
+                Return {
+                  Call(target=substring) {
+                    Var(name=text)
+                    Var(name=afterFirst)
+                    Var(name=secondMarker)
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Extract markdown body (content after front matter)
+  Let(name=extractMarkdownBody) {
+    Fn(params=text) {
+      Block {
+        Let(name=firstMarker) { Call(target=find) { Var(name=text) Lit(value="---") Lit(value=0) } }
+
+        If {
+          Eq { Var(name=firstMarker) Lit(value=-1) }
+          Block { Return { Var(name=text) } }
+          Block {
+            Let(name=afterFirst) { Add { Var(name=firstMarker) Lit(value=3) } }
+            Let(name=secondMarker) { Call(target=find) { Var(name=text) Lit(value="---") Var(name=afterFirst) } }
+
+            If {
+              Eq { Var(name=secondMarker) Lit(value=-1) }
+              Block { Return { Lit(value="") } }
+              Block {
+                Let(name=bodyStart) { Add { Var(name=secondMarker) Lit(value=3) } }
+                Let(name=textLen) { Call(target=length) { Var(name=text) } }
+                Return {
+                  Call(target=trim) {
+                    Call(target=substring) {
+                      Var(name=text)
+                      Var(name=bodyStart)
+                      Var(name=textLen)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Parse "command: name" from front matter
+  Let(name=parseCommandName) {
+    Fn(params=frontMatter) {
+      Block {
+        Let(name=needle) { Lit(value="command:") }
+        Let(name=pos) { Call(target=find) { Var(name=frontMatter) Var(name=needle) Lit(value=0) } }
+
+        If {
+          Eq { Var(name=pos) Lit(value=-1) }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=afterColon) { Add { Var(name=pos) Lit(value=8) } }
+            Let(name=newline) { Call(target=find) { Var(name=frontMatter) Lit(value="\n") Var(name=afterColon) } }
+
+            Let(name=endPos) {
+              If {
+                Eq { Var(name=newline) Lit(value=-1) }
+                Block { Call(target=length) { Var(name=frontMatter) } }
+                Block { Var(name=newline) }
+              }
+            }
+
+            Let(name=value) {
+              Call(target=substring) {
+                Var(name=frontMatter)
+                Var(name=afterColon)
+                Var(name=endPos)
+              }
+            }
+
+            Return { Call(target=trim) { Var(name=value) } }
+          }
+        }
+      }
+    }
+  }
+
+  // Parse "summary: text" from front matter
+  Let(name=parseSummary) {
+    Fn(params=frontMatter) {
+      Block {
+        Let(name=needle) { Lit(value="summary:") }
+        Let(name=pos) { Call(target=find) { Var(name=frontMatter) Var(name=needle) Lit(value=0) } }
+
+        If {
+          Eq { Var(name=pos) Lit(value=-1) }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=afterColon) { Add { Var(name=pos) Lit(value=8) } }
+            Let(name=newline) { Call(target=find) { Var(name=frontMatter) Lit(value="\n") Var(name=afterColon) } }
+
+            Let(name=endPos) {
+              If {
+                Eq { Var(name=newline) Lit(value=-1) }
+                Block { Call(target=length) { Var(name=frontMatter) } }
+                Block { Var(name=newline) }
+              }
+            }
+
+            Let(name=value) {
+              Call(target=substring) {
+                Var(name=frontMatter)
+                Var(name=afterColon)
+                Var(name=endPos)
+              }
+            }
+
+            Return { Call(target=trim) { Var(name=value) } }
+          }
+        }
+      }
+    }
+  }
+
+  // Parse "usage: pattern" from front matter
+  Let(name=parseUsage) {
+    Fn(params=frontMatter) {
+      Block {
+        Let(name=needle) { Lit(value="usage:") }
+        Let(name=pos) { Call(target=find) { Var(name=frontMatter) Var(name=needle) Lit(value=0) } }
+
+        If {
+          Eq { Var(name=pos) Lit(value=-1) }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=afterColon) { Add { Var(name=pos) Lit(value=6) } }
+            Let(name=newline) { Call(target=find) { Var(name=frontMatter) Lit(value="\n") Var(name=afterColon) } }
+
+            Let(name=endPos) {
+              If {
+                Eq { Var(name=newline) Lit(value=-1) }
+                Block { Call(target=length) { Var(name=frontMatter) } }
+                Block { Var(name=newline) }
+              }
+            }
+
+            Let(name=value) {
+              Call(target=substring) {
+                Var(name=frontMatter)
+                Var(name=afterColon)
+                Var(name=endPos)
+              }
+            }
+
+            Return { Call(target=trim) { Var(name=value) } }
+          }
+        }
+      }
+    }
+  }
+
+  // Parse "options:" section from front matter
+  // Returns empty list for now - full YAML parsing would be needed for proper implementation
+  Let(name=parseOptions) {
+    Fn(params=frontMatter) {
+      Block {
+        // Simplified: return empty list
+        // Full implementation would parse YAML list structure
+        Return { List {} }
+      }
+    }
+  }
+
+  // Helper: trim whitespace from string
+  Let(name=trim) {
+    Fn(params=str) {
+      Block {
+        // Simple trim: remove leading/trailing spaces and newlines
+        Let(name=start) { Call(target=findNonWhitespace) { Var(name=str) Lit(value=0) } }
+
+        If {
+          Eq { Var(name=start) Lit(value=-1) }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=end) { Call(target=findNonWhitespaceReverse) { Var(name=str) } }
+            Return {
+              Call(target=substring) {
+                Var(name=str)
+                Var(name=start)
+                Add { Var(name=end) Lit(value=1) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findNonWhitespace) {
+    Fn(params=str,pos) {
+      Block {
+        Let(name=len) { Call(target=length) { Var(name=str) } }
+
+        If {
+          Ge { Var(name=pos) Var(name=len) }
+          Block { Return { Lit(value=-1) } }
+          Block {
+            Let(name=char) { Call(target=substring) { Var(name=str) Var(name=pos) Add { Var(name=pos) Lit(value=1) } } }
+
+            If {
+              Or {
+                Eq { Var(name=char) Lit(value=" ") }
+                Or {
+                  Eq { Var(name=char) Lit(value="\n") }
+                  Or {
+                    Eq { Var(name=char) Lit(value="\t") }
+                    Eq { Var(name=char) Lit(value="\r") }
+                  }
+                }
+              }
+              Block { Return { Call(target=findNonWhitespace) { Var(name=str) Add { Var(name=pos) Lit(value=1) } } } }
+              Block { Return { Var(name=pos) } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findNonWhitespaceReverse) {
+    Fn(params=str) {
+      Block {
+        Let(name=len) { Call(target=length) { Var(name=str) } }
+        Return { Call(target=findNonWhitespaceReverseFrom) { Var(name=str) Sub { Var(name=len) Lit(value=1) } } }
+      }
+    }
+  }
+
+  Let(name=findNonWhitespaceReverseFrom) {
+    Fn(params=str,pos) {
+      Block {
+        If {
+          Lt { Var(name=pos) Lit(value=0) }
+          Block { Return { Lit(value=-1) } }
+          Block {
+            Let(name=char) { Call(target=substring) { Var(name=str) Var(name=pos) Add { Var(name=pos) Lit(value=1) } } }
+
+            If {
+              Or {
+                Eq { Var(name=char) Lit(value=" ") }
+                Or {
+                  Eq { Var(name=char) Lit(value="\n") }
+                  Or {
+                    Eq { Var(name=char) Lit(value="\t") }
+                    Eq { Var(name=char) Lit(value="\r") }
+                  }
+                }
+              }
+              Block { Return { Call(target=findNonWhitespaceReverseFrom) { Var(name=str) Sub { Var(name=pos) Lit(value=1) } } } }
+              Block { Return { Var(name=pos) } }
+            }
+          }
+        }
+      }
+    }
+  }
+}
