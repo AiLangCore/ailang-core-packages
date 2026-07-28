@@ -1,0 +1,243 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=createApplication)
+  Export(name=createCommand)
+  Export(name=createArgument)
+  Export(name=createOption)
+  Export(name=commandWithUsage)
+  Export(name=commandWithArgument)
+  Export(name=commandWithOption)
+  Export(name=commandAllowTrailing)
+  Export(name=commandAsExecutable)
+  Export(name=cliResult)
+  Export(name=invocationPositional)
+  Export(name=invocationOption)
+  Export(name=invocationHasFlag)
+  Export(name=invocationRemaining)
+  Export(name=invocationRawArgs)
+
+  Let(name=createApplication) {
+    Fn(params=name,version,summary) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliApplication") }
+            Field(key="name") { Var(name=name) }
+            Field(key="version") { Var(name=version) }
+            Field(key="summary") { Var(name=summary) }
+            Field(key="commands") { MakeBlock { Lit(value="List") } }
+            Field(key="diagnostic") { Map { } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=createCommand) {
+    Fn(params=name,summary,handler) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Var(name=name) }
+            Field(key="summary") { Var(name=summary) }
+            Field(key="usage") { Lit(value="") }
+            Field(key="arguments") { MakeBlock { Lit(value="List") } }
+            Field(key="options") { MakeBlock { Lit(value="List") } }
+            Field(key="allowTrailing") { Lit(value=false) }
+            Field(key="handler") { Var(name=handler) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=createArgument) {
+    Fn(params=name,required,description) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliArgument") }
+            Field(key="name") { Var(name=name) }
+            Field(key="required") { Var(name=required) }
+            Field(key="description") { Var(name=description) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=createOption) {
+    Fn(params=name,alias,requiresValue,required,description) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliOption") }
+            Field(key="name") { Var(name=name) }
+            Field(key="alias") { Var(name=alias) }
+            Field(key="requiresValue") { Var(name=requiresValue) }
+            Field(key="required") { Var(name=required) }
+            Field(key="description") { Var(name=description) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandWithUsage) {
+    Fn(params=command,usage) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="summary") Lit(value="") } }
+            Field(key="usage") { Var(name=usage) }
+            Field(key="arguments") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+            Field(key="options") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } }
+            Field(key="allowTrailing") { Call(target=mapGetBoolOr) { Var(name=command) Lit(value="allowTrailing") Lit(value=false) } }
+            Field(key="handler") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="handler") Lit(value=0) } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandWithArgument) {
+    Fn(params=command,argument) {
+      Block {
+        Let(name=arguments) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="summary") Lit(value="") } }
+            Field(key="usage") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="usage") Lit(value="") } }
+            Field(key="arguments") { AppendChild { Var(name=arguments) Var(name=argument) } }
+            Field(key="options") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } }
+            Field(key="allowTrailing") { Call(target=mapGetBoolOr) { Var(name=command) Lit(value="allowTrailing") Lit(value=false) } }
+            Field(key="handler") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="handler") Lit(value=0) } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandWithOption) {
+    Fn(params=command,option) {
+      Block {
+        Let(name=options) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } }
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="summary") Lit(value="") } }
+            Field(key="usage") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="usage") Lit(value="") } }
+            Field(key="arguments") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+            Field(key="options") { AppendChild { Var(name=options) Var(name=option) } }
+            Field(key="allowTrailing") { Call(target=mapGetBoolOr) { Var(name=command) Lit(value="allowTrailing") Lit(value=false) } }
+            Field(key="handler") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="handler") Lit(value=0) } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandAllowTrailing) {
+    Fn(params=command) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="summary") Lit(value="") } }
+            Field(key="usage") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="usage") Lit(value="") } }
+            Field(key="arguments") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+            Field(key="options") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } }
+            Field(key="allowTrailing") { Lit(value=true) }
+            Field(key="handler") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="handler") Lit(value=0) } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=commandAsExecutable) {
+    Fn(params=command,executable,argumentPrefix) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliCommand") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="summary") Lit(value="") } }
+            Field(key="usage") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="usage") Lit(value="") } }
+            Field(key="arguments") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+            Field(key="options") { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } }
+            Field(key="allowTrailing") { Call(target=mapGetBoolOr) { Var(name=command) Lit(value="allowTrailing") Lit(value=false) } }
+            Field(key="handler") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="handler") Lit(value="") } }
+            Field(key="invocationMode") { Lit(value="Executable") }
+            Field(key="executable") { Var(name=executable) }
+            Field(key="argumentPrefix") { Var(name=argumentPrefix) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=cliResult) {
+    Fn(params=exitCode,output,diagnostic) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliResult") }
+            Field(key="exitCode") { Var(name=exitCode) }
+            Field(key="output") { Var(name=output) }
+            Field(key="diagnostic") { Var(name=diagnostic) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=invocationPositional) {
+    Fn(params=invocation,index,fallback) {
+      Block {
+        Let(name=values) { Call(target=mapGetNodeOr) { Var(name=invocation) Lit(value="positionals") MakeBlock { Lit(value="List") } } }
+        If {
+          Lt { Var(name=index) ChildCount { Var(name=values) } }
+          Block { Return { AttrValueString { ChildAt { Var(name=values) Var(name=index) } Lit(value=0) } } }
+          Block { Return { Var(name=fallback) } }
+        }
+      }
+    }
+  }
+
+  Let(name=invocationOption) {
+    Fn(params=invocation,name,fallback) {
+      Block {
+        Return { Call(target=mapGetStringOr) { Call(target=mapGetNodeOr) { Var(name=invocation) Lit(value="options") Map { } } Var(name=name) Var(name=fallback) } }
+      }
+    }
+  }
+
+  Let(name=invocationHasFlag) {
+    Fn(params=invocation,name) {
+      Block {
+        Return { Call(target=mapHas) { Call(target=mapGetNodeOr) { Var(name=invocation) Lit(value="flags") Map { } } Var(name=name) } }
+      }
+    }
+  }
+
+  Let(name=invocationRemaining) {
+    Fn(params=invocation) {
+      Block { Return { Call(target=mapGetNodeOr) { Var(name=invocation) Lit(value="remaining") MakeBlock { Lit(value="List") } } } }
+    }
+  }
+
+  Let(name=invocationRawArgs) {
+    Fn(params=invocation) {
+      Block { Return { Call(target=mapGetNodeOr) { Var(name=invocation) Lit(value="rawArgs") MakeBlock { Lit(value="List") } } } }
+    }
+  }
+}

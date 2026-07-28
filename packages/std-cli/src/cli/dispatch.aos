@@ -1,128 +1,69 @@
 Program {
-  Import(sdk="ailang" path="std/str.aos")
-  Import(path="args.aos")
+  Import(sdk="ailang" path="std/core.aos")
+  Import(path="arguments.aos")
+  Import(path="diagnostics.aos")
   Import(path="help.aos")
-  Import(path="common.aos")
+  Import(path="invoke.aos")
+  Import(path="model.aos")
+  Import(path="registry.aos")
 
-  Export(name=dispatch)
-  Export(name=createDispatcher)
+  Export(name=execute)
+  Export(name=run)
 
-  // Main dispatch function - automatically handles help, version, and command execution
-  // appInfo: Map with name, version, description, author, platform
-  // commands: List of command metadata from scanner
-  // options: List of global options
-  // commandRegistry: Function that maps command name -> handler function
-  // args: Command-line arguments
-  Let(name=dispatch) {
-    Fn(params=appInfo,commands,options,commandRegistry,args) {
+  Let(name=execute) {
+    Fn(params=application,args) {
       Block {
-        // Define which options take values
-        Let(name=optionDefs) { Call(target=buildOptionDefs) { Var(name=options) } }
-
-        // Parse arguments
-        Let(name=parsed) { Call(target=parseArgs) { Var(name=args) Var(name=optionDefs) } }
-
-        // Check for help request
+        Let(name=registrationProblem) { Call(target=applicationDiagnostic) { Var(name=application) } }
         If {
-          Call(target=isHelpRequested) { Var(name=parsed) }
-          Block { Return { Call(target=showHelp) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+          Eq { Eq { Call(target=diagnosticCode) { Var(name=registrationProblem) } Lit(value="") } Lit(value=false) }
+          Block { Return { Call(target=cliResult) { Lit(value=2) Lit(value="") Var(name=registrationProblem) } } }
           Block { Lit(value=0) }
         }
-
-        // Check for version request
         If {
-          Call(target=isVersionRequested) { Var(name=parsed) }
-          Block { Return { Call(target=showVersion) { Var(name=appInfo) } } }
+          Eq { ChildCount { Var(name=args) } Lit(value=0) }
+          Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatRootHelp) { Var(name=application) } Map { } } } }
           Block { Lit(value=0) }
         }
-
-        // Get the subcommand
-        Let(name=subcommand) { Call(target=getPositional) { Var(name=parsed) Lit(value=0) } }
-
-        // If no subcommand, show help
+        Let(name=first) { Call(target=argText) { Var(name=args) Lit(value=0) } }
         If {
-          Eq { Var(name=subcommand) Lit(value="") }
-          Block { Return { Call(target=showHelp) { Var(name=appInfo) Var(name=commands) Var(name=options) } } }
+          Call(target=cliOr) { Eq { Var(name=first) Lit(value="--help") } Eq { Var(name=first) Lit(value="-h") } }
+          Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatRootHelp) { Var(name=application) } Map { } } } }
           Block { Lit(value=0) }
         }
-
-        // Get the command handler
-        Let(name=handler) { Call(target=commandRegistry) { Var(name=subcommand) } }
-
-        // If command not found, show error
         If {
-          Eq { Var(name=handler) Lit(value=0) }
-          Block { Return { Call(target=unknownCommand) { Var(name=subcommand) } } }
+          Call(target=cliOr) { Eq { Var(name=first) Lit(value="version") } Eq { Var(name=first) Lit(value="--version") } }
+          Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatVersion) { Var(name=application) } Map { } } } }
           Block { Lit(value=0) }
         }
-
-        // Execute the command handler with parsed args
-        Return { Call(target=handler) { Var(name=parsed) } }
-      }
-    }
-  }
-
-  // Create a dispatcher function with appInfo and commands baked in
-  // Returns a function that takes (commandRegistry, args)
-  Let(name=createDispatcher) {
-    Fn(params=appInfo,commands,options) {
-      Block {
-        Return {
-          Fn(params=commandRegistry,args) {
-            Block {
-              Return { Call(target=dispatch) { Var(name=appInfo) Var(name=commands) Var(name=options) Var(name=commandRegistry) Var(name=args) } }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  // Build option definitions map from options list
-  Let(name=buildOptionDefs) {
-    Fn(params=options) {
-      Block {
-        Return { Call(target=buildOptionDefsRecursive) { Var(name=options) Lit(value=0) Map {} } }
-      }
-    }
-  }
-
-  Let(name=buildOptionDefsRecursive) {
-    Fn(params=options,index,defs) {
-      Block {
-        Let(name=count) { ChildCount { Var(name=options) } }
-
         If {
-          Ge { Var(name=index) Var(name=count) }
-          Block { Return { Var(name=defs) } }
+          Eq { Var(name=first) Lit(value="help") }
+          Block { Return { Call(target=executeHelp) { Var(name=application) Var(name=args) } } }
+          Block { Lit(value=0) }
+        }
+        Let(name=command) { Call(target=findCommand) { Var(name=application) Var(name=first) } }
+        If {
+          Eq { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } Lit(value="") }
+          Block { Return { Call(target=cliResult) { Lit(value=2) Lit(value="") Call(target=cliDiagnostic) { Lit(value="CLI001") StrConcat { Lit(value="unknown command: ") Var(name=first) } Var(name=first) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=hasCommandHelp) { Var(name=args) Lit(value=1) }
+          Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatCommandHelp) { Var(name=application) Var(name=command) } Map { } } } }
+          Block { Lit(value=0) }
+        }
+        Let(name=parsed) { Call(target=parseInvocation) { Var(name=command) Var(name=args) Lit(value=1) } }
+        If {
+          Eq { Call(target=mapGetBoolOr) { Var(name=parsed) Lit(value="ok") Lit(value=false) } Lit(value=false) }
+          Block { Return { Call(target=cliResult) { Lit(value=2) Lit(value="") Call(target=mapGetNodeOr) { Var(name=parsed) Lit(value="diagnostic") Map { } } } } }
           Block {
-            Let(name=opt) { ChildAt { Var(name=options) Var(name=index) } }
-            Let(name=name) { Call(target=mapGetString) { Var(name=opt) Lit(value="name") } }
-            Let(name=shortName) { Call(target=mapGetString) { Var(name=opt) Lit(value="short") } }
-            Let(name=takesValue) { Call(target=mapGetBool) { Var(name=opt) Lit(value="takesValue") } }
-
-            // Add both long and short names to defs
-            Let(name=withLong) {
-              If {
-                Gt { Call(target=length) { Var(name=name) } Lit(value=0) }
-                Block { Call(target=mapPut) { Var(name=defs) Var(name=name) Var(name=takesValue) } }
-                Block { Var(name=defs) }
-              }
-            }
-
-            Let(name=withShort) {
-              If {
-                Gt { Call(target=length) { Var(name=shortName) } Lit(value=0) }
-                Block { Call(target=mapPut) { Var(name=withLong) Var(name=shortName) Var(name=takesValue) } }
-                Block { Var(name=withLong) }
-              }
-            }
-
             Return {
-              Call(target=buildOptionDefsRecursive) {
-                Var(name=options)
-                Add { Var(name=index) Lit(value=1) }
-                Var(name=withShort)
+              Call(target=invokeCommand) {
+                Var(name=command)
+                Call(target=mapGetNodeOr) {
+                  Var(name=parsed)
+                  Lit(value="invocation")
+                  Map { }
+                }
               }
             }
           }
@@ -131,28 +72,81 @@ Program {
     }
   }
 
-  // Placeholder helpers
-  Let(name=mapGetString) {
-    Fn(params=map,key) {
+  Let(name=executeHelp) {
+    Fn(params=application,args) {
       Block {
-        Return { AttrValueString { Var(name=map) Var(name=key) } }
+        If {
+          Eq { ChildCount { Var(name=args) } Lit(value=1) }
+          Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatRootHelp) { Var(name=application) } Map { } } } }
+          Block {
+            Let(name=topic) { Call(target=argText) { Var(name=args) Lit(value=1) } }
+            Let(name=command) { Call(target=findCommand) { Var(name=application) Var(name=topic) } }
+            If {
+              Eq { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } Lit(value="") }
+              Block { Return { Call(target=cliResult) { Lit(value=2) Lit(value="") Call(target=cliDiagnostic) { Lit(value="CLI001") StrConcat { Lit(value="unknown command: ") Var(name=topic) } Var(name=topic) } } } }
+              Block { Return { Call(target=cliResult) { Lit(value=0) Call(target=formatCommandHelp) { Var(name=application) Var(name=command) } Map { } } } }
+            }
+          }
+        }
       }
     }
   }
 
-  Let(name=mapGetBool) {
-    Fn(params=map,key) {
+  Let(name=hasCommandHelp) {
+    Fn(params=args,index) {
       Block {
-        Return { AttrValueBool { Var(name=map) Var(name=key) } }
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=args) } }
+          Block { Return { Lit(value=false) } }
+          Block {
+            Let(name=value) { Call(target=argText) { Var(name=args) Var(name=index) } }
+            If {
+              Eq { Var(name=value) Lit(value="--") }
+              Block { Return { Lit(value=false) } }
+              Block {
+                If {
+                  Call(target=cliOr) { Eq { Var(name=value) Lit(value="--help") } Eq { Var(name=value) Lit(value="-h") } }
+                  Block { Return { Lit(value=true) } }
+                  Block { Return { Call(target=hasCommandHelp) { Var(name=args) Add { Var(name=index) Lit(value=1) } } } }
+                }
+              }
+            }
+          }
+        }
       }
     }
   }
 
-  Let(name=mapPut) {
-    Fn(params=map,key,value) {
+  Let(name=argText) {
+    Fn(params=args,index) {
+      Block { Return { AttrValueString { ChildAt { Var(name=args) Var(name=index) } Lit(value=0) } } }
+    }
+  }
+
+  Let(name=run) {
+    Fn(params=application,args) {
       Block {
-        // Would create new map with key=value
-        Return { Var(name=map) }
+        Let(name=result) { Call(target=execute) { Var(name=application) Var(name=args) } }
+        Let(name=output) { Call(target=mapGetStringOr) { Var(name=result) Lit(value="output") Lit(value="") } }
+        If {
+          Eq { Eq { Var(name=output) Lit(value="") } Lit(value=false) }
+          Block { Call(target=sys.stdout.writeLine) { Var(name=output) } }
+          Block { Lit(value=0) }
+        }
+        Let(name=diagnostic) { Call(target=mapGetNodeOr) { Var(name=result) Lit(value="diagnostic") Map { } } }
+        If {
+          Eq { Eq { Call(target=diagnosticCode) { Var(name=diagnostic) } Lit(value="") } Lit(value=false) }
+          Block {
+            Call(target=sys.stdout.writeLine) {
+              StrConcat {
+                Call(target=diagnosticCode) { Var(name=diagnostic) }
+                StrConcat { Lit(value=": ") Call(target=diagnosticMessage) { Var(name=diagnostic) } }
+              }
+            }
+          }
+          Block { Lit(value=0) }
+        }
+        Return { Call(target=mapGetIntOr) { Var(name=result) Lit(value="exitCode") Lit(value=2) } }
       }
     }
   }

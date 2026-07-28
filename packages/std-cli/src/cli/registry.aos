@@ -1,0 +1,174 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/str.aos")
+  Import(path="diagnostics.aos")
+
+  Export(name=registerCommand)
+  Export(name=findCommand)
+  Export(name=applicationDiagnostic)
+
+  Let(name=registerCommand) {
+    Fn(params=application,command) {
+      Block {
+        Let(name=name) { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+        Let(name=commands) { Call(target=mapGetNodeOr) { Var(name=application) Lit(value="commands") MakeBlock { Lit(value="List") } } }
+        Let(name=problem) { Call(target=validateCommand) { Var(name=commands) Var(name=command) } }
+        If {
+          Eq { Eq { Call(target=diagnosticCode) { Var(name=problem) } Lit(value="") } Lit(value=false) }
+          Block { Return { Call(target=applicationWith) { Var(name=application) Var(name=commands) Var(name=problem) } } }
+          Block {
+            Let(name=registered) { AppendChild { Var(name=commands) Var(name=command) } }
+            Return { Call(target=applicationWith) { Var(name=application) Var(name=registered) Map { } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=applicationWith) {
+    Fn(params=application,commands,diagnostic) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliApplication") }
+            Field(key="name") { Call(target=mapGetStringOr) { Var(name=application) Lit(value="name") Lit(value="") } }
+            Field(key="version") { Call(target=mapGetStringOr) { Var(name=application) Lit(value="version") Lit(value="") } }
+            Field(key="summary") { Call(target=mapGetStringOr) { Var(name=application) Lit(value="summary") Lit(value="") } }
+            Field(key="commands") { Var(name=commands) }
+            Field(key="diagnostic") { Var(name=diagnostic) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=validateCommand) {
+    Fn(params=commands,command) {
+      Block {
+        Let(name=name) { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+        If {
+          Eq { Var(name=name) Lit(value="") }
+          Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI010") Lit(value="invalid command descriptor: command name is empty") Var(name=name) } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=cliOr) { Eq { Var(name=name) Lit(value="help") } Eq { Var(name=name) Lit(value="version") } }
+          Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI008") StrConcat { Lit(value="reserved command name: ") Var(name=name) } Var(name=name) } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Eq { Eq { Call(target=findCommandIndex) { Var(name=commands) Var(name=name) Lit(value=0) } Lit(value=-1) } Lit(value=false) }
+          Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI002") StrConcat { Lit(value="duplicate command: ") Var(name=name) } Var(name=name) } } }
+          Block { Return { Call(target=validateOptions) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } Lit(value=0) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=validateOptions) {
+    Fn(params=options,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Map { } } }
+          Block {
+            Let(name=option) { ChildAt { Var(name=options) Var(name=index) } }
+            Let(name=name) { Call(target=mapGetStringOr) { Var(name=option) Lit(value="name") Lit(value="") } }
+            Let(name=alias) { Call(target=mapGetStringOr) { Var(name=option) Lit(value="alias") Lit(value="") } }
+            If {
+              Call(target=cliOr) { Eq { Var(name=name) Lit(value="help") } Eq { Var(name=alias) Lit(value="h") } }
+              Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI010") Lit(value="invalid command descriptor: reserved help option") Var(name=name) } } }
+              Block { Lit(value=0) }
+            }
+            Let(name=duplicateName) { Call(target=findOptionName) { Var(name=options) Var(name=name) Add { Var(name=index) Lit(value=1) } } }
+            If {
+              Var(name=duplicateName)
+              Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI005") StrConcat { Lit(value="duplicate option: --") Var(name=name) } Var(name=name) } } }
+              Block { Lit(value=0) }
+            }
+            Let(name=duplicateAlias) { Call(target=findOptionAlias) { Var(name=options) Var(name=alias) Add { Var(name=index) Lit(value=1) } } }
+            If {
+              Call(target=cliAnd) { Eq { Eq { Var(name=alias) Lit(value="") } Lit(value=false) } Var(name=duplicateAlias) }
+              Block { Return { Call(target=cliDiagnostic) { Lit(value="CLI009") StrConcat { Lit(value="duplicate option alias: -") Var(name=alias) } Var(name=alias) } } }
+              Block { Return { Call(target=validateOptions) { Var(name=options) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findOptionName) {
+    Fn(params=options,name,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Lit(value=false) } }
+          Block {
+            If {
+              Eq { Call(target=mapGetStringOr) { ChildAt { Var(name=options) Var(name=index) } Lit(value="name") Lit(value="") } Var(name=name) }
+              Block { Return { Lit(value=true) } }
+              Block { Return { Call(target=findOptionName) { Var(name=options) Var(name=name) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findOptionAlias) {
+    Fn(params=options,alias,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Lit(value=false) } }
+          Block {
+            If {
+              Eq { Call(target=mapGetStringOr) { ChildAt { Var(name=options) Var(name=index) } Lit(value="alias") Lit(value="") } Var(name=alias) }
+              Block { Return { Lit(value=true) } }
+              Block { Return { Call(target=findOptionAlias) { Var(name=options) Var(name=alias) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findCommandIndex) {
+    Fn(params=commands,name,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=commands) } }
+          Block { Return { Lit(value=-1) } }
+          Block {
+            If {
+              Eq { Call(target=mapGetStringOr) { ChildAt { Var(name=commands) Var(name=index) } Lit(value="name") Lit(value="") } Var(name=name) }
+              Block { Return { Var(name=index) } }
+              Block { Return { Call(target=findCommandIndex) { Var(name=commands) Var(name=name) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findCommand) {
+    Fn(params=application,name) {
+      Block {
+        Let(name=commands) { Call(target=mapGetNodeOr) { Var(name=application) Lit(value="commands") MakeBlock { Lit(value="List") } } }
+        Let(name=index) { Call(target=findCommandIndex) { Var(name=commands) Var(name=name) Lit(value=0) } }
+        If {
+          Eq { Var(name=index) Lit(value=-1) }
+          Block { Return { Map { } } }
+          Block { Return { ChildAt { Var(name=commands) Var(name=index) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=applicationDiagnostic) {
+    Fn(params=application) {
+      Block { Return { Call(target=mapGetNodeOr) { Var(name=application) Lit(value="diagnostic") Map { } } } }
+    }
+  }
+}

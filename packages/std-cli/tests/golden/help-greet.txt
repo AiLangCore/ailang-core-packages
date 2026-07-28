@@ -1,0 +1,11 @@
+Usage: sample greet <name> [--greeting <text>] [--loud]
+
+Greet a person
+
+Arguments:
+  name  Person to greet
+
+Options:
+  -g, --greeting <value>  Greeting text
+  -l, --loud  Use loud output
+  -h, --help  Show command help

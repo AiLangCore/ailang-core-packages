@@ -1,0 +1,144 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/process.aos")
+  Import(path="model.aos")
+
+  Export(name=invokeCommand)
+
+  Let(name=invokeCommand) {
+    Fn(params=command,invocation) {
+      Block {
+        If {
+          Eq {
+            Call(target=mapGetStringOr) {
+              Var(name=command)
+              Lit(value="invocationMode")
+              Lit(value="Library")
+            }
+            Lit(value="Executable")
+          }
+          Block {
+            Return {
+              Call(target=invokeExecutableCommand) {
+                Var(name=command)
+                Var(name=invocation)
+              }
+            }
+          }
+          Block {
+            Return {
+              Call(target=cliResult) {
+                Call(target=cliCommandHandler) { Var(name=invocation) }
+                Lit(value="")
+                Map { }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=invokeExecutableCommand) {
+    Fn(params=command,invocation) {
+      Block {
+        Let(name=arguments) {
+          Call(target=appendInvocationArguments) {
+            Call(target=mapGetNodeOr) {
+              Var(name=command)
+              Lit(value="argumentPrefix")
+              MakeBlock { Lit(value="Arguments") }
+            }
+            Call(target=invocationRawArgs) { Var(name=invocation) }
+            Lit(value=1)
+          }
+        }
+        Let(name=result) {
+          Call(target=runCaptured) {
+            Call(target=mapGetStringOr) {
+              Var(name=command)
+              Lit(value="executable")
+              Lit(value="")
+            }
+            Var(name=arguments)
+            Lit(value="")
+            MakeBlock { Lit(value="Environment") }
+          }
+        }
+        Let(name=stderrText) {
+          Call(target=withoutFinalLineFeed) {
+            Call(target=processResultStderrText) { Var(name=result) }
+          }
+        }
+        If {
+          Eq { Eq { Var(name=stderrText) Lit(value="") } Lit(value=false) }
+          Block { Call(target=sys.stdout.writeLine) { Var(name=stderrText) } }
+          Block { Lit(value=0) }
+        }
+        Return {
+          Call(target=cliResult) {
+            Call(target=processResultExitCode) { Var(name=result) }
+            Call(target=withoutFinalLineFeed) {
+              Call(target=processResultStdoutText) { Var(name=result) }
+            }
+            Map { }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=withoutFinalLineFeed) {
+    Fn(params=text) {
+      Block {
+        Let(name=length) { StringScalarLength { Var(name=text) } }
+        If {
+          Eq { Var(name=length) Lit(value=0) }
+          Block { Return { Var(name=text) } }
+          Block {
+            Let(name=lastIndex) { Sub { Var(name=length) Lit(value=1) } }
+            If {
+              Eq {
+                StringSlice { Var(name=text) Var(name=lastIndex) Lit(value=1) }
+                Lit(value="\n")
+              }
+              Block {
+                Return {
+                  StringSlice {
+                    Var(name=text)
+                    Lit(value=0)
+                    Var(name=lastIndex)
+                  }
+                }
+              }
+              Block { Return { Var(name=text) } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=appendInvocationArguments) {
+    Fn(params=arguments,rawArguments,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=rawArguments) } }
+          Block { Return { Var(name=arguments) } }
+          Block {
+            Return {
+              Call(target=appendInvocationArguments) {
+                AppendChild {
+                  Var(name=arguments)
+                  ChildAt { Var(name=rawArguments) Var(name=index) }
+                }
+                Var(name=rawArguments)
+                Add { Var(name=index) Lit(value=1) }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

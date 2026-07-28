@@ -1,0 +1,82 @@
+Program {
+  Import(path="../src/cli/cli.aos")
+  Import(sdk="ailang" path="std/core.aos")
+  Export(name=start)
+
+  Let(name=cliCommandHandler) {
+    Fn(params=invocation) {
+      Block {
+        Call(target=sys.stdout.writeLine) {
+          StrConcat {
+            Call(target=invocationPositional) { Var(name=invocation) Lit(value=0) Lit(value="nobody") }
+            StrConcat {
+              Lit(value=":")
+              Call(target=invocationOption) { Var(name=invocation) Lit(value="greeting") Lit(value="hello") }
+            }
+          }
+        }
+        If {
+          Call(target=invocationHasFlag) { Var(name=invocation) Lit(value="loud") }
+          Block { Call(target=sys.stdout.writeLine) { Lit(value="LOUD") } }
+          Block { Lit(value=0) }
+        }
+        Return { Lit(value=7) }
+      }
+    }
+  }
+
+  Let(name=start) {
+    Fn(params=args) {
+      Block {
+        Let(name=command0) { Call(target=createCommand) { Lit(value="greet") Lit(value="Greet a person") Lit(value="greet") } }
+        Let(name=command1) { Call(target=commandWithUsage) { Var(name=command0) Lit(value="greet <name> [--greeting <text>] [--loud]") } }
+        Let(name=command2) { Call(target=commandWithArgument) { Var(name=command1) Call(target=createArgument) { Lit(value="name") Lit(value=true) Lit(value="Person to greet") } } }
+        Let(name=command3) { Call(target=commandWithOption) { Var(name=command2) Call(target=createOption) { Lit(value="greeting") Lit(value="g") Lit(value=true) Lit(value=false) Lit(value="Greeting text") } } }
+        Let(name=command4) { Call(target=commandWithOption) { Var(name=command3) Call(target=createOption) { Lit(value="loud") Lit(value="l") Lit(value=false) Lit(value=false) Lit(value="Use loud output") } } }
+        Let(name=application0) { Call(target=createApplication) { Lit(value="sample") Lit(value="1.2.3") Lit(value="Sample CLI") } }
+        Let(name=application1) { Call(target=registerCommand) { Var(name=application0) Var(name=command4) } }
+        Let(name=prefix0) {
+          AppendChild {
+            MakeBlock { Lit(value="Arguments") }
+            MakeLitString { Lit(value="arg0") Lit(value="-c") }
+          }
+        }
+        Let(name=prefix1) {
+          AppendChild {
+            Var(name=prefix0)
+            MakeLitString {
+              Lit(value="arg1")
+              Lit(value="printf exec-error >&2; printf %s \"$1\"; exit 9")
+            }
+          }
+        }
+        Let(name=prefix2) {
+          AppendChild {
+            Var(name=prefix1)
+            MakeLitString { Lit(value="arg2") Lit(value="std-cli-exec") }
+          }
+        }
+        Let(name=exec0) {
+          Call(target=commandAllowTrailing) {
+            Call(target=createCommand) {
+              Lit(value="exec")
+              Lit(value="Execute a captured command")
+              Lit(value="")
+            }
+          }
+        }
+        Let(name=exec1) {
+          Call(target=commandAsExecutable) {
+            Var(name=exec0)
+            Lit(value="/bin/sh")
+            Var(name=prefix2)
+          }
+        }
+        Let(name=application2) {
+          Call(target=registerCommand) { Var(name=application1) Var(name=exec1) }
+        }
+        Return { Call(target=run) { Var(name=application2) Var(name=args) } }
+      }
+    }
+  }
+}

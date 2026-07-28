@@ -1,0 +1,60 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+
+  Export(name=cliDiagnostic)
+  Export(name=diagnosticCode)
+  Export(name=diagnosticMessage)
+  Export(name=cliOr)
+  Export(name=cliAnd)
+
+  Let(name=cliDiagnostic) {
+    Fn(params=code,message,subject) {
+      Block {
+        Return {
+          Map {
+            Field(key="kind") { Lit(value="CliDiagnostic") }
+            Field(key="code") { Var(name=code) }
+            Field(key="message") { Var(name=message) }
+            Field(key="subject") { Var(name=subject) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=diagnosticCode) {
+    Fn(params=diagnostic) {
+      Block { Return { Call(target=mapGetStringOr) { Var(name=diagnostic) Lit(value="code") Lit(value="") } } }
+    }
+  }
+
+  Let(name=diagnosticMessage) {
+    Fn(params=diagnostic) {
+      Block { Return { Call(target=mapGetStringOr) { Var(name=diagnostic) Lit(value="message") Lit(value="") } } }
+    }
+  }
+
+  Let(name=cliOr) {
+    Fn(params=left,right) {
+      Block {
+        If {
+          Var(name=left)
+          Block { Return { Lit(value=true) } }
+          Block { Return { Var(name=right) } }
+        }
+      }
+    }
+  }
+
+  Let(name=cliAnd) {
+    Fn(params=left,right) {
+      Block {
+        If {
+          Var(name=left)
+          Block { Return { Var(name=right) } }
+          Block { Return { Lit(value=false) } }
+        }
+      }
+    }
+  }
+}

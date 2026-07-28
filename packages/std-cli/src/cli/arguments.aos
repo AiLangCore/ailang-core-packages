@@ -1,0 +1,427 @@
+Program {
+  Import(sdk="ailang" path="std/core.aos")
+  Import(sdk="ailang" path="std/str.aos")
+  Import(path="diagnostics.aos")
+
+  Export(name=parseInvocation)
+
+  Let(name=parseInvocation) {
+    Fn(params=command,args,startIndex) {
+      Block {
+        Let(name=state) {
+          Map {
+            Field(key="positionals") { MakeBlock { Lit(value="List") } }
+            Field(key="options") { Map { } }
+            Field(key="flags") { MakeBlock { Lit(value="List") } }
+            Field(key="remaining") { MakeBlock { Lit(value="List") } }
+            Field(key="diagnostic") { Map { } }
+            Field(key="afterMarker") { Lit(value=false) }
+          }
+        }
+        Let(name=parsed) { Call(target=parseAt) { Var(name=command) Var(name=args) Var(name=startIndex) Var(name=state) } }
+        If {
+          Eq {
+            Eq {
+              Call(target=diagnosticCode) {
+                Call(target=mapGetNodeOr) {
+                  Var(name=parsed)
+                  Lit(value="diagnostic")
+                  Map { }
+                }
+              }
+              Lit(value="")
+            }
+            Lit(value=false)
+          }
+          Block { Return { Call(target=parseResult) { Lit(value=false) Map { } Call(target=mapGetNodeOr) { Var(name=parsed) Lit(value="diagnostic") Map { } } } } }
+          Block { Return { Call(target=validatePositionals) { Var(name=command) Var(name=args) Var(name=parsed) } } }
+        }
+      }
+    }
+  }
+
+  Let(name=parseAt) {
+    Fn(params=command,args,index,state) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=args) } }
+          Block { Return { Var(name=state) } }
+          Block {
+            Let(name=token) { Call(target=argText) { Var(name=args) Var(name=index) } }
+            If {
+              Call(target=mapGetBoolOr) { Var(name=state) Lit(value="afterMarker") Lit(value=false) }
+              Block {
+                Return { Call(target=parseAt) { Var(name=command) Var(name=args) Add { Var(name=index) Lit(value=1) } Call(target=stateAddRemaining) { Var(name=state) Var(name=token) } } }
+              }
+              Block { Lit(value=0) }
+            }
+            If {
+              Eq { Var(name=token) Lit(value="--") }
+              Block { Return { Call(target=parseAt) { Var(name=command) Var(name=args) Add { Var(name=index) Lit(value=1) } Call(target=stateAfterMarker) { Var(name=state) } } } }
+              Block { Lit(value=0) }
+            }
+            If {
+              Call(target=startsWithText) { Var(name=token) Lit(value="--") }
+              Block {
+                Let(name=name) { StringSlice { Var(name=token) Lit(value=2) Lit(value=2147483647) } }
+                Return { Call(target=parseNamedOption) { Var(name=command) Var(name=args) Var(name=index) Var(name=state) Var(name=name) Lit(value="--") } }
+              }
+              Block { Lit(value=0) }
+            }
+            If {
+              Call(target=startsWithText) { Var(name=token) Lit(value="-") }
+              Block {
+                Let(name=alias) { StringSlice { Var(name=token) Lit(value=1) Lit(value=2147483647) } }
+                If {
+                  Eq { Eq { StringScalarLength { Var(name=alias) } Lit(value=1) } Lit(value=false) }
+                  Block { Return { Call(target=stateError) { Var(name=state) Call(target=cliDiagnostic) { Lit(value="CLI003") StrConcat { Lit(value="unknown option: ") Var(name=token) } Var(name=token) } } } }
+                  Block {
+                    Let(name=option) { Call(target=findOptionByAlias) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } Var(name=alias) Lit(value=0) } }
+                    Return { Call(target=parseOption) { Var(name=command) Var(name=args) Var(name=index) Var(name=state) Var(name=option) Var(name=token) } }
+                  }
+                }
+              }
+              Block { Lit(value=0) }
+            }
+            Return { Call(target=parseAt) { Var(name=command) Var(name=args) Add { Var(name=index) Lit(value=1) } Call(target=stateAddPositional) { Var(name=state) Var(name=token) } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=parseNamedOption) {
+    Fn(params=command,args,index,state,name,prefix) {
+      Block {
+        If {
+          Eq { Var(name=name) Lit(value="help") }
+          Block {
+            Let(name=helpOption) {
+              Map {
+                Field(key="name") { Lit(value="help") }
+                Field(key="requiresValue") { Lit(value=false) }
+              }
+            }
+            Return { Call(target=parseOption) { Var(name=command) Var(name=args) Var(name=index) Var(name=state) Var(name=helpOption) Lit(value="--help") } }
+          }
+          Block { Lit(value=0) }
+        }
+        Let(name=option) { Call(target=findOptionByName) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } } Var(name=name) Lit(value=0) } }
+        Return { Call(target=parseOption) { Var(name=command) Var(name=args) Var(name=index) Var(name=state) Var(name=option) StrConcat { Var(name=prefix) Var(name=name) } } }
+      }
+    }
+  }
+
+  Let(name=parseOption) {
+    Fn(params=command,args,index,state,option,spelling) {
+      Block {
+        Let(name=name) { Call(target=mapGetStringOr) { Var(name=option) Lit(value="name") Lit(value="") } }
+        If {
+          Eq { Var(name=name) Lit(value="") }
+          Block { Return { Call(target=stateError) { Var(name=state) Call(target=cliDiagnostic) { Lit(value="CLI003") StrConcat { Lit(value="unknown option: ") Var(name=spelling) } Var(name=spelling) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=stateHasOption) { Var(name=state) Var(name=name) }
+          Block { Return { Call(target=stateError) { Var(name=state) Call(target=cliDiagnostic) { Lit(value="CLI005") StrConcat { Lit(value="duplicate option: --") Var(name=name) } Var(name=name) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=mapGetBoolOr) { Var(name=option) Lit(value="requiresValue") Lit(value=false) }
+          Block {
+            Let(name=valueIndex) { Add { Var(name=index) Lit(value=1) } }
+            If {
+              Eq { Var(name=valueIndex) ChildCount { Var(name=args) } }
+              Block { Return { Call(target=stateError) { Var(name=state) Call(target=cliDiagnostic) { Lit(value="CLI004") StrConcat { Lit(value="missing value for option: --") Var(name=name) } Var(name=name) } } } }
+              Block {
+                Return { Call(target=parseAt) { Var(name=command) Var(name=args) Add { Var(name=index) Lit(value=2) } Call(target=stateSetOption) { Var(name=state) Var(name=name) Call(target=argText) { Var(name=args) Var(name=valueIndex) } } } }
+              }
+            }
+          }
+          Block {
+            Return { Call(target=parseAt) { Var(name=command) Var(name=args) Add { Var(name=index) Lit(value=1) } Call(target=stateSetFlag) { Var(name=state) Var(name=name) } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=validatePositionals) {
+    Fn(params=command,args,state) {
+      Block {
+        Let(name=missingOption) {
+          Call(target=findMissingRequiredOption) {
+            Call(target=mapGetNodeOr) { Var(name=command) Lit(value="options") MakeBlock { Lit(value="List") } }
+            Var(name=state)
+            Lit(value=0)
+          }
+        }
+        If {
+          Eq { Eq { Var(name=missingOption) Lit(value="") } Lit(value=false) }
+          Block {
+            Return {
+              Call(target=parseResult) {
+                Lit(value=false)
+                Map { }
+                Call(target=cliDiagnostic) {
+                  Lit(value="CLI006")
+                  StrConcat { Lit(value="missing required option: --") Var(name=missingOption) }
+                  Var(name=missingOption)
+                }
+              }
+            }
+          }
+          Block { Lit(value=0) }
+        }
+        Let(name=positionals) { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } }
+        Let(name=descriptors) { Call(target=mapGetNodeOr) { Var(name=command) Lit(value="arguments") MakeBlock { Lit(value="List") } } }
+        Let(name=missing) { Call(target=findMissingRequired) { Var(name=descriptors) ChildCount { Var(name=positionals) } Lit(value=0) } }
+        If {
+          Eq { Eq { Var(name=missing) Lit(value="") } Lit(value=false) }
+          Block { Return { Call(target=parseResult) { Lit(value=false) Map { } Call(target=cliDiagnostic) { Lit(value="CLI006") StrConcat { Lit(value="missing required argument: ") Var(name=missing) } Var(name=missing) } } } }
+          Block { Lit(value=0) }
+        }
+        If {
+          Call(target=cliAnd) {
+            Eq { Call(target=mapGetBoolOr) { Var(name=command) Lit(value="allowTrailing") Lit(value=false) } Lit(value=false) }
+            Lt { ChildCount { Var(name=descriptors) } ChildCount { Var(name=positionals) } }
+          }
+          Block {
+            Let(name=unexpected) { AttrValueString { ChildAt { Var(name=positionals) ChildCount { Var(name=descriptors) } } Lit(value=0) } }
+            Return { Call(target=parseResult) { Lit(value=false) Map { } Call(target=cliDiagnostic) { Lit(value="CLI007") StrConcat { Lit(value="unexpected argument: ") Var(name=unexpected) } Var(name=unexpected) } } }
+          }
+          Block {
+            Let(name=invocation) {
+              Map {
+                Field(key="kind") { Lit(value="CliInvocation") }
+                Field(key="command") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="name") Lit(value="") } }
+                Field(key="handler") { Call(target=mapGetStringOr) { Var(name=command) Lit(value="handler") Lit(value="") } }
+                Field(key="positionals") { Var(name=positionals) }
+                Field(key="options") { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } }
+                Field(key="flags") { Call(target=flagsToMap) { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Lit(value=0) Map { } } }
+                Field(key="remaining") { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } }
+                Field(key="rawArgs") { Var(name=args) }
+              }
+            }
+            Return { Call(target=parseResult) { Lit(value=true) Var(name=invocation) Map { } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findMissingRequiredOption) {
+    Fn(params=options,state,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=option) { ChildAt { Var(name=options) Var(name=index) } }
+            Let(name=name) { Call(target=mapGetStringOr) { Var(name=option) Lit(value="name") Lit(value="") } }
+            If {
+              Call(target=cliAnd) {
+                Call(target=mapGetBoolOr) { Var(name=option) Lit(value="required") Lit(value=false) }
+                Eq { Call(target=stateHasOption) { Var(name=state) Var(name=name) } Lit(value=false) }
+              }
+              Block { Return { Var(name=name) } }
+              Block { Return { Call(target=findMissingRequiredOption) { Var(name=options) Var(name=state) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findMissingRequired) {
+    Fn(params=descriptors,provided,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=descriptors) } }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=descriptor) { ChildAt { Var(name=descriptors) Var(name=index) } }
+            If {
+              Call(target=cliAnd) {
+                Call(target=mapGetBoolOr) { Var(name=descriptor) Lit(value="required") Lit(value=false) }
+                Eq { Lt { Var(name=index) Var(name=provided) } Lit(value=false) }
+              }
+              Block { Return { Call(target=mapGetStringOr) { Var(name=descriptor) Lit(value="name") Lit(value="") } } }
+              Block { Return { Call(target=findMissingRequired) { Var(name=descriptors) Var(name=provided) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findOptionByName) {
+    Fn(params=options,name,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Map { } } }
+          Block {
+            Let(name=option) { ChildAt { Var(name=options) Var(name=index) } }
+            If {
+              Eq { Call(target=mapGetStringOr) { Var(name=option) Lit(value="name") Lit(value="") } Var(name=name) }
+              Block { Return { Var(name=option) } }
+              Block { Return { Call(target=findOptionByName) { Var(name=options) Var(name=name) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=findOptionByAlias) {
+    Fn(params=options,alias,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=options) } }
+          Block { Return { Map { } } }
+          Block {
+            Let(name=option) { ChildAt { Var(name=options) Var(name=index) } }
+            If {
+              Eq { Call(target=mapGetStringOr) { Var(name=option) Lit(value="alias") Lit(value="") } Var(name=alias) }
+              Block { Return { Var(name=option) } }
+              Block { Return { Call(target=findOptionByAlias) { Var(name=options) Var(name=alias) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=startsWithText) {
+    Fn(params=text,prefix) {
+      Block {
+        Return {
+          Call(target=cliAnd) {
+            Eq { Lt { StringScalarLength { Var(name=text) } StringScalarLength { Var(name=prefix) } } Lit(value=false) }
+            Eq { StringSlice { Var(name=text) Lit(value=0) StringScalarLength { Var(name=prefix) } } Var(name=prefix) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=argText) {
+    Fn(params=args,index) {
+      Block { Return { AttrValueString { ChildAt { Var(name=args) Var(name=index) } Lit(value=0) } } }
+    }
+  }
+
+  Let(name=stateHasOption) {
+    Fn(params=state,name) {
+      Block {
+        Return {
+          Call(target=cliOr) {
+            Call(target=mapHas) { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Var(name=name) }
+            Call(target=listHasString) { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Var(name=name) Lit(value=0) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=listHasString) {
+    Fn(params=values,value,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=values) } }
+          Block { Return { Lit(value=false) } }
+          Block {
+            If {
+              Eq { AttrValueString { ChildAt { Var(name=values) Var(name=index) } Lit(value=0) } Var(name=value) }
+              Block { Return { Lit(value=true) } }
+              Block { Return { Call(target=listHasString) { Var(name=values) Var(name=value) Add { Var(name=index) Lit(value=1) } } } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=stateAddPositional) {
+    Fn(params=state,value) {
+      Block { Return { Call(target=stateWith) { Var(name=state) AppendChild { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } MakeLitString { Lit(value="value") Var(name=value) } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } Map { } Lit(value=false) } } }
+    }
+  }
+
+  Let(name=stateAddRemaining) {
+    Fn(params=state,value) {
+      Block { Return { Call(target=stateWith) { Var(name=state) Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } AppendChild { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } MakeLitString { Lit(value="value") Var(name=value) } } Map { } Lit(value=true) } } }
+    }
+  }
+
+  Let(name=stateSetOption) {
+    Fn(params=state,name,value) {
+      Block { Return { Call(target=stateWith) { Var(name=state) Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } Call(target=mapSet) { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Var(name=name) Var(name=value) } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } Map { } Lit(value=false) } } }
+    }
+  }
+
+  Let(name=stateSetFlag) {
+    Fn(params=state,name) {
+      Block { Return { Call(target=stateWith) { Var(name=state) Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } AppendChild { Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } MakeLitString { Lit(value="value") Var(name=name) } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } Map { } Lit(value=false) } } }
+    }
+  }
+
+  Let(name=stateAfterMarker) {
+    Fn(params=state) {
+      Block { Return { Call(target=stateWith) { Var(name=state) Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } Map { } Lit(value=true) } } }
+    }
+  }
+
+  Let(name=stateError) {
+    Fn(params=state,diagnostic) {
+      Block { Return { Call(target=stateWith) { Var(name=state) Call(target=mapGetNodeOr) { Var(name=state) Lit(value="positionals") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="options") Map { } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="flags") MakeBlock { Lit(value="List") } } Call(target=mapGetNodeOr) { Var(name=state) Lit(value="remaining") MakeBlock { Lit(value="List") } } Var(name=diagnostic) Lit(value=false) } } }
+    }
+  }
+
+  Let(name=stateWith) {
+    Fn(params=state,positionals,options,flags,remaining,diagnostic,afterMarker) {
+      Block {
+        Return {
+          Map {
+            Field(key="positionals") { Var(name=positionals) }
+            Field(key="options") { Var(name=options) }
+            Field(key="flags") { Var(name=flags) }
+            Field(key="remaining") { Var(name=remaining) }
+            Field(key="diagnostic") { Var(name=diagnostic) }
+            Field(key="afterMarker") { Var(name=afterMarker) }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=flagsToMap) {
+    Fn(params=flags,index,result) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=flags) } }
+          Block { Return { Var(name=result) } }
+          Block {
+            Let(name=name) { AttrValueString { ChildAt { Var(name=flags) Var(name=index) } Lit(value=0) } }
+            Return { Call(target=flagsToMap) { Var(name=flags) Add { Var(name=index) Lit(value=1) } Call(target=mapSet) { Var(name=result) Var(name=name) Lit(value="true") } } }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=parseResult) {
+    Fn(params=ok,invocation,diagnostic) {
+      Block {
+        Return {
+          Map {
+            Field(key="ok") { Var(name=ok) }
+            Field(key="invocation") { Var(name=invocation) }
+            Field(key="diagnostic") { Var(name=diagnostic) }
+          }
+        }
+      }
+    }
+  }
+}
