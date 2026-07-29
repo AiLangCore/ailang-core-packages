@@ -1,0 +1,305 @@
+Program {
+  Export(name=std.json.stringify)
+
+  Let(name=std.json.stringify) {
+    Fn(params=node) {
+      Block {
+        If {
+          Eq { NodeKind { Var(name=node) } Lit(value="Map") }
+          Block {
+            Return {
+              Call(target=std.json.stringifyMap) {
+                Var(name=node)
+              }
+            }
+          }
+          Block {
+            If {
+              Eq { NodeKind { Var(name=node) } Lit(value="Lit") }
+              Block {
+                Return {
+                  Call(target=std.json.stringifyLit) {
+                    Var(name=node)
+                  }
+                }
+              }
+              Block { Return { Lit(value="null") } }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.stringifyMap) {
+    Fn(params=mapNode) {
+      Block {
+        Return {
+          StrConcat {
+            Lit(value="{")
+            StrConcat {
+              Call(target=std.json.stringifyFields) {
+                Var(name=mapNode)
+                Lit(value=0)
+              }
+              Lit(value="}")
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.stringifyFields) {
+    Fn(params=mapNode,index) {
+      Block {
+        If {
+          Eq { Var(name=index) ChildCount { Var(name=mapNode) } }
+          Block { Return { Lit(value="") } }
+          Block {
+            Let(name=field) {
+              ChildAt {
+                Var(name=mapNode)
+                Var(name=index)
+              }
+            }
+            Let(name=current) {
+              Call(target=std.json.stringifyField) {
+                Var(name=field)
+              }
+            }
+            Let(name=rest) {
+              Call(target=std.json.stringifyFields) {
+                Var(name=mapNode)
+                Add {
+                  Var(name=index)
+                  Lit(value=1)
+                }
+              }
+            }
+            If {
+              Eq { Var(name=rest) Lit(value="") }
+              Block { Return { Var(name=current) } }
+              Block {
+                Return {
+                  StrConcat {
+                    Var(name=current)
+                    StrConcat {
+                      Lit(value=",")
+                      Var(name=rest)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.stringifyField) {
+    Fn(params=field) {
+      Block {
+        Let(name=key) {
+          Call(target=std.json.fieldKey) {
+            Var(name=field)
+          }
+        }
+        Let(name=value) {
+          If {
+            Eq { ChildCount { Var(name=field) } Lit(value=1) }
+            Block {
+              Call(target=std.json.stringify) {
+                ChildAt {
+                  Var(name=field)
+                  Lit(value=0)
+                }
+              }
+            }
+            Block { Lit(value="null") }
+          }
+        }
+        Return {
+          StrConcat {
+            Lit(value="\"")
+            StrConcat {
+              StrEscape { Var(name=key) }
+              StrConcat {
+                Lit(value="\":")
+                Var(name=value)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.fieldKey) {
+    Fn(params=field) {
+      Block {
+        Return {
+          Call(target=std.json.attrString) {
+            Var(name=field)
+            Lit(value="key")
+            Lit(value=0)
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.stringifyLit) {
+    Fn(params=lit) {
+      Block {
+        Let(name=valueIndex) {
+          Call(target=std.json.attrIndex) {
+            Var(name=lit)
+            Lit(value="value")
+            Lit(value=0)
+          }
+        }
+        If {
+          Eq { Var(name=valueIndex) Lit(value=-1) }
+          Block { Return { Lit(value="null") } }
+          Block {
+            Let(name=kind) {
+              AttrValueKind {
+                Var(name=lit)
+                Var(name=valueIndex)
+              }
+            }
+            If {
+              Eq { Var(name=kind) Lit(value="string") }
+              Block {
+                Return {
+                  StrConcat {
+                    Lit(value="\"")
+                    StrConcat {
+                      StrEscape {
+                        AttrValueString {
+                          Var(name=lit)
+                          Var(name=valueIndex)
+                        }
+                      }
+                      Lit(value="\"")
+                    }
+                  }
+                }
+              }
+              Block {
+                If {
+                  Eq { Var(name=kind) Lit(value="int") }
+                  Block {
+                    Return {
+                      ToString {
+                        AttrValueInt {
+                          Var(name=lit)
+                          Var(name=valueIndex)
+                        }
+                      }
+                    }
+                  }
+                  Block {
+                    If {
+                      Eq { Var(name=kind) Lit(value="bool") }
+                      Block {
+                        If {
+                          AttrValueBool {
+                            Var(name=lit)
+                            Var(name=valueIndex)
+                          }
+                          Block { Return { Lit(value="true") } }
+                          Block { Return { Lit(value="false") } }
+                        }
+                      }
+                      Block { Return { Lit(value="null") } }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.attrString) {
+    Fn(params=node,key,index) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block { Return { Lit(value="") } }
+          Block {
+            If {
+              Eq {
+                AttrKey {
+                  Var(name=node)
+                  Var(name=index)
+                }
+                Var(name=key)
+              }
+              Block {
+                Return {
+                  AttrValueString {
+                    Var(name=node)
+                    Var(name=index)
+                  }
+                }
+              }
+              Block {
+                Return {
+                  Call(target=std.json.attrString) {
+                    Var(name=node)
+                    Var(name=key)
+                    Add {
+                      Var(name=index)
+                      Lit(value=1)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  Let(name=std.json.attrIndex) {
+    Fn(params=node,key,index) {
+      Block {
+        If {
+          Eq { Var(name=index) AttrCount { Var(name=node) } }
+          Block { Return { Lit(value=-1) } }
+          Block {
+            If {
+              Eq {
+                AttrKey {
+                  Var(name=node)
+                  Var(name=index)
+                }
+                Var(name=key)
+              }
+              Block { Return { Var(name=index) } }
+              Block {
+                Return {
+                  Call(target=std.json.attrIndex) {
+                    Var(name=node)
+                    Var(name=key)
+                    Add {
+                      Var(name=index)
+                      Lit(value=1)
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
