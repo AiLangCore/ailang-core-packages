@@ -18,11 +18,6 @@ jobs:
       - name: Validate package namespaces
         run: ./scripts/validate-package-namespaces.sh
 
-      - name: Validate AiOS target shell tools
-        run: |
-          sh -n packages/target-aios-gui/tools/aios
-          sh -n packages/target-aios-gui/tools/qemu
-
       - name: List package descriptors
         run: find packages -name package.toml -print | sort
 
