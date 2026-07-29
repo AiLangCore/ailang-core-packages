@@ -1,6 +1,7 @@
 Program {
   Import(sdk="ailang" path="std/core.aos")
   Import(sdk="ailang" path="std/str.aos")
+  Import(path="stringify.aos")
 
   Let(name=encode) {
     Fn(params=node) {
