@@ -170,17 +170,15 @@ Program {
   Let(name=httpEmitRaw) {
     Fn(params=state,responseText) {
       Block {
-        Let(name=cmdText) {
-          StrConcat {
-            Lit(value="Program#std_http_cmdp1 { Command#Emit(type=\"http.raw\" payload=\"")
-            StrConcat {
-              StrEscape { Var(name=responseText) }
-              Lit(value="\") }")
+        Let(name=cmdNode) {
+          AppendAttr {
+            AppendAttr {
+              MakeNode { Lit(value="Command") Lit(value="std_http_emit_raw") }
+              MakeLitString { Lit(value="type") Lit(value="http.raw") }
             }
+            MakeLitString { Lit(value="payload") Var(name=responseText) }
           }
         }
-        Let(name=cmdParsed) { Call(target=compiler.parse) { Var(name=cmdText) } }
-        Let(name=cmdNode) { ChildAt { Var(name=cmdParsed) Lit(value=0) } }
         Return {
           AppendChild {
             AppendChild {
@@ -378,21 +376,11 @@ Program {
     Fn(params=state) {
       Block {
         Let(name=error) { Call(target=httpRequestError) { Var(name=state) } }
-        Return {
-          Or {
-            Or {
-              Eq { Var(name=error) Lit(value="connect_failed") }
-              Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_failed:") }
-            }
-            Or {
-              Eq { Var(name=error) Lit(value="connect_invalid") }
-              Or {
-                Eq { Var(name=error) Lit(value="connect_tls_failed") }
-                Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_tls_failed:") }
-              }
-            }
-          }
-        }
+        If { Eq { Var(name=error) Lit(value="connect_failed") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        If { Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_failed:") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        If { Eq { Var(name=error) Lit(value="connect_invalid") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        If { Eq { Var(name=error) Lit(value="connect_tls_failed") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        Return { Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_tls_failed:") } }
       }
     }
   }
@@ -427,15 +415,9 @@ Program {
     Fn(params=state) {
       Block {
         Let(name=error) { Call(target=httpRequestError) { Var(name=state) } }
-        Return {
-          Or {
-            Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="dns_failed:") }
-            Or {
-              Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_failed:dns_failed:") }
-              Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_tls_failed:dns_failed:") }
-            }
-          }
-        }
+        If { Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="dns_failed:") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        If { Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_failed:dns_failed:") } Block { Return { Lit(value=true) } } Block { Lit(value=0) } }
+        Return { Call(target=httpErrorStartsWith) { Var(name=error) Lit(value="connect_tls_failed:dns_failed:") } }
       }
     }
   }
@@ -503,16 +485,16 @@ Program {
                       Block { Return { Lit(value=false) } }
                       Block {
                         If {
-                          Eq { Call(target=at) { Var(name=data) Var(name=index) } Lit(value=13) }
+                          Eq { Call(target=bytes.at) { Var(name=data) Var(name=index) } Lit(value=13) }
                           Block {
                             If {
-                              Eq { Call(target=at) { Var(name=data) Add { Var(name=index) Lit(value=1) } } Lit(value=10) }
+                              Eq { Call(target=bytes.at) { Var(name=data) Add { Var(name=index) Lit(value=1) } } Lit(value=10) }
                               Block {
                                 If {
-                                  Eq { Call(target=at) { Var(name=data) Add { Var(name=index) Lit(value=2) } } Lit(value=13) }
+                                  Eq { Call(target=bytes.at) { Var(name=data) Add { Var(name=index) Lit(value=2) } } Lit(value=13) }
                                   Block {
                                     Return {
-                                      Eq { Call(target=at) { Var(name=data) Add { Var(name=index) Lit(value=3) } } Lit(value=10) }
+                                      Eq { Call(target=bytes.at) { Var(name=data) Add { Var(name=index) Lit(value=3) } } Lit(value=10) }
                                     }
                                   }
                                   Block { Return { Lit(value=false) } }
@@ -574,13 +556,13 @@ Program {
         }
         If {
           Eq { Var(name=marker) Lit(value=-1) }
-          Block { Return { Call(target=slice) { Var(name=responseBytes) Lit(value=0) Lit(value=0) } } }
+          Block { Return { Call(target=bytes.slice) { Var(name=responseBytes) Lit(value=0) Lit(value=0) } } }
           Block {
             Let(name=bodyStart) {
               Add { Var(name=marker) Lit(value=4) }
             }
             Return {
-              Call(target=slice) {
+              Call(target=bytes.slice) {
                 Var(name=responseBytes)
                 Var(name=bodyStart)
                 Lit(value=2147483647)
@@ -1108,7 +1090,13 @@ Program {
                 Lit(value=3)
               }
             }
-            Return { ToInt { Var(name=codeText) } }
+            Return {
+              Call(target=httpParseDecimalStringAt) {
+                Var(name=codeText)
+                Lit(value=0)
+                Lit(value=0)
+              }
+            }
           }
         }
       }
@@ -1360,33 +1348,23 @@ Program {
     Fn(params=responseText) {
       Block {
         Let(name=statusCode) { Call(target=httpResponseStatusCode) { Var(name=responseText) } }
-        Return {
-          If {
-            Eq { Var(name=statusCode) Lit(value=301) }
-            Block { Lit(value=true) }
-            Block {
-              If {
-                Eq { Var(name=statusCode) Lit(value=302) }
-                Block { Lit(value=true) }
-                Block {
-                  If {
-                    Eq { Var(name=statusCode) Lit(value=303) }
-                    Block { Lit(value=true) }
-                    Block {
-                      If {
-                        Eq { Var(name=statusCode) Lit(value=307) }
-                        Block { Lit(value=true) }
-                        Block {
-                          Eq { Var(name=statusCode) Lit(value=308) }
-                        }
-                      }
-                    }
-                  }
-                }
-              }
-            }
-          }
+        If {
+          Eq { Var(name=statusCode) Lit(value=301) }
+          Block { Return { Lit(value=true) } }
         }
+        If {
+          Eq { Var(name=statusCode) Lit(value=302) }
+          Block { Return { Lit(value=true) } }
+        }
+        If {
+          Eq { Var(name=statusCode) Lit(value=303) }
+          Block { Return { Lit(value=true) } }
+        }
+        If {
+          Eq { Var(name=statusCode) Lit(value=307) }
+          Block { Return { Lit(value=true) } }
+        }
+        Return { Eq { Var(name=statusCode) Lit(value=308) } }
       }
     }
   }

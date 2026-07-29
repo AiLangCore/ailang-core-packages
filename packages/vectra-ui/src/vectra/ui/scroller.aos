@@ -301,12 +301,10 @@ Program {
   Let(name=scrollerThumbWidth) {
     Fn(params=w) {
       Block {
-        Return {
-          If {
-            Call(target=lt) { Var(name=w) Lit(value=240) }
-            Block { Lit(value=72) }
-            Block { Lit(value=112) }
-          }
+        If {
+          Call(target=lt) { Var(name=w) Lit(value=240) }
+          Block { Return { Lit(value=72) } }
+          Block { Return { Lit(value=112) } }
         }
       }
     }
