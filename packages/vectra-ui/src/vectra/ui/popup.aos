@@ -1,5 +1,5 @@
 Program {
-  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="aivectra" path="src/AiVectra/src/math.aos")
   Import(path="button.aos")
 
   Export(name=popupHalfFloor)

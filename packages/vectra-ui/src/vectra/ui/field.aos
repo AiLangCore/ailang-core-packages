@@ -1,5 +1,7 @@
 Program {
-  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="aivectra" path="src/AiVectra/src/geometry.aos")
+  Import(package="aivectra" path="src/AiVectra/src/math.aos")
+  Import(package="aivectra" path="src/AiVectra/src/text_input.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
   Import(path="element.aos")
 
