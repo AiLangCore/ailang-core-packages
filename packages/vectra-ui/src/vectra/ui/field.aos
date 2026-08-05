@@ -1,5 +1,7 @@
 Program {
-  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="aivectra" path="src/AiVectra/src/geometry.aos")
+  Import(package="aivectra" path="src/AiVectra/src/math.aos")
+  Import(package="aivectra" path="src/AiVectra/src/text_input.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
   Import(path="element.aos")
 
@@ -156,12 +158,19 @@ Program {
             Block { Var(name=value) }
           }
         }
+        Let(name=valueColor) {
+          If {
+            Eq { Var(name=value) Lit(value="") }
+            Block { Lit(value="#94a3b8") }
+            Block { Lit(value="#ffffff") }
+          }
+        }
         Call(target=sys.ui.drawText) {
           Var(name=handle)
           Add { Var(name=x) Lit(value=16) }
           Add { Var(name=y) Lit(value=31) }
           Var(name=visibleValue)
-          If { Eq { Var(name=value) Lit(value="") } Block { Lit(value="#94a3b8") } Block { Lit(value="#ffffff") } }
+          Var(name=valueColor)
           Lit(value=18)
         }
         Return { Lit(value=0) }
@@ -271,12 +280,19 @@ Program {
           Call(target=elementPropString) { Var(name=element) Lit(value="placeholder") Lit(value="") }
           Call(target=elementPropBool) { Var(name=element) Lit(value="focused") Lit(value=false) }
         }
-        If {
+        Let(name=shouldDrawCaret) {
           If {
             Eq { Var(name=value) Lit(value="") }
             Block { Lit(value=false) }
-            Block { Call(target=elementPropBool) { Var(name=element) Lit(value="caretVisible") Lit(value=false) } }
+            Block {
+              Call(target=elementPropBool) {
+                Var(name=element) Lit(value="caretVisible") Lit(value=false)
+              }
+            }
           }
+        }
+        If {
+          Var(name=shouldDrawCaret)
           Block {
             Call(target=sys.ui.drawRect) {
               Var(name=handle)

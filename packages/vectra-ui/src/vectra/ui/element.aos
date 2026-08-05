@@ -1,6 +1,6 @@
 Program {
   Import(sdk="ailang" path="std/core.aos")
-  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
+  Import(package="aivectra" path="src/AiVectra/src/geometry.aos")
   Import(package="std-ui-input" path="src/ui/input.aos")
 
   Export(name=uiElement)

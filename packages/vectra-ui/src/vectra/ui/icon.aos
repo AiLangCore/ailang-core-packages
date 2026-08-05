@@ -1,5 +1,4 @@
 Program {
-  Import(package="aivectra" path="src/AiVectra/src/lib.aos")
   Import(path="button.aos")
 
   Export(name=gearIcon)
